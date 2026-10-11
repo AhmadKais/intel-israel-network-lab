@@ -67,6 +67,7 @@ Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint.
 - [docs/design.md](docs/design.md) — the full addressing / VLAN / naming plan (your "source of truth")
 - [docs/requirements-matrix.md](docs/requirements-matrix.md) — every ministry requirement → where it is built
 - [docs/passwords.md](docs/passwords.md) — password table (also needed in the project book)
+- [docs/glossary.md](docs/glossary.md) — every networking term in simple English
 - [docs/cheatsheet.md](docs/cheatsheet.md) — the `show` commands you will use 100 times
 - [docs/pt-gotchas.md](docs/pt-gotchas.md) — Packet Tracer quirks and how to get past them
 

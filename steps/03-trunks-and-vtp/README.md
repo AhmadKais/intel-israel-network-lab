@@ -7,7 +7,79 @@ automatically by **VTP**.
 
 Ministry requirements: **22.6, 22.7, 22.8, 6 (L2 redundancy)**
 
-## Concepts
+## Understand it first (simple English)
+
+### 1. The problem: VLANs on more than one switch
+In step 02 every VLAN lived on one switch. But Engineering PCs sit on **ACC1 and ACC2**, and
+both switches connect to the distribution switches. How do we carry 6 VLANs between
+switches? One cable per VLAN would need 6 cables per uplink — impossible at scale.
+
+### 2. The solution: a trunk
+A **trunk** is one cable that carries **many VLANs** at once.
+
+Think of a highway between two office buildings. Every car (frame) gets a **coloured
+sticker** with its room number (VLAN) when it enters the highway. At the other end, the
+switch reads the sticker and sends the car into the right room, then removes the sticker.
+
+- The sticker is called a **tag** (4 bytes, standard **802.1Q**).
+- **Access port** = a door into one room → no sticker (the PC never sees tags).
+- **Trunk port** = the highway → stickers on.
+
+| | Access port | Trunk port |
+|---|---|---|
+| Carries | 1 VLAN | many VLANs |
+| Connects to | PC, printer, AP | another switch / router |
+| Tags | no | yes (except the native VLAN) |
+
+### 3. Native VLAN — the cars without a sticker
+On a trunk, one VLAN travels **without** a tag: the **native VLAN** (VLAN 1 by default).
+Attackers can abuse this ("double tagging" — hiding a second sticker under the first to
+jump into another VLAN). Our fix: make the native VLAN **998**, a VLAN nobody uses.
+Both ends of the trunk **must** agree on the native VLAN.
+
+### 4. Allowed VLAN list
+By default a trunk carries **all** VLANs. We list only the ones that are needed
+(`10,20,30,99,110,120,998`). Less useless broadcast traffic, and fewer ways in for an
+attacker.
+
+### 5. DTP — and why we turn it off
+**DTP** lets two switch ports *negotiate* to become a trunk on their own. Convenient — but a
+laptop can pretend to be a switch and negotiate a trunk, then see every VLAN.
+`switchport nonegotiate` turns DTP off: trunks are only trunks because **we** said so.
+
+### 6. VTP — one VLAN list for the whole building
+Creating the same 8 VLANs by hand on every switch is slow and error-prone. **VTP** (VLAN
+Trunking Protocol) is like a head office that publishes the official list of rooms, and
+every branch office copies it automatically.
+
+| VTP mode | Role | Comparison |
+|---|---|---|
+| **Server** | Create / delete / rename VLANs here; sends the list out | Head office |
+| **Client** | Receives the list, can't change it | Branch office |
+| **Transparent** | Ignores the list, keeps its own VLANs (just passes the messages on) | An independent shop |
+
+Switches only share a list if they have the same **domain name** and **password**.
+
+⚠️ **The revision number danger.** Every change to the list adds 1 to its **revision
+number**. A switch always accepts the list with the **highest** revision — even if that list
+is empty or wrong. Real story from many companies: someone takes a lab switch (revision 50)
+and plugs it into the production network → its list overwrites everyone's → all VLANs
+disappear → the whole company goes offline.
+**Safe rule:** before joining any switch to a domain, set it to `vtp mode transparent`
+(this resets the revision to 0), then to `client`.
+
+### 7. Why every access switch has two uplinks
+If an access switch had one cable to one distribution switch, losing that cable or that
+switch would cut off everyone on it. With **two uplinks to two different distribution
+switches**, either can fail and users keep working (requirement 6).
+
+Two uplinks create a **loop** (ACC1 → DIST1 → ACC2 → DIST2 → ACC1). Loops are deadly in
+switching — a broadcast would go round forever. A protocol called **Spanning Tree** blocks
+one link automatically. You'll see it in this step's challenge and control it in step 04.
+
+---
+
+### Short technical summary
 - **Trunk (802.1Q)** — one cable carries many VLANs; each frame gets a 4-byte tag with its
   VLAN ID. Frames of the **native VLAN** travel *untagged*. We make the native VLAN 998
   (unused) so an attacker can't use "double tagging" to hop into VLAN 1.
@@ -174,6 +246,17 @@ wr
 ```
 PCs: `PC-HFA-ENG-03` = 10.10.16.103/24, `PC-HFA-FIN-03` = 10.10.17.103/24.
 
+### What the new commands mean
+| Command | In simple English |
+|---|---|
+| `vtp domain HFA-A` | "I belong to the building-A VLAN club" |
+| `vtp password Intel#Vtp` | The club password — only members with it share lists |
+| `vtp mode server` / `client` / `transparent` | Head office / branch office / independent (table above) |
+| `switchport mode trunk` | "This port is a highway — carry tagged VLANs" |
+| `switchport trunk native vlan 998` | "Cars without a sticker belong to the unused VLAN 998" |
+| `switchport trunk allowed vlan ...` | "Only these VLANs may use this highway" |
+| `switchport nonegotiate` | "Don't negotiate with whoever is at the other end (DTP off)" |
+
 ## Verify
 
 ```
@@ -219,3 +302,23 @@ The root is the switch with the **lowest bridge ID** = priority (default 32768 +
 and then **lowest MAC address**. Since all priorities are equal, the oldest/lowest MAC
 wins — probably an access switch, which is a terrible root. We fix this in step 04.
 </details>
+
+---
+
+## 👩‍🏫 Teacher notes
+- **Lesson plan (~2 × 90 min):** lesson 1 = trunks (draw the highway with coloured stickers),
+  native VLAN, allowed list, DTP; students cable and configure trunks. Lesson 2 = VTP with
+  the head-office comparison, the revision-number story, the VTP experiment
+  (create/delete VLAN 50 on DIST1 and watch it appear/disappear on ACC2).
+- **Show tagging live:** Simulation mode → ping ENG-01 → ENG-03 → click the frame on the
+  trunk cable → the 802.1Q header shows `VLAN: 10`. On the PC's cable there is no tag.
+- **Common student questions**
+  - *"Why don't PCs need to understand tags?"* — The access port adds/removes the tag; the
+    PC only ever sees normal frames.
+  - *"If VTP is dangerous, why use it?"* — It saves a lot of work in a big network. The danger
+    is managed with passwords, the transparent→client rule, and in Kiryat Gat we
+    deliberately use transparent mode (a design choice to discuss in the book).
+  - *"Why does `show interfaces trunk` not show my trunk?"* — The other end isn't a trunk
+    yet, or the port is down. Both ends must be configured.
+- **Typical errors:** native VLAN mismatch (CDP warning in the console), forgetting the
+  power supply on the 3650s, VTP domain typo (case-sensitive: `HFA-A` ≠ `hfa-a`).
