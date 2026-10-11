@@ -1,33 +1,78 @@
 # Step 16 — Final integration, scaling & the project book
 
-## Goal
-Turn the working lab into a **submission**: 8+ PCs per department, email accounts, a full
-end-to-end test run, and a project book that maps every ministry requirement to proof.
+> ⏱ 3–4 lessons · 🎯 ministry requirements 20.2, 22.19 + the project book · 📁 start from: `my-work/step15.pkt` · 💾 save as: `my-work/final.pkt`
 
-Ministry requirements: **20.2, 22.19**, and the whole **ספר הפרויקט** section
+## What you will have at the end
+A **submission-ready** project: every department has at least 8 PCs, every department has two
+email users, every requirement is tested with a screenshot, and the project book is drafted.
 
-## 1. Scale every department to ≥ 8 PCs (req. 20.2)
-You have 2 PCs per department. Add 6 more to each:
-1. Select the two existing PCs of a department → **Ctrl+C / Ctrl+V** → drag the copies next
-   to the switch.
-2. Cable them to the next free ports **of that department's range** (e.g. Engineering =
-   Fa0/1-10 on ACC1/ACC2).
-3. Rename them (`PC-HFA-ENG-03` … `-08`) — names must stay logical (req. 22.1).
-4. DHCP is already on → they get addresses automatically. Port-security sticky learns them.
+---
 
-| Branch | Departments × 8 | Total PCs |
-|---|---|---|
-| Haifa | ENG, FIN, HR, MKT, RND, IT | 48 |
-| Jerusalem | SAL, LOG, PRD, QA, SEC, ADM | 48 |
-| Kiryat Gat | FAB, QUA, MNT, SAF, PLN, TRN | 48 |
+## Part 1 — Understand it first (simple English)
 
-> PT gets slow with ~200 devices. Save often, close other programs, and use the
-> *Logical → Cluster* feature to group each building into one icon if the canvas gets messy.
+### 1.1 Why scale at the end?
+The ministry requires **6 departments × at least 8 PCs** in every branch (req. 20.2). Building with
+2 PCs per department made the lab fast and readable. Because everything is automatic now (DHCP,
+SLAAC, port-security sticky), adding PCs is just drag, cable, rename.
 
-## 2. Email accounts — 2 PCs per department, per branch (req. 22.19)
+### 1.2 How email works in Packet Tracer
+- The **email server** keeps mailboxes (`eng1@intel.lab`) — like a post office with P.O. boxes.
+- The PC's **email client** sends mail to the server (SMTP) and collects its own mail (POP3).
+- The client finds the server by **name** (`mail.intel.lab`) → that's why DNS had to work first.
 
-**SRV-HFA-DMZ-MAIL** (domain `intel.lab`) — *Services → EMAIL → User Setup*, password
-`Mail#2026` for all:
+Haifa and Jerusalem use the DMZ mail server (Jerusalem through the VPN). Kiryat Gat uses its own IPv6
+mail server (`kg.intel.lab`).
+
+### 1.3 Testing = proof
+The examiner grades what you can **show**. Every requirement needs a test you can run live and a
+screenshot in the book.
+
+---
+
+## Part 2 — Prepare
+**File → Open** → `my-work/step15.pkt` → **File → Save As** → `my-work/final.pkt`.
+
+---
+
+## Part 3 — Scale every department to 8 PCs
+
+### 3.1 How to add PCs quickly (click by click)
+1. Hold **Ctrl**, click the **PC** icon (End Devices), click 6 times next to the access switch → **Esc**.
+2. Cable each new PC (**Straight-Through**, PC **FastEthernet0**) to the next free port **in that
+   department's range** (table below).
+3. Rename each (`Config → Display Name`).
+4. **Desktop → IP Configuration → DHCP** (Kiryat Gat: **IPv6 → Automatic**).
+5. Ping the gateway from each new PC once (so port-security learns its MAC).
+
+### 3.2 Port ranges and names
+| Branch | Department | Switches · ports | New PCs |
+|---|---|---|---|
+| Haifa | Engineering | A-ACC1 / A-ACC2 · Fa0/3-10 | PC-HFA-ENG-04 … 08 |
+| Haifa | Finance | A-ACC1 / A-ACC2 · Fa0/13-20 | PC-HFA-FIN-04 … 08 |
+| Haifa | HR | B-ACC1 / B-ACC2 · Fa0/2-10 | PC-HFA-HR-03 … 08 |
+| Haifa | Marketing | B-ACC1 / B-ACC2 · Fa0/12-20 | PC-HFA-MKT-03 … 08 |
+| Haifa | R&D | C-ACC1 / C-ACC2 · Fa0/2-10 | PC-HFA-RND-03 … 08 |
+| Haifa | IT | C-ACC1 / C-ACC2 · Fa0/12-20 | PC-HFA-IT-03 … 08 |
+| Jerusalem | Sales / Logistics | F1-ACC1 · Fa0/3-10 / Fa0/13-20 | PC-JLM-SAL-03…08 / PC-JLM-LOG-03…08 |
+| Jerusalem | Production / QA | F2-ACC1 · Fa0/3-10 / Fa0/13-20 | PC-JLM-PRD-… / PC-JLM-QA-… |
+| Jerusalem | Security / Admin | F3-ACC1 · Fa0/3-10 / Fa0/13-20 | PC-JLM-SEC-… / PC-JLM-ADM-… |
+| Kiryat Gat | Fab-Ops / Quality | KG-ACC1 · Fa0/3-10 / Fa0/13-20 | PC-KG-FAB-… / PC-KG-QUA-… |
+| Kiryat Gat | Maintenance / Safety | KG-ACC2 · Fa0/3-10 / Fa0/13-20 | PC-KG-MNT-… / PC-KG-SAF-… |
+| Kiryat Gat | Planning / Training | KG-ACC3 · Fa0/3-10 / Fa0/13-20 | PC-KG-PLN-… / PC-KG-TRN-… |
+
+Totals: 48 PCs per branch, **144** user PCs.
+
+> PT gets slow with ~250 devices. Save often, close other programs, and stay in **Realtime** mode.
+> Tip: **Logical view** → select a building's devices → right-click → **Cluster** groups them into one
+> icon (double-click to open). Great for clean screenshots.
+
+---
+
+## Part 4 — Email accounts (2 per department, per branch — req. 22.19)
+
+### 4.1 Create the mailboxes
+**SRV-HFA-DMZ-MAIL** → Services → **EMAIL** → *User Setup*: type User + Password → **+** (Add).
+All passwords: `Mail#2026`.
 
 | Users | Department |
 |---|---|
@@ -37,109 +82,137 @@ You have 2 PCs per department. Add 6 more to each:
 | `mkt1`, `mkt2` | Haifa Marketing |
 | `rnd1`, `rnd2` | Haifa R&D |
 | `it1`, `it2` | Haifa IT |
-| `sal1`, `sal2`, `log1`, `log2`, `prd1`, `prd2`, `qa1`, `qa2`, `sec1`, `sec2`, `adm1`, `adm2` | Jerusalem (via VPN) |
+| `sal1`, `sal2`, `log1`, `log2`, `prd1`, `prd2` | Jerusalem Sales, Logistics, Production |
+| `qa1`, `qa2`, `sec1`, `sec2`, `adm1`, `adm2` | Jerusalem QA, Security, Admin |
 
 **SRV-KG-MAIL** (domain `kg.intel.lab`): `fab1/2`, `qua1/2`, `mnt1/2`, `saf1/2`, `pln1/2`, `trn1/2`.
 
-On each chosen PC → *Desktop → Email → Configure Mail*:
+### 4.2 Configure the clients
+On the **-01** and **-02** PC of every department → **Desktop → Email** → **Configure Mail**:
 
-| Field | Haifa / Jerusalem | Kiryat Gat |
+| Field | Haifa / Jerusalem example | Kiryat Gat example |
 |---|---|---|
-| Your Name | e.g. `Engineering 1` | `Fab Ops 1` |
+| Your Name | `Engineering 1` | `Fab Ops 1` |
 | Email Address | `eng1@intel.lab` | `fab1@kg.intel.lab` |
-| Incoming / Outgoing server | `mail.intel.lab` | `mail.kg.intel.lab` |
-| User name / Password | `eng1` / `Mail#2026` | `fab1` / `Mail#2026` |
+| Incoming Mail Server | `mail.intel.lab` | `mail.kg.intel.lab` |
+| Outgoing Mail Server | `mail.intel.lab` | `mail.kg.intel.lab` |
+| User Name | `eng1` | `fab1` |
+| Password | `Mail#2026` | `Mail#2026` |
 
-Test: `eng1` sends to `sal1` (Haifa → Jerusalem, across the VPN). `sal1` → *Receive*. ✅
-Write the full list in the book's **email table** (טבלת אימיילים).
+→ **Save**.
 
-## 3. Final hardening sweep — on every router and switch
+### 4.3 Test
+1. On PC-HFA-ENG-01: **Compose** → To `sal1@intel.lab`, Subject `Test`, text → **Send**.
+2. On PC-JLM-SAL-01 → Email → **Receive** → the message arrives (Haifa → Jerusalem through the VPN). ✅
+3. In Kiryat Gat: `fab1` → `qua1@kg.intel.lab` → Receive on PC-KG-QUA-01. ✅
+
+Copy the full user list into the book's **email table** (טבלת אימיילים).
+
+---
+
+## Part 5 — Final hardening sweep
+On **every** router and switch run:
 ```
-show run | include hostname|banner|enable secret|service password|ip ssh|logging|ntp server
+show running-config | include hostname|banner|enable secret|service password|ip ssh|logging|ntp server
 ```
-Every device must show: logical hostname, banner, `enable secret`,
-`service password-encryption`, SSH v2, `transport input ssh`, VTY ACL, logging host, NTP.
-Fix whatever is missing. Then **`wr` on every device**.
+Each must show: logical hostname, banner, `enable secret`, `service password-encryption`, SSH v2,
+logging host, NTP server. Also check `show running-config | section vty` → `transport input ssh` +
+`access-class`. Fix what's missing, then save **every** device (`copy run start`, `write memory` on the ASA).
 
-## 4. End-to-end test plan (screenshot each ✅ for the book)
+---
 
-| # | From | To / command | Proves |
+## Part 6 — The end-to-end test plan (screenshot every ✅)
+
+| # | From | Do | Proves |
 |---|---|---|---|
-| 1 | PC-HFA-ENG-01 | `ping` PC-HFA-IT-01 | inter-VLAN + OSPF areas 1→0→2→3 (virtual link) |
-| 2 | PC-HFA-ENG-01 | `http://www.isp-web1.com` | ASA → edge PAT → BGP |
-| 3 | PC-HOME-01 | `http://www.intel.lab` | static NAT + ASA ACL |
-| 4 | LT-HFA-GUEST-01 | `ping 10.10.1.10` ❌ / `http://www.isp-web2.com` ✅ | guest isolation |
+| 1 | PC-HFA-ENG-01 | `ping` PC-HFA-IT-01 | inter-VLAN + OSPF areas 1 → 0 → 2 → 3 (virtual link) |
+| 2 | PC-HFA-ENG-01 | browse `http://www.isp-web1.com` | ASA → edge PAT → BGP internet |
+| 3 | PC-HOME-01 | browse `http://www.intel.lab` | static NAT + ASA ACL |
+| 4 | LT-HFA-GUEST-01 | `ping 10.10.1.10` ❌ / browse `www.isp-web2.com` ✅ | guest isolation |
 | 5 | PC-JLM-SAL-01 | `ping 10.10.16.1` | GRE/IPsec VPN, private addressing |
-| 6 | PC-JLM-SAL-01 | `http://www.intel.lab`, email to HQ | DMZ via VPN |
+| 6 | PC-JLM-SAL-01 | browse `www.intel.lab` + email to Haifa | DMZ services via VPN |
 | 7 | PC-JLM-SAL-01 | `ping 200.1.100.11` + `show ip nat translations` on R-JLM-EDGE | dynamic NAT |
-| 8 | PC-KG-FAB-01 | `http://www6.isp-web.com` | IPv6 end-to-end |
-| 9 | PC-KG-LEGACY-01 | `ping 200.1.100.11` | PAT overload |
+| 8 | PC-KG-FAB-01 | browse `http://www6.isp-web.com` | IPv6 end to end |
+| 9 | PC-KG-LEGACY-01 | `ping 200.1.100.11` | PAT (overload) |
 | 10 | PC-HOME-01 | VPN client → `ping 10.10.1.10` | remote-access VPN |
-| 11 | PC-HFA-IT-01 | `ssh` to devices in all 3 branches | SSH + AAA + mgmt ACL |
-| 12 | PC-HFA-RND-01 | `ssh` to a switch ❌ | mgmt ACL blocks non-admins |
-| 13 | power off A-DIST1 | `ping -t` keeps going | HSRP + STP + OSPF redundancy |
-| 14 | shut R-HFA-EDGE Gi0/1 | edge still reaches ISP-B | DSL floating static |
-| 15 | shut ISPA-BR ↔ ISPC-BR link | home → www.intel.lab still works | BGP redundancy |
+| 11 | PC-HFA-IT-01 | `ssh` to devices in Haifa and Jerusalem | SSH + AAA + management ACL |
+| 12 | PC-HFA-RND-01 | `ssh` to a switch ❌ | management ACL blocks non-admins |
+| 13 | power off A-DIST1 | `ping -t` from an ENG PC keeps going | HSRP + STP + OSPF redundancy |
+| 14 | shut R-HFA-EDGE Gi0/1 | `show ip route` → default via 200.2.9.1 | DSL floating static |
+| 15 | shut ISPA-BR ↔ ISPC-BR link | PC-HOME-01 → www.intel.lab still works | BGP redundancy |
 | 16 | rogue DHCP server on an access port | PC still gets the real lease | DHCP snooping |
 | 17 | rogue switch on a PortFast port | port err-disabled | BPDU Guard |
 | 18 | `show ntp status` in each branch | synchronized | NTP hierarchy |
 | 19 | SRV-HFA-SYSLOG / SRV-JLM-SYSLOG | messages with timestamps | Syslog |
+| 20 | `show etherchannel summary` (HFA + JLM) | `Po1(SU)` LACP / PAgP | EtherChannel |
+| 21 | `show ip ospf virtual-links` on B-DIST1 | up | virtual link |
+| 22 | `show ip route` on R-JLM-EDGE | `D 10.20.8.0/21` | EIGRP summarization |
+| 23 | `show ip bgp` on R-ISPA-BR | 3 prefixes | BGP |
+| 24 | `show standby brief` in each branch | Active/Standby | HSRP (incl. IPv6) |
 
-## 5. The project book (ספר הפרויקט — 30% of the grade)
-Follow the ministry's order. Where each part comes from:
+**How to take a screenshot for the book:** on Linux press **PrtSc** (or **Shift+PrtSc** to select an area);
+on Windows **Win+Shift+S**. Save as `test-01.png`, `test-02.png` … in a `screenshots` folder.
 
-| # | Chapter | Source in this repo |
-|---|---|---|
-| 1 | דף שער | school, project name "Intel Israel — Enterprise Network", your name, ID, year, mentor |
-| 2 | תוכן עניינים | auto-generated in Word/Docs |
-| 3 | מבוא | why a company needs a secure multi-site network |
-| 4 | אודות החברה | Intel Israel: Haifa (HQ, R&D), Jerusalem, Kiryat Gat (fab) |
-| 5 | דרישות הארגון מהרשת | [requirements-matrix.md](../../docs/requirements-matrix.md), in business language |
-| 6 | בחירות וחלופות | the "Concepts" sections: LACP vs PAgP, OSPF vs EIGRP, GRE/IPsec vs plain IPsec, collapsed core vs 3-tier, dynamic NAT vs PAT, the IPv6/NAT trade-off |
-| 7 | רשימת סניפים ומחלקות | [design.md](../../docs/design.md) §3–5 |
-| 8 | טופולוגיה פיזית | PT **Physical** view screenshots (buildings / floors) |
-| 9 | טופולוגיה לוגית | PT **Logical** view screenshots, one per branch + WAN |
-| 10–11 | חלוקת ציוד / מפרט ציוד | device count per branch + datasheet facts (2911, 3650, 2960, ASA 5506-X) |
-| 12 | טבלת שמות | [design.md §1](../../docs/design.md) naming convention + the list of all devices |
-| 13 | טבלאות VLAN / IP | design.md tables |
-| 14 | טבלת סיסמאות | [passwords.md](../../docs/passwords.md) |
-| 15 | טבלת אימיילים | section 2 above |
-| 16 | פקודות | `show run` of each device type, explained (reuse the commented configs from the steps) + the test screenshots from section 4 |
-| 17 | ביבליוגרפיה | Cisco CCNA/CCNP docs, RFC 4271 (BGP), RFC 2328 (OSPF), RFC 7868 (EIGRP), RFC 4861 (IPv6 ND), RFC 4301 (IPsec), Cisco ASA config guide |
+---
 
-**Known simulator limitations** — put them in chapter 6, it shows understanding:
+## Part 7 — The project book (ספר הפרויקט — 30% of the grade)
+A **Hebrew draft** of the whole book is ready in [`docs/project-book-draft-he.md`](../../docs/project-book-draft-he.md)
+— the chapters in the ministry's order, already filled with this project's content. What **you** add:
+
+| Chapter | You add |
+|---|---|
+| 1 Cover page | school, your name, ID, year, mentor |
+| 8 Physical topology | PT **Physical** view screenshots |
+| 9 Logical topology | PT **Logical** view screenshots — one per branch + WAN |
+| 16 Commands | `show run` of one device of each type + the 24 test screenshots |
+
+Also adapt the text to **your** words — the examiner will ask you about every choice.
+
+**Known simulator limitations** (already in the draft, chapter 6 — it shows understanding):
 - IPv6-only branch can't reach IPv4-only services (no NAT64 in PT).
 - RA Guard / DHCPv6 Guard not available.
 - DSL backup carries router traffic only unless route-map NAT is supported.
 - Private VLANs for DMZ server isolation not available.
+- AAA over IPv6 limited — Kiryat Gat uses local authentication.
+
+---
 
 ## Checkpoint — final
-- [ ] `my-work/final.pkt` saved and committed
-- [ ] every row of the test plan has a screenshot
-- [ ] every row of the requirements matrix is ✅
-- [ ] project book draft written
+- [ ] `my-work/final.pkt` saved (and committed)
+- [ ] 8+ PCs per department, 6 departments per branch
+- [ ] 2 email users per department, mail test passed
+- [ ] All 24 tests done with screenshots
+- [ ] Every row of [docs/requirements-matrix.md](../../docs/requirements-matrix.md) ✅
+- [ ] Project book completed from the draft
 
 ## Final challenge — defend it
-Your examiner will ask "why?" about every choice. Answer these out loud without notes:
-1. Why is building C's area not connected to area 0, and what does the virtual link do?
-2. Why does the ASA not do NAT in this design?
+The examiner asks "why?" about every choice. Answer out loud without notes:
+1. Why isn't building C's area connected to area 0, and what does the virtual link do?
+2. Why doesn't the ASA do NAT in this design?
 3. Why GRE over IPsec instead of plain IPsec?
-4. Why is HSRP active always the STP root for the same VLAN?
-5. What happens to Jerusalem if R-JLM-EDGE dies? What would you add to fix it?
+4. Why is the HSRP active always the STP root of the same VLAN?
+5. What happens to Jerusalem if R-JLM-EDGE dies? How would you fix it?
 
 <details><summary>Short answers</summary>
 
-1. To demonstrate (and satisfy req. 8/22.16) the rule that every area must touch area 0.
-   The virtual link is a logical area-0 adjacency through transit area 2 between
-   B-DIST (ABR 0/2) and C-DIST (ABR 2/3).
-2. So that private addresses pass the ASA unchanged — the edge router does NAT and the VPN
-   sees real 10.x addresses; one NAT point is simpler to troubleshoot.
-3. Static NAT on the web server would translate its VPN replies before encryption; traffic
-   routed through a GRE tunnel interface (not `nat outside`) bypasses NAT. GRE also allows
-   routing protocols/multicast through the tunnel if needed later.
-4. To keep the Layer-2 path to the gateway optimal — otherwise frames cross the
-   inter-distribution link unnecessarily.
-5. Jerusalem loses internet and the VPN (single edge router = single point of failure).
-   Fix: a second edge router + second ISP link, HSRP/EIGRP between them, and a second
-   tunnel to Haifa.
+1. To meet req. 8/22.16 and show the rule "every area must touch area 0". The virtual link is a logical
+   area-0 connection through transit area 2 between B-DIST (ABR 0/2) and C-DIST (ABR 2/3).
+2. So private addresses pass the ASA unchanged — one NAT point (the edge) is simpler, and the VPN sees
+   the real 10.x addresses.
+3. Static NAT on the web server would translate its VPN replies before encryption; traffic through a GRE
+   tunnel interface (not a NAT interface) isn't translated. GRE also allows routing protocols through the tunnel later.
+4. To keep the path to the gateway short — otherwise frames cross the inter-distribution link for nothing.
+5. Jerusalem loses internet and the VPN (single point of failure). Fix: a second edge router + second ISP
+   link, HSRP between them, and a second tunnel to Haifa.
 </details>
+
+---
+
+## 👩‍🏫 Teacher notes
+- **Lesson 1:** scaling (pairs: each pair scales one branch) + Clusters for clean screenshots.
+- **Lesson 2:** email servers and clients; the mail test across the VPN.
+- **Lesson 3:** the test plan — students run all 24 tests and collect screenshots.
+- **Lesson 4:** the project book — go through the draft chapter by chapter; mock oral exam with the
+  final challenge questions.
+- **Before submission check:** two students may not submit the same project — each student's company,
+  cities, names and address plan must be their own.

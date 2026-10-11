@@ -1,59 +1,108 @@
 # Step 15 — VPN: site-to-site (GRE over IPsec) + remote access
 
-## Goal
-1. **Haifa ↔ Jerusalem** talk with their **private** addresses through an encrypted tunnel
-   across the internet. Jerusalem users reach Haifa's DMZ servers (DNS, mail, web, NTP,
-   FTP, AAA) privately.
-2. A **teleworker** at home (on ISP-C) connects with the PC's VPN client to Haifa and works
-   as if they were in the office.
+> ⏱ 2–3 lessons · 🎯 ministry requirements 2, 21, 23.4, 20.8 · 📁 start from: `my-work/step14.pkt` · 💾 save as: `my-work/step15.pkt`
 
-Ministry requirements: **2, 21 (VPN access to DMZ servers), 23.4, 20.8**
+## What you will have at the end
+1. **Haifa ↔ Jerusalem** talk with their **private** addresses through an **encrypted tunnel**
+   across the internet. Jerusalem users reach Haifa's DMZ servers (DNS, email, web, NTP, FTP, AAA).
+2. A **teleworker** at home connects with the PC's VPN client to Haifa and works as if in the office.
 
-## Concepts
-- **IPsec** encrypts and authenticates IP packets. Two phases:
-  - **Phase 1 (ISAKMP/IKE)** — the two routers authenticate each other (pre-shared key) and
-    build a secure management channel. `crypto isakmp policy`.
-  - **Phase 2 (IPsec SA)** — the actual data encryption (`transform-set`: ESP + AES + SHA).
-  - A **crypto map** on the WAN interface says *which* traffic to encrypt (ACL) and *to
-    whom* (peer).
-- **GRE** — a plain tunnel: a virtual point-to-point interface (`Tunnel0`) between two public
-  IPs. No encryption on its own.
-- **GRE over IPsec** — we route branch traffic **into Tunnel0**, and IPsec encrypts the GRE
-  packets. Why not plain IPsec? Because of **NAT**:
-  > Haifa's web server has a static NAT (`10.10.200.13 ↔ 200.1.10.3`). With plain IPsec, its
-  > reply to a Jerusalem PC would be NAT-ed *before* encryption → wrong source → broken.
-  > With GRE, the reply leaves through `Tunnel0`, which is **not** an `ip nat outside`
-  > interface → no NAT → private addresses preserved. Problem solved without route-map NAT.
-- **Remote-access VPN (Easy VPN)** — the router is a VPN *server*. The client logs in with a
-  **group** name + key and a **username** + password (XAUTH), receives an address from a pool
-  (`172.16.250.0/24`) and a tunnel to HQ.
-
-## Prerequisite — security licence on both edge routers
 ```
-R-HFA-EDGE(config)# license boot module c2900 technology-package securityk9
-   (accept: yes)
-R-HFA-EDGE(config)# end
-R-HFA-EDGE# wr
-R-HFA-EDGE# reload
+   Haifa LAN 10.10.0.0/16                                           Jerusalem LAN 10.20.0.0/16
+        │                                                                   │
+   R-HFA-EDGE ══════ Tunnel0 172.16.12.1 ⇄ 172.16.12.2 (GRE, encrypted by IPsec) ══════ R-JLM-EDGE
+   200.1.1.2            ... across ISP-A ⇄ ISP-B (the internet sees only ESP) ...        200.2.1.2
+        ▲
+        ╚═══════ remote-access VPN ═══════ PC-HOME-01 (200.3.50.10, gets 172.16.250.x)
 ```
-Same on **R-JLM-EDGE**. After the reload `show version` lists `securityk9`.
 
-## Configure
+---
 
-### Part A — site-to-site on R-HFA-EDGE
+## Part 1 — Understand it first (simple English)
+
+### 1.1 Why a VPN?
+Haifa and Jerusalem are connected through the **internet**:
+- private addresses (10.x) **can't** travel on the internet (step 12);
+- anything sent there can be **read** by others on the way.
+
+A **VPN (Virtual Private Network)** solves both: it builds a **tunnel** — the private packet is put
+**inside** a public packet and **encrypted**. Comparison: putting a letter in a locked armoured box
+and sending the box by normal post. The post office sees only the box's outside address.
+
+### 1.2 IPsec — the lock
+**IPsec** encrypts and authenticates the packets. It starts in two phases:
+
+| Phase | What happens | Commands |
+|---|---|---|
+| **Phase 1 (ISAKMP / IKE)** | The two routers check each other's identity (pre-shared key) and agree how to talk safely | `crypto isakmp policy`, `crypto isakmp key` |
+| **Phase 2 (IPsec SA)** | They agree how to encrypt the **data** (ESP + AES + SHA) | `crypto ipsec transform-set` |
+
+A **crypto map** on the internet interface says **which** traffic to encrypt and **to whom**.
+
+### 1.3 GRE — the tunnel
+**GRE** creates a virtual interface (`Tunnel0`) between two public addresses, like a private cable
+through the internet. GRE alone doesn't encrypt — so we **encrypt the GRE packets with IPsec**:
+**GRE over IPsec**.
+
+### 1.4 Why GRE + IPsec and not IPsec alone? (an excellent exam question)
+Because of **static NAT** in Haifa (step 12). The web server is always translated
+10.10.200.13 ↔ 200.1.10.3. With plain IPsec, the web server's reply to a Jerusalem PC would be
+**translated before encryption** — wrong address — broken.
+With GRE, the reply leaves through `Tunnel0`, which is **not** a NAT interface → it isn't translated →
+private addresses stay private end to end. Problem solved.
+
+### 1.5 Remote-access VPN
+A teleworker's PC is not a router. The edge router acts as a **VPN server** ("Easy VPN"):
+1. the PC's VPN client logs in with a **group** name + group key, and a **username** + password;
+2. the router gives the PC an address from a pool (`172.16.250.10 – .100`) and the DNS server;
+3. the PC's traffic to HQ goes through the encrypted tunnel (req. 23.4).
+
+### 1.6 The security licence
+Encryption commands on a Cisco 2911 need the **securityk9** licence. In PT you activate it with one
+command and a reboot.
+
+---
+
+## Part 2 — Prepare
+**File → Open** → `my-work/step14.pkt` → **File → Save As** → `my-work/step15.pkt`.
+
+## Part 3 — Build
+Nothing new to place — the edge routers, the ASA and PC-HOME-01 already exist.
+
+---
+
+## Part 4 — Configure
+
+### 4.1 Activate the security licence — on R-HFA-EDGE **and** R-JLM-EDGE
 ```
+enable
 configure terminal
-! ---------- GRE tunnel ----------
+license boot module c2900 technology-package securityk9
+```
+The router shows a licence text and asks `ACCEPT? [yes/no]:` → type **`yes`**.
+```
+end
+copy running-config startup-config
+reload
+```
+Press **Enter** to confirm the reload. Wait for the router to boot (Fast Forward Time), log in again.
+Check: `show version` → in the licence table `securityk9` is **Permanent** / **Active**.
+
+### 4.2 R-HFA-EDGE — site-to-site (Haifa side)
+```
+enable
+configure terminal
+! ===== 1. the GRE tunnel =====
 interface tunnel 0
  description GRE to R-JLM-EDGE (encrypted by IPsec)
  ip address 172.16.12.1 255.255.255.252
  tunnel source gi0/1
  tunnel destination 200.2.1.2
  exit
-! Jerusalem's private block goes into the tunnel (static - req. 22.17)
+! Jerusalem's private block goes into the tunnel (a static route - req. 22.17)
 ip route 10.20.0.0 255.255.0.0 172.16.12.2
 
-! ---------- IPsec phase 1 ----------
+! ===== 2. IPsec phase 1 =====
 crypto isakmp policy 10
  encryption aes 256
  hash sha
@@ -61,12 +110,13 @@ crypto isakmp policy 10
  group 5
  lifetime 86400
  exit
-! no-xauth: this peer is a router, don't ask it for a username (the RA clients will be)
+! the shared secret with Jerusalem; no-xauth = it's a router, don't ask it for a username
 crypto isakmp key Intel#S2S-Key address 200.2.1.2 no-xauth
 
-! ---------- IPsec phase 2 ----------
+! ===== 3. IPsec phase 2 =====
 crypto ipsec transform-set S2S-SET esp-aes 256 esp-sha-hmac
 ip access-list extended S2S-GRE
+ remark --- encrypt the GRE packets between the two edges ---
  permit gre host 200.1.1.2 host 200.2.1.2
  exit
 crypto map VPN-MAP 10 ipsec-isakmp
@@ -74,14 +124,17 @@ crypto map VPN-MAP 10 ipsec-isakmp
  set transform-set S2S-SET
  match address S2S-GRE
  exit
+! ===== 4. apply on the internet interface =====
 interface gi0/1
  crypto map VPN-MAP
-end
-wr
+ end
+copy running-config startup-config
 ```
+You see `%CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON` — good.
 
-### Part B — site-to-site on R-JLM-EDGE (the mirror)
+### 4.3 R-JLM-EDGE — site-to-site (the mirror image)
 ```
+enable
 configure terminal
 interface tunnel 0
  description GRE to R-HFA-EDGE (encrypted by IPsec)
@@ -90,7 +143,6 @@ interface tunnel 0
  tunnel destination 200.1.1.2
  exit
 ip route 10.10.0.0 255.255.0.0 172.16.12.1
-! (EIGRP "redistribute static" from step 13 now also gives this route to CC1/CC2)
 
 crypto isakmp policy 10
  encryption aes 256
@@ -111,129 +163,186 @@ crypto map VPN-MAP 10 ipsec-isakmp
  exit
 interface gi0/1
  crypto map VPN-MAP
-end
-wr
+ end
+copy running-config startup-config
 ```
-(The `WAN-IN` ACL from step 13 already permits ISAKMP, ESP and GRE from Haifa.)
+> The `redistribute static` from step 13 now also gives the route `10.10.0.0/16` to CC1/CC2 — so all
+> of Jerusalem knows "Haifa is through the edge router". The CBAC ACL `WAN-IN` already lets the VPN in.
 
-### Part C — let Jerusalem through the ASA
+### 4.4 ASA — let Jerusalem in
 ```
-ASA-HFA-FW1(config)# access-list OUTSIDE_IN extended permit ip 10.20.0.0 255.255.0.0 10.10.0.0 255.255.0.0
-ASA-HFA-FW1(config)# access-list OUTSIDE_IN extended permit ip 10.20.0.0 255.255.0.0 10.10.200.0 255.255.255.0
-ASA-HFA-FW1(config)# write memory
-```
-(`10.10.200.0` is inside `10.10.0.0/16`, so the first line already covers the DMZ — the
-second line is there to make the intent obvious in the book.)
-
-### Part D — remote-access VPN server on R-HFA-EDGE
-```
+enable
 configure terminal
+access-list OUTSIDE_IN extended permit ip 10.20.0.0 255.255.0.0 10.10.0.0 255.255.0.0
+end
+write memory
+```
+(10.10.0.0/16 includes the DMZ 10.10.200.0/24 — so Jerusalem reaches the inside **and** the DMZ servers.)
+
+### 4.5 R-HFA-EDGE — remote-access VPN server
+```
+enable
+configure terminal
+! ===== who may log in =====
 aaa new-model
 aaa authentication login default group tacacs+ local
 aaa authentication login VPN-AUTH local
 aaa authorization network VPN-GROUP local
 username remote1 secret Intel#Remote1
-
+! ===== addresses for remote users =====
 ip local pool RA-POOL 172.16.250.10 172.16.250.100
-
+! ===== phase 1 for clients =====
 crypto isakmp policy 20
  encryption aes 256
  hash sha
  authentication pre-share
  group 2
  exit
+! ===== the group the PC logs into =====
 crypto isakmp client configuration group HQ-RA
  key Intel#RA-Group
  dns 10.10.200.11
  domain intel.lab
  pool RA-POOL
  exit
+! ===== phase 2 for clients =====
 crypto ipsec transform-set RA-SET esp-aes 256 esp-sha-hmac
 crypto dynamic-map RA-DYN 10
  set transform-set RA-SET
  reverse-route
  exit
+! ===== add the clients to the same crypto map =====
 crypto map VPN-MAP client authentication list VPN-AUTH
 crypto map VPN-MAP isakmp authorization list VPN-GROUP
 crypto map VPN-MAP client configuration address respond
-! dynamic entries always get the highest sequence number
 crypto map VPN-MAP 65535 ipsec-isakmp dynamic RA-DYN
-end
-wr
+ end
+copy running-config startup-config
 ```
-And on the ASA — remote users may reach HQ:
+And on the **ASA** — remote users may reach HQ:
 ```
+configure terminal
 access-list OUTSIDE_IN extended permit ip 172.16.250.0 255.255.255.0 10.10.0.0 255.255.0.0
+end
+write memory
 ```
-(The PAT ACL `NAT-HFA` from step 12 already excludes `172.16.250.0/24`.)
+(The PAT list `NAT-HFA` from step 12 already skips 172.16.250.0/24 — we prepared for this.)
 
-### Part E — the teleworker
-PC-HOME-01 → *Desktop → VPN*:
+### 4.6 The teleworker's VPN client (click by click)
+1. Click **PC-HOME-01** → **Desktop** → **VPN**.
+2. Fill in:
 
 | Field | Value |
 |---|---|
 | GroupName | `HQ-RA` |
 | Group Key | `Intel#RA-Group` |
-| Host IP (server) | `200.1.1.2` |
+| Host IP (Server IP) | `200.1.1.2` |
 | Username | `remote1` |
 | Password | `Intel#Remote1` |
 
-→ *Connect* → "VPN is connected". `ipconfig` shows a tunnel address `172.16.250.x`.
+3. Click **Connect** → after a moment: **"VPN is connected"**.
+4. Close the VPN window → Command Prompt → `ipconfig` → you see an extra address `172.16.250.x`.
 
-## Verify
+### 4.7 What the new commands mean
+| Command | In simple English |
+|---|---|
+| `license boot module ... securityk9` | Unlock the encryption features (reboot needed) |
+| `interface tunnel 0` + `tunnel source` / `tunnel destination` | A virtual cable from my public address to theirs |
+| `crypto isakmp policy 10` (encryption/hash/authentication/group) | How we check each other in phase 1 (must match on both sides) |
+| `crypto isakmp key KEY address PEER no-xauth` | The shared secret with that peer, no username asked |
+| `crypto ipsec transform-set ... esp-aes 256 esp-sha-hmac` | How the data is encrypted (AES-256) and checked (SHA) |
+| `crypto map VPN-MAP 10 ipsec-isakmp` / `set peer` / `match address` | "Encrypt traffic matching this ACL, toward this peer" |
+| `interface gi0/1` → `crypto map VPN-MAP` | Switch the encryption on at the internet interface |
+| `ip local pool RA-POOL ...` | Addresses to give remote users |
+| `crypto isakmp client configuration group HQ-RA` | The group the VPN client logs into (key, DNS, pool) |
+| `crypto dynamic-map` + `... 65535 ipsec-isakmp dynamic` | A template for clients whose address we don't know in advance |
+| `reverse-route` | Add a route to each connected client automatically |
 
+---
+
+## Part 5 — Check your work
+
+### 5.1 Make the tunnel come up
+The tunnel starts only when traffic needs it. From **PC-JLM-SAL-01**: `ping 10.10.16.1` — the first
+one or two pings may time out while the tunnel builds, then replies come.
+
+### 5.2 On the routers
 ```
 R-HFA-EDGE# show crypto isakmp sa
-dst          src          state      ...
-200.2.1.2    200.1.1.2    QM_IDLE        <- phase 1 up with Jerusalem
-200.1.1.2    200.3.50.10  QM_IDLE        <- phase 1 up with the teleworker
+dst             src             state          conn-id status
+200.2.1.2       200.1.1.2       QM_IDLE           1001 ACTIVE    <- phase 1 up with Jerusalem
+200.1.1.2       200.3.50.10     QM_IDLE           1002 ACTIVE    <- the teleworker (when connected)
 R-HFA-EDGE# show crypto ipsec sa
-   #pkts encaps: 57, #pkts encrypt: 57    <- grows while you ping = encrypted
-   #pkts decaps: 57, #pkts decrypt: 57
-R-HFA-EDGE# show interfaces tunnel 0      <- up/up
-R-HFA-EDGE# show ip route static          <- 10.20.0.0/16 via 172.16.12.2
+    #pkts encaps: 57, #pkts encrypt: 57, ...        <- growing while you ping = encrypted
+    #pkts decaps: 57, #pkts decrypt: 57, ...
+R-HFA-EDGE# show interfaces tunnel 0              <- Tunnel0 is up, line protocol is up
+R-HFA-EDGE# show ip route static                  <- S 10.20.0.0/16 via 172.16.12.2
+SWL3-JLM-CC1# show ip route | include 10.10.0.0  <- D EX 10.10.0.0/16 via 10.20.4.1
 ```
-(No ISAKMP SA yet? Send some traffic first — the tunnel only comes up when "interesting"
-traffic arrives.)
 
-| From | Test | Expected |
+### 5.3 Tests
+| From | Do | Expected |
 |---|---|---|
-| PC-JLM-SAL-01 | `ping 10.10.16.1` | ✅ private Haifa address — through the VPN |
-| PC-JLM-SAL-01 | `tracert 10.10.200.13` | 10.20.10.2 → 10.20.4.1 → **172.16.12.1** → … (the tunnel!) |
-| PC-JLM-SAL-01 | browser `http://www.intel.lab` | ✅ — DNS 10.10.200.11 now reachable too |
-| PC-JLM-SAL-01 | email / FTP to `mail.intel.lab` / `ftp.intel.lab` | ✅ (req. 21) |
+| PC-JLM-SAL-01 | `ping 10.10.16.1` | ✅ a **private** Haifa address — through the VPN |
+| PC-JLM-SAL-01 | `tracert 10.10.200.13` | 10.20.10.2 → 10.20.4.1 → **172.16.12.1** (the tunnel!) → … |
+| PC-JLM-SAL-01 | Web Browser → `http://www.intel.lab` | ✅ DNS 10.10.200.11 is reachable now too |
+| PC-JLM-SAL-01 | `nslookup ftp.intel.lab` | 10.10.200.15 (DMZ services via VPN — req. 21) |
 | SWL3-JLM-CC1 | `show ntp status` | synchronized to 10.10.200.14 (req. 20.8) |
-| PC-HFA-IT-01 | `ssh -l admin 10.20.0.11` | ✅ HQ IT manages Jerusalem over the VPN |
-| PC-HOME-01 (VPN up) | `ping 10.10.1.10`, browse `www.intel.lab` | ✅ |
-| PC-HOME-01 (VPN down) | `ping 10.10.1.10` | ❌ |
+| PC-HFA-IT-01 | `ssh -l admin 10.20.0.11` | ✅ HQ's IT manages Jerusalem over the VPN |
+| PC-HOME-01 (VPN connected) | `ping 10.10.1.10`, browse `www.intel.lab` | ✅ |
+| PC-HOME-01 (VPN disconnected) | `ping 10.10.1.10` | ❌ |
 
-**See the encryption**: Simulation mode, ping from a JLM PC to a Haifa PC, click the packet
-on the ISP link → outer header `200.2.1.2 → 200.1.1.2`, protocol **ESP** — the private
-addresses inside are invisible to the ISPs.
+### 5.4 See the encryption (Simulation mode)
+1. **Simulation** → **Edit Filters** → **ICMP** (and ISAKMP/ESP if offered).
+2. From PC-JLM-SAL-01 ping a Haifa PC. Follow the packet.
+3. Click it on a cable **between the ISPs** → the outer header is `200.2.1.2 → 200.1.1.2`,
+   protocol **ESP**. The private addresses inside are invisible to the providers. 🔒
+4. Back to **Realtime**.
+
+---
+
+## Part 6 — Save
+`copy running-config startup-config` on both edges, `write memory` on the ASA → **File → Save**.
 
 ## Checkpoint
-`my-work/step15.pkt` + commit.
+- [ ] `QM_IDLE` with Jerusalem; encaps/decaps counters growing
+- [ ] Jerusalem PCs reach Haifa's private addresses and DMZ servers by name
+- [ ] Jerusalem's NTP synchronized to Haifa
+- [ ] The teleworker connects and reaches HQ servers
 
-## Common mistakes
-- Phase 1 never comes up → ISAKMP policy mismatch (encryption/hash/group must match on both
-  peers) or different pre-shared keys.
-- Tunnel up, pings fail → missing static route into the tunnel, or the ASA ACL line for
-  10.20.0.0/16.
-- The S2S peer suddenly asks for XAUTH → `no-xauth` missing on `crypto isakmp key`.
-- `crypto` commands don't exist → securityk9 licence not active (reload!).
+## If something doesn't work
+| Problem | Fix |
+|---|---|
+| `crypto` commands don't exist | Licence not active — 4.1 and **reload** |
+| Phase 1 never comes up (no `QM_IDLE`) | Policy mismatch (encryption/hash/group must be equal on both sides) or different keys |
+| Tunnel up, pings fail | Static route into the tunnel missing; ASA ACL line for 10.20.0.0/16 missing |
+| Jerusalem's ACL blocks the VPN | WAN-IN must permit isakmp, esp **and** gre from 200.1.1.2 |
+| S2S peer asks for a username / breaks after adding remote access | `no-xauth` missing on the `crypto isakmp key` line |
+| VPN client: "authentication failed" | Group name/key or user/password typo; `aaa authorization network VPN-GROUP local` missing |
+| Client connects but can't reach HQ | ASA ACL for 172.16.250.0/24 missing |
 
 ## Challenge
-Kiryat Gat has no VPN. Without adding one, explain which of the DMZ services KG **can**
-still use and how (look at what we published with static NAT and what KG has).
+Kiryat Gat has no VPN. Without adding one, which DMZ services can Kiryat Gat still use, and how?
 
 <details><summary>Answer</summary>
 
-Only what is published to the internet **and** reachable over IPv4 from KG:
-- **NTP** — DIST1 has an IPv4 path (legacy transit + PAT) and syncs to the public static
-  NAT `200.1.10.4` → req. 20.8 satisfied.
-- **Web** — only the legacy IPv4 VLAN 199 devices can browse `200.1.10.3`; IPv6 users can't
-  (no IPv4 stack — step 14 challenge).
-- Mail/DNS/FTP/AAA — not published, so no. That's why KG has its **own** DNS, mail, syslog
-  and AAA servers. Write this trade-off in the book; adding a third tunnel (needs dual-stack
-  or an IPv6-capable VPN) would be the real fix.
+Only what is published on the internet **and** reachable over IPv4 from Kiryat Gat:
+- **NTP** — DIST1 has an IPv4 path (legacy transit + PAT) and syncs to the public 200.1.10.4 → req. 20.8 OK.
+- **Web** — only the legacy IPv4 devices can open 200.1.10.3; IPv6 users can't (step 14 challenge).
+- Mail/DNS/FTP/AAA are not published → no. That's why Kiryat Gat has its **own** DNS, mail, syslog and
+  AAA servers. A real fix would be a third tunnel over IPv6 or a dual-stack DMZ — write the trade-off in the book.
 </details>
+
+---
+
+## 👩‍🏫 Teacher notes
+- **Lesson 1:** why VPN (armoured box comparison), IPsec phases, GRE, *why GRE over IPsec* (the static-NAT
+  story) → licence + reload on both edges.
+- **Lesson 2:** site-to-site configuration → tests → encryption in Simulation mode on the projector.
+- **Lesson 3:** remote access → VPN client → tests → challenge.
+- **Common student questions**
+  - *"Why is the first ping lost?"* — The tunnel is built on demand (phase 1 + 2 take a moment).
+  - *"Why sequence 65535 for the dynamic map?"* — Specific peers (Jerusalem, seq 10) must be checked
+    first; the "anyone" template must be last.
+- **Typical errors:** forgetting the reload after the licence; mismatched ISAKMP policy; forgetting the
+  ASA ACL lines.

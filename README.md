@@ -67,13 +67,14 @@ Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint.
 - [docs/design.md](docs/design.md) — the full addressing / VLAN / naming plan (your "source of truth")
 - [docs/requirements-matrix.md](docs/requirements-matrix.md) — every ministry requirement → where it is built
 - [docs/passwords.md](docs/passwords.md) — password table (also needed in the project book)
+- [docs/project-book-draft-he.md](docs/project-book-draft-he.md) — **Hebrew draft of the project book** (ספר הפרויקט), in the ministry's chapter order
 - [docs/glossary.md](docs/glossary.md) — every networking term in simple English
 - [docs/cheatsheet.md](docs/cheatsheet.md) — the `show` commands you will use 100 times
 - [docs/pt-gotchas.md](docs/pt-gotchas.md) — Packet Tracer quirks and how to get past them
 
-> **Status:** steps **00–07** are in the full *guided* format (every click and command,
-> simple-English explanations, attack/break labs, teacher notes). Steps 08–16 have the complete
-> configurations and are being converted to the same format.
+> **Status:** all 17 steps (00–16) are in the full *guided* format — every click and every
+> command for every device, simple-English explanations, break/attack labs and teacher notes.
+> A Hebrew draft of the project book is in [docs/project-book-draft-he.md](docs/project-book-draft-he.md).
 
 ## How each step is organised
 
