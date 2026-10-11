@@ -1,5 +1,7 @@
 # Step 01 — Plan the network (on paper first!)
 
+> ⏱ 2 lessons · 📁 start from: a new file · 💾 save as: `my-work/step01.pkt`
+
 ## Goal
 Before you drag a single device, you understand **why** every address in
 [docs/design.md](../../docs/design.md) is what it is. A network built without a plan
@@ -135,6 +137,69 @@ requires logical names (22.1). Full rules: [design.md §1](../../docs/design.md)
 
 ---
 
+## The Haifa plan you will build in steps 02–09
+Keep this page open while you work — every number you type in the next steps comes from here.
+
+### Naming rule
+```
+<ROLE>-<SITE>-<AREA>-<FUNCTION><NUMBER>
+```
+| Part | Values |
+|---|---|
+| ROLE | `R` router · `SW` Layer-2 switch · `SWL3` Layer-3 switch · `ASA` firewall · `AP` access point · `SRV` server · `PC` · `LT` laptop · `PRN` printer |
+| SITE | `HFA` Haifa · `JLM` Jerusalem · `KG` Kiryat Gat |
+| AREA | building `A` / `B` / `C` (or floor `F1`…) |
+| FUNCTION | `ACC` access · `DIST` distribution · `CORE` core · `EDGE` internet edge |
+
+PCs: `PC-HFA-ENG-01` = PC, Haifa, Engineering, number 01.
+
+### Haifa building A — the devices of steps 02–07
+```
+                 SWL3-HFA-A-DIST1 ══(Po1)══ SWL3-HFA-A-DIST2
+                      │      ╲              ╱      │
+                      │        ╲          ╱        │
+                      │          ╲      ╱          │
+                 SW-HFA-A-ACC1      ╳       SW-HFA-A-ACC2
+                 (Gi0/1 → DIST1, Gi0/2 → DIST2 on both)
+                   │ │ │                    │ │ │
+                 PCs, printer, admin PC     PCs, printer, 2 WiFi APs
+```
+
+### Building A VLANs
+| VLAN | Name | Subnet | Gateway | DIST1 IP | DIST2 IP | Who is "boss" |
+|---|---|---|---|---|---|---|
+| 10 | ENGINEERING | 10.10.16.0/24 | 10.10.16.1 | .2 | .3 | DIST1 |
+| 20 | FINANCE | 10.10.17.0/24 | 10.10.17.1 | .2 | .3 | DIST2 |
+| 30 | PRINTERS-A | 10.10.18.0/24 | 10.10.18.1 | .2 | .3 | DIST1 |
+| 99 | MGMT-A | 10.10.19.0/24 | 10.10.19.1 | .2 | .3 | DIST1 |
+| 110 | WIFI-EMP | 10.10.20.0/24 | 10.10.20.1 | .2 | .3 | DIST1 |
+| 120 | WIFI-GUEST | 10.10.21.0/24 | 10.10.21.1 | .2 | .3 | DIST2 |
+| 998 | NATIVE | — no devices, no IP | | | | |
+| 999 | PARKING | — unused ports | | | | |
+
+### Building B and C VLANs (step 09)
+| VLAN | Name | Subnet | | VLAN | Name | Subnet |
+|---|---|---|---|---|---|---|
+| 40 | HR | 10.10.32.0/24 | | 70 | RND | 10.10.48.0/24 |
+| 50 | MARKETING | 10.10.33.0/24 | | 80 | IT | 10.10.49.0/24 |
+| 60 | PRINTERS-B | 10.10.34.0/24 | | 90 | PRINTERS-C | 10.10.50.0/24 |
+| 99 | MGMT-B | 10.10.35.0/24 | | 99 | MGMT-C | 10.10.51.0/24 |
+
+The 6 Haifa departments: **Engineering, Finance, HR, Marketing, R&D, IT**.
+
+### Fixed addresses in building A
+| Device | Address |
+|---|---|
+| PRN-HFA-A-01 (printer) | 10.10.18.10 / gw 10.10.18.1 |
+| PC-HFA-ADMIN-01 (network admin) | 10.10.19.100 / gw 10.10.19.1 |
+| SW-HFA-A-ACC1 management | 10.10.19.11 |
+| SW-HFA-A-ACC2 management | 10.10.19.12 |
+
+The full company plan (Jerusalem, Kiryat Gat, the WAN) is in
+[docs/design.md](../../docs/design.md); each later step repeats the part it needs.
+
+---
+
 ## Do it — exercises (paper or a spreadsheet)
 
 Do these **without looking** at design.md, then compare.
@@ -167,6 +232,26 @@ Draw (draw.io / paper) the **logical** topology of Haifa building A as you imagi
 2 access switches, 2 distribution L3 switches, 2 core L3 switches. Every access switch
 has **two** uplinks (one to each distribution switch). Why two? → if one distribution switch
 dies, the building keeps working. That is the heart of requirement 6 (redundancy).
+
+## Prepare your project file in Packet Tracer (click by click)
+This is the file you will keep building in for the whole project.
+
+1. Open Packet Tracer → **File → New**.
+2. Mark the three Haifa buildings on the workspace:
+   1. In the common tools, click **Draw Rectangle** (the square icon in the drawing tools).
+   2. Pick a light colour, then drag a big rectangle on the left part of the workspace.
+   3. Draw two more rectangles next to it. Leave space at the top for the core (step 08) and at
+      the right for the firewall and the internet (steps 11–12).
+3. Label them:
+   1. Click the **Place Note** tool (the notepad icon).
+   2. Click inside the first rectangle and type `HAIFA - BUILDING A (OSPF area 1)`.
+   3. Do the same for `BUILDING B (area 2)` and `BUILDING C (area 3)`, and a note at the top:
+      `HAIFA HQ - CORE (area 0)`.
+4. Press **Esc** to go back to the **Select** arrow.
+5. **File → Save As** → `my-work/step01.pkt`.
+
+> Tip: the rectangles are only drawings — they don't do anything technical, but they make the
+> big network readable and look good in the project book's screenshots.
 
 ## Checkpoint
 - [ ] You did the 5 exercises

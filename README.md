@@ -71,6 +71,10 @@ Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint.
 - [docs/cheatsheet.md](docs/cheatsheet.md) — the `show` commands you will use 100 times
 - [docs/pt-gotchas.md](docs/pt-gotchas.md) — Packet Tracer quirks and how to get past them
 
+> **Status:** steps **00–07** are in the full *guided* format (every click and command,
+> simple-English explanations, attack/break labs, teacher notes). Steps 08–16 have the complete
+> configurations and are being converted to the same format.
+
 ## How each step is organised
 
 ```
