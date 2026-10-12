@@ -2,6 +2,9 @@
 
 > ⏱ 4 lessons · 🎯 ministry requirements 7, 10 (overload), 17, 20.x, 22.11 (student's choice) · 📁 start from: `my-work/step13.pkt` · 💾 save as: `my-work/step14.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 13 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 The third branch runs **IPv6** for all users, servers and management: automatic addresses
 (SLAAC + stateless DHCPv6), **OSPFv3** routing, **HSRP for IPv6**. One small legacy IPv4 VLAN
@@ -1083,6 +1086,73 @@ The ministry requires one site that is **entirely IPv6** (req. 7).
 site to an IPv6 internet server works.
 
 💾 Save as `my-project/step14.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ◆ What are the main IPv6 address types?**
+
+<details><summary>Answer</summary>
+
+Global unicast (`2000::/3`, routable on the internet), link-local (`FE80::/10`, only on the link — used by routing protocols and as gateway), multicast (`FF00::/8`). There is no broadcast in IPv6.
+
+**Show it:** `show ipv6 interface brief`
+</details>
+
+**2. ◆ What is the difference between SLAAC, stateless DHCPv6 and stateful DHCPv6?**
+
+<details><summary>Answer</summary>
+
+SLAAC: the PC builds its own address from the router's prefix (Router Advertisement). Stateless DHCPv6: address by SLAAC, but extra information (DNS) from a DHCPv6 server (`ipv6 nd other-config-flag`). Stateful DHCPv6: the server hands out the address itself.
+
+**Show it:** PC → IP Configuration → IPv6 (Automatic)
+</details>
+
+**3. ◆ How is OSPFv3 different from OSPFv2?**
+
+<details><summary>Answer</summary>
+
+It routes IPv6, is enabled **per interface** (`ipv6 ospf 1 area 0`) instead of with `network` statements, uses link-local addresses for neighbors, and still needs a 32-bit router-ID set by hand when there is no IPv4 address.
+
+**Show it:** `show ipv6 ospf neighbor`, `show ipv6 route`
+</details>
+
+**4. ◆ How does HSRP work for IPv6?**
+
+<details><summary>Answer</summary>
+
+The same as IPv4 (`standby version 2` is required), but the virtual gateway is a **link-local** address (here `FE80::1`), which the PCs learn as their default gateway.
+
+**Show it:** `show standby brief`
+</details>
+
+**5. ★1 What is PAT? Why is there NAT at all in an IPv6 site?**
+
+<details><summary>Answer</summary>
+
+PAT lets many inside hosts share one public IPv4 address using port numbers. IPv6 doesn't need NAT (there are enough addresses); this site keeps one small legacy IPv4 VLAN, and only that VLAN is PAT-ed — to meet the requirement of NAT in every site (req. 10).
+
+**Show it:** `show ip nat translations`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, remove the IPv6 addresses and OSPFv3 from one distribution switch.
+Without this page, configure them again from your plan. Target: **15 minutes**. Then show a PC
+with an IPv6 address from your prefix and `show ipv6 ospf neighbor`.
 
 ---
 

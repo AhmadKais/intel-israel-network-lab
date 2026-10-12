@@ -2,6 +2,9 @@
 
 > ⏱ 1–2 lessons · 🎯 ministry requirements 13, 16, 22.9 · 📁 start from: `my-work/step05.pkt` · 💾 save as: `my-work/step06.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 05 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 The access switches defend themselves against the classic attacks a person can do just by
 **plugging something into a wall socket**: flooding the switch with fake MACs, running a fake
@@ -303,6 +306,73 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 **Check:** repeat the attack lab of this step against **your** network — it must be blocked.
 
 💾 Save as `my-project/step06.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★3 Which attack related to DHCP do you know, and what is the solution? Where did you implement it?**
+
+<details><summary>Answer</summary>
+
+**Rogue DHCP server:** an attacker's device answers DHCP requests and hands out itself as the gateway (man-in-the-middle). Solution: **DHCP snooping** — only ports marked `trust` (the uplinks toward the real server) may send DHCP offers; offers from any other port are dropped.
+
+**Show it:** `show ip dhcp snooping`, `show running-config interface <uplink>` → `ip dhcp snooping trust`
+</details>
+
+**2. ★3 What is DHCP starvation? How do you prevent it, and where did you configure it?**
+
+<details><summary>Answer</summary>
+
+The attacker sends thousands of DHCP requests with fake MAC addresses until the pool is empty; real users get no address (denial of service), and then a rogue server can serve them. Prevention: **port-security** (limit MACs per port) and DHCP snooping rate-limiting.
+
+**Show it:** `show port-security`, `show port-security interface fa0/1`
+</details>
+
+**3. ◆ What is port-security? What are the violation modes? What is `sticky`?**
+
+<details><summary>Answer</summary>
+
+It limits which and how many MAC addresses may use a port. Violation modes: `shutdown` (port goes err-disabled — default), `restrict` (drops and logs), `protect` (drops silently). `sticky` learns the first MAC(s) automatically and writes them into the running-config.
+
+**Show it:** `show port-security interface fa0/1`
+</details>
+
+**4. ◆ How do you bring back a port that port-security shut down?**
+
+<details><summary>Answer</summary>
+
+Remove the cause (unplug the foreign device), then on the interface: `shutdown` and `no shutdown`.
+
+**Show it:** `show interfaces status` → err-disabled
+</details>
+
+**5. ◆ What is Dynamic ARP Inspection?**
+
+<details><summary>Answer</summary>
+
+It checks ARP replies against the DHCP-snooping binding table and drops fake ones, which stops ARP spoofing (an attacker claiming to be the gateway).
+
+**Show it:** `show running-config | include arp inspection`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-05 file, remove port-security and DHCP snooping from one access switch.
+Without this page, configure them again from your plan. Target: **10 minutes**. Then repeat the
+attack lab of this step in front of the examiner and show that it is blocked.
 
 ---
 

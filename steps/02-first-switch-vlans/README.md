@@ -2,6 +2,9 @@
 
 > ⏱ 1–2 lessons · 🎯 ministry requirements 22.1, 22.2, 22.3, 22.6 · 📁 start from: `my-work/step01.pkt` · 💾 save as: `my-work/step02.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 01 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 One access switch in Haifa building A, protected with the basic security settings every
 device in the project needs, with one VLAN per department. PCs in the **same** VLAN can talk;
@@ -394,6 +397,83 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 cross-VLAN ping fails.
 
 💾 Save as `my-project/step02.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ◆ What is a VLAN and why do you use VLANs?**
+
+<details><summary>Answer</summary>
+
+A VLAN splits one physical switch into separate logical switches — each VLAN is its own broadcast domain. Why: security (departments are separated), less broadcast traffic, and organisation (a user's VLAN follows the port, not the location).
+
+**Show it:** `show vlan brief`
+</details>
+
+**2. ◆ What is the difference between an access port and a trunk port?**
+
+<details><summary>Answer</summary>
+
+An access port belongs to one VLAN and connects one end device; frames are not tagged. A trunk carries many VLANs between switches (step 03) and tags each frame with its VLAN number (802.1Q).
+
+**Show it:** `show interfaces fa0/1 switchport`
+</details>
+
+**3. ◆ Why do the unused ports go to VLAN 999 and get shut down?**
+
+<details><summary>Answer</summary>
+
+An unused port is an open door — anyone could plug in a laptop. Shut down = the port doesn't work at all; VLAN 999 = even if someone enables it by mistake, it leads nowhere.
+
+**Show it:** `show interfaces status`, `show vlan brief`
+</details>
+
+**4. ◆ What is the difference between `enable secret` and `enable password`? What does `service password-encryption` do?**
+
+<details><summary>Answer</summary>
+
+`enable secret` is stored as an MD5 hash (type 5) — cannot be reversed. `enable password` is clear text. `service password-encryption` scrambles the other passwords (console, VTY) with type 7, which is weak but hides them from someone reading the config.
+
+**Show it:** `show running-config` → `enable secret 5 …`, `password 7 …`
+</details>
+
+**5. ◆ Why the banner?**
+
+<details><summary>Answer</summary>
+
+Legal warning before login: only authorised users may enter. Without it, it is harder to take legal action against an intruder (req. 22.2).
+
+**Show it:** Log out (`exit`) and log in again.
+</details>
+
+**6. ◆ Why `switchport mode access` and not leaving the default?**
+
+<details><summary>Answer</summary>
+
+It forces the port to stay an access port, so a device cannot negotiate a trunk (DTP) and reach every VLAN — a VLAN-hopping attack.
+
+**Show it:** `show interfaces fa0/1 switchport` → `Administrative Mode: static access`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+1. **File → New**, drag one 2960. Open only your plan — not this page.
+2. Type from memory: hostname, `no ip domain-lookup`, `enable secret`, `service password-encryption`,
+   banner, console line, all your VLANs, the port plan, and parking for unused ports.
+3. Target: **15 minutes**. Then `show vlan brief` and `show running-config`, and explain every line.
 
 ---
 

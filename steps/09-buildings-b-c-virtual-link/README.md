@@ -2,6 +2,9 @@
 
 > ⏱ 4 lessons · 🎯 ministry requirements 8, 22.16, 22.15, 20.1, 20.2 · 📁 start from: `my-work/step08.pkt` · 💾 save as: `my-work/step09.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 08 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 Haifa HQ's LAN is **complete**: 3 buildings, 6 departments, 3-tier design, OSPF areas
 0/1/2/3. Building C is connected only to building B, so you'll meet a real OSPF problem and
@@ -1325,6 +1328,82 @@ This step is already "do it yourself" on the example. In your project:
 every other.
 
 💾 Save as `my-project/step09.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★3 Where did you configure a virtual link? Why?**
+
+<details><summary>Answer</summary>
+
+Every OSPF area must touch area 0. The building whose area has no direct link to area 0 is joined to the backbone **through** a transit area: `area <transit> virtual-link <router-ID of the other ABR>` on both ABRs. The ministry requires this structure (req. 8, 22.16).
+
+**Show it:** `show ip ospf virtual-links` → "is up"
+</details>
+
+**2. ◆ Why can't the virtual link's transit area be a stub?**
+
+<details><summary>Answer</summary>
+
+A virtual link needs full routing information in the transit area; stub areas block it, so the virtual link can only cross a normal area.
+
+**Show it:** —
+</details>
+
+**3. ★3 What is a STUB area? Which LSAs does it block and receive?**
+
+<details><summary>Answer</summary>
+
+An area that doesn't receive external routes: type 4 and 5 LSAs are blocked; it receives types 1, 2, 3 and a default route from the ABR. Configured with `area X stub` on **all** routers of the area.
+
+**Show it:** —
+</details>
+
+**4. ★3 What is a TOTALLY STUBBY area, and how do you make a stub area totally stubby?**
+
+<details><summary>Answer</summary>
+
+It also blocks type 3 (inter-area) LSAs; the area receives only types 1, 2 and a default route. On the ABR only: `area X stub no-summary`.
+
+**Show it:** —
+</details>
+
+**5. ★3 What is an NSSA, and how do you make it totally NSSA?**
+
+<details><summary>Answer</summary>
+
+Not-So-Stubby Area: like a stub, but a router inside it may import external routes, which travel as type 7 LSAs and are converted to type 5 by the ABR. Totally NSSA: `area X nssa no-summary` on the ABR.
+
+**Show it:** —
+</details>
+
+**6. ◆ How do you summarize an area in OSPF?**
+
+<details><summary>Answer</summary>
+
+On the ABR: `area <N> range <network> <mask>` — one route for the whole /20 of the building is sent to the backbone.
+
+**Show it:** `show ip route` on a core switch → one `O IA` per building
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-09 file, delete the virtual link on both ABRs. Show that the far area
+is no longer reachable (`show ip route`), then add the virtual link again without this page.
+Target: **5 minutes**. Explain to the examiner why the area needs it.
 
 ---
 

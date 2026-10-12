@@ -2,6 +2,9 @@
 
 > ⏱ 2–3 lessons · 🎯 ministry requirements 2, 21, 23.4, 20.8 · 📁 start from: `my-work/step14.pkt` · 💾 save as: `my-work/step15.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 14 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 1. **Haifa ↔ Jerusalem** talk with their **private** addresses through an **encrypted tunnel**
    across the internet. Jerusalem users reach Haifa's DMZ servers (DNS, email, web, NTP, FTP, AAA).
@@ -350,6 +353,83 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 tunnel; the home PC connects with the VPN client and reaches HQ.
 
 💾 Save as `my-project/step15.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★2 What is a site-to-site VPN? What is a remote-access VPN?**
+
+<details><summary>Answer</summary>
+
+Site-to-site: a permanent encrypted tunnel between two routers, joining two offices; users notice nothing. Remote access: one user (at home) runs a VPN client and connects to the company's VPN server over the internet.
+
+**Show it:** `show crypto isakmp sa`; the home PC → Desktop → VPN
+</details>
+
+**2. ★2 What happens in phase 1 of setting up the VPN? Show it in the project.**
+
+<details><summary>Answer</summary>
+
+IKE phase 1 (ISAKMP): the two peers agree on a policy — encryption (AES), hash (SHA), authentication (pre-shared key), Diffie-Hellman group, lifetime — authenticate each other and build a secure channel. Phase 2 then negotiates the IPsec SAs (transform set) that encrypt the user data.
+
+**Show it:** `show crypto isakmp sa` → `QM_IDLE`; `show crypto ipsec sa` → encrypted/decrypted counters
+</details>
+
+**3. ★3 What is Diffie-Hellman?**
+
+<details><summary>Answer</summary>
+
+A method for two sides to create the **same secret key** over an insecure network without ever sending the key itself. The DH group decides the key strength.
+
+**Show it:** `show running-config` → `crypto isakmp policy` → `group`
+</details>
+
+**4. ★3 What is the difference between symmetric and asymmetric encryption? Name protocols of each.**
+
+<details><summary>Answer</summary>
+
+Symmetric: the same key encrypts and decrypts — fast (AES, 3DES, DES). Asymmetric: a public key and a private key — slow, used for key exchange and signatures (RSA, Diffie-Hellman, ECC).
+
+**Show it:** —
+</details>
+
+**5. ★2 What is integrity, and which protocols do hashing?**
+
+<details><summary>Answer</summary>
+
+Integrity = proof that the data wasn't changed on the way. A hash (fingerprint) of the data is sent with it; any change gives a different hash. MD5, SHA-1, SHA-256 (in VPN as HMAC).
+
+**Show it:** `crypto ipsec transform-set` → `esp-sha-hmac`
+</details>
+
+**6. ◆ Why GRE over IPsec and not only IPsec?**
+
+<details><summary>Answer</summary>
+
+IPsec alone carries only unicast IP; routing protocols use multicast. GRE wraps everything (including multicast) in a tunnel interface, and IPsec encrypts the GRE packets.
+
+**Show it:** `show interfaces tunnel 0`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, remove the crypto configuration from one end of the tunnel. Without this
+page, write it again from your plan (policy, key, transform set, ACL or profile, apply). Target:
+**15 minutes**. Then ping across the tunnel and show `show crypto isakmp sa` and the counters of
+`show crypto ipsec sa`.
 
 ---
 

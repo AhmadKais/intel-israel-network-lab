@@ -17,6 +17,7 @@
 2. A screenshot of a successful ping (4.4) and a screenshot of the MAC table (4.5).
 3. A one-sentence answer to each: what is the difference between `Switch>` and `Switch#`?
    What is the difference between a MAC address and an IP address?
+4. Your progress table `my-project/progress.md`, with step 00 ticked (see 🛠 Your own project).
 
 ---
 
@@ -59,7 +60,10 @@ not in the commands.
 ### 0.3 How every step is organised
 Every step follows the same order: **What you will have at the end** → **Understand it first**
 (the theory) → **Build** → **Configure** → **Check your work** → **Save** → **If something
-doesn't work** → **Challenge** → **🛠 Your own project**.
+doesn't work** → **Challenge** → **🛠 Your own project** → **🎓 Explain it to the examiner** →
+**🔁 Do it again — without the guide**. The last two prepare you for the exam: you will have to
+explain everything you built and configure it again in front of the examiner
+([docs/exam-guide.md](../../docs/exam-guide.md)).
 Don't skip "Understand it first" — without it, the commands are just text you copy.
 
 ---
@@ -451,9 +455,90 @@ In this step you don't build your project yet — you prepare its foundation.
 3. If something is missing or unclear — write it down and ask your teacher next lesson.
 4. Open [docs/project-plan-template.md](../../docs/project-plan-template.md) and read it once.
    In step 01 you will fill it in from your proposal.
+5. Copy [docs/progress-template.md](../../docs/progress-template.md) to `my-project/progress.md`.
+   Tick step 00 when you finish it, and show it to your teacher at the end of every step.
+6. Read [docs/exam-guide.md](../../docs/exam-guide.md) once, so you know from today what the
+   examiner will ask.
 
 > **Important:** don't save files containing an ID number (such as the proposal form) in the
 > course folder. This folder may be shared.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ◆ What is the difference between a MAC address and an IP address?**
+
+<details><summary>Answer</summary>
+
+A MAC address is burned into the network card and never changes; switches use it to deliver frames **inside** one network. An IP address is given by the admin or DHCP and changes when the device moves; routers use it to deliver packets **between** networks.
+
+**Show it:** PC → Desktop → Command Prompt → `ipconfig /all` (shows both). On the switch: `show mac address-table`.
+</details>
+
+**2. ★1 What is a default gateway?**
+
+<details><summary>Answer</summary>
+
+The address of the router on the PC's own network. When the destination is on another network, the PC sends the packet to the gateway, and the router forwards it. Without a gateway the PC can only reach its own network.
+
+**Show it:** PC → Desktop → IP Configuration (the Default Gateway field).
+</details>
+
+**3. ◆ How does a switch learn where each device is? What does it do with a frame for an unknown MAC?**
+
+<details><summary>Answer</summary>
+
+It reads the **source** MAC of every frame and writes "this MAC is on this port" in its MAC address table. A frame for a MAC that isn't in the table is **flooded** out of every port except the one it came in on.
+
+**Show it:** `show mac address-table`
+</details>
+
+**4. ◆ What is ARP and why did the first ping sometimes fail?**
+
+<details><summary>Answer</summary>
+
+ARP finds the MAC address that belongs to an IP address: the PC broadcasts "who has 192.168.1.2?" and the owner replies with its MAC. The first ping can time out while the PC is still waiting for that reply.
+
+**Show it:** Simulation mode with the ARP and ICMP filters; PC → `arp -a`.
+</details>
+
+**5. ◆ What is the difference between running-config and startup-config?**
+
+<details><summary>Answer</summary>
+
+running-config is in RAM — what the device is doing now; every command changes it immediately. startup-config is in NVRAM — what the device loads when it boots. `copy running-config startup-config` saves the first into the second.
+
+**Show it:** `show running-config`, `show startup-config`
+</details>
+
+**6. ◆ What are the CLI modes and how do you move between them?**
+
+<details><summary>Answer</summary>
+
+User EXEC `>` (look only) → `enable` → privileged EXEC `#` (see everything, save) → `configure terminal` → global config `(config)#` → e.g. `interface fa0/1` → sub-mode `(config-if)#`. `exit` goes one level down, `end` goes straight back to `#`.
+
+**Show it:** Type them on any switch and watch the prompt change.
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+1. **File → New**. Without opening this page, build PC0 – Switch0 – PC1 with the correct cable
+   and ports, give the PCs `192.168.1.1` and `192.168.1.2`, ping, and show the MAC table.
+2. Target: **5 minutes**. Say out loud what you are doing and why at every click.
+3. Then change PC1 to another network, show that the ping fails, and explain why.
 
 ---
 

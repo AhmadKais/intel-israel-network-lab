@@ -2,6 +2,9 @@
 
 > ⏱ 2 lessons · 🎯 ministry requirements 22.6, 22.7, 22.8, 6 · 📁 start from: `my-work/step02.pkt` · 💾 save as: `my-work/step03.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 02 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 Building A gets its two **distribution** switches and a second access switch. Every access
 switch has **two trunk uplinks** (one to each distribution switch). VLANs are created
@@ -486,6 +489,74 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 `show vtp status` shows your domain on every switch of the building.
 
 💾 Save as `my-project/step03.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★2 What is 802.1Q and why is it used?**
+
+<details><summary>Answer</summary>
+
+The trunking standard: it inserts a 4-byte tag with the 12-bit VLAN ID into each Ethernet frame, so one link can carry many VLANs and the other side knows which VLAN each frame belongs to. It is used between switches and between a switch and a router (router-on-a-stick).
+
+**Show it:** `show interfaces trunk`
+</details>
+
+**2. ◆ What is the native VLAN and why is yours an unused VLAN?**
+
+<details><summary>Answer</summary>
+
+Frames of the native VLAN cross the trunk **untagged**. If the native VLAN is a user VLAN, an attacker can double-tag frames and hop into another VLAN. An unused native VLAN with no ports and no IP blocks that.
+
+**Show it:** `show interfaces trunk` → Native vlan column
+</details>
+
+**3. ◆ Why limit the allowed VLANs on a trunk?**
+
+<details><summary>Answer</summary>
+
+Only the VLANs that are needed cross the link: less unnecessary broadcast traffic, and a VLAN that shouldn't be in a building can't leak into it.
+
+**Show it:** `show interfaces trunk` → "Vlans allowed on trunk"
+</details>
+
+**4. ◆ What is VTP? What are server, client and transparent?**
+
+<details><summary>Answer</summary>
+
+VTP shares the VLAN list between switches in one domain. Server: creates/deletes VLANs and advertises them. Client: learns VLANs from the server, cannot change them. Transparent: keeps its own VLANs and only passes advertisements on.
+
+**Show it:** `show vtp status`
+</details>
+
+**5. ◆ What is the danger of VTP and how do you protect against it?**
+
+<details><summary>Answer</summary>
+
+A switch with a higher configuration revision number, added to the domain, can overwrite (even delete) the VLANs of every switch. Protection: a VTP password, the same domain name only where intended, and resetting the revision of a new switch before connecting it.
+
+**Show it:** `show vtp status` → Configuration Revision
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-02 file: add the second access switch and the two distribution
+switches, cable the uplinks, and type the trunk and VTP configuration from your plan, without
+this page. Target: **20 minutes**. Then `show interfaces trunk` and `show vtp status` on every
+switch, and explain the native VLAN and allowed list you chose.
 
 ---
 

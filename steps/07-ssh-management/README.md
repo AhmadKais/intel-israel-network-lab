@@ -2,6 +2,9 @@
 
 > ⏱ 1–2 lessons · 🎯 ministry requirements 13, 22.5 · 📁 start from: `my-work/step06.pkt` · 💾 save as: `my-work/step07.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 06 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 Every switch in building A can be managed **remotely**, but:
 - only with **SSH** (encrypted) — never Telnet;
@@ -250,6 +253,74 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 **Check:** SSH from your admin PC works; SSH from a user PC is refused; Telnet is refused.
 
 💾 Save as `my-project/step07.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 What is SSH? Which protocols does it use for encryption? Show the configuration on a switch or router.**
+
+<details><summary>Answer</summary>
+
+Secure Shell — remote management over an **encrypted** session, TCP port 22 (Telnet, port 23, is clear text). An RSA key pair (`crypto key generate rsa`) is used to authenticate the device and exchange keys; the session itself is encrypted with a symmetric cipher (e.g. AES). Needed lines: `hostname`, `ip domain-name`, `crypto key generate rsa`, `ip ssh version 2`, a local user, `line vty` → `login local` + `transport input ssh`.
+
+**Show it:** `show ip ssh`, `show running-config` → `line vty`
+</details>
+
+**2. ★1 What is the difference between a standard and an extended access list?**
+
+<details><summary>Answer</summary>
+
+Standard (1–99) checks only the **source** IP; place it close to the destination. Extended (100–199) checks source **and** destination, protocol and port; place it close to the source.
+
+**Show it:** `show access-lists`
+</details>
+
+**3. ★1 Show me where you configured a standard access list.**
+
+<details><summary>Answer</summary>
+
+The VTY ACL: it permits only the management subnet / admin PC to open SSH sessions, applied with `access-class <name> in` under `line vty`.
+
+**Show it:** `show access-lists`, `show running-config` → `line vty`
+</details>
+
+**4. ★1 In what order is an access list processed? How do you check that it works?**
+
+<details><summary>Answer</summary>
+
+Top to bottom; the first line that matches decides, and the rest is ignored. At the end there is an invisible **deny any**. Check with `show access-lists` — the match counters grow when you test.
+
+**Show it:** `show access-lists` before and after an SSH attempt
+</details>
+
+**5. ◆ Why a separate management VLAN?**
+
+<details><summary>Answer</summary>
+
+Management traffic (SSH to network devices) is kept apart from users. Users can't even reach the devices' management addresses, and the ACL can allow just this one subnet (req. 22.5).
+
+**Show it:** `show ip interface brief` → `Vlan99`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+On a fresh switch in a copy of your file: without this page, set the management SVI and default
+gateway, the domain name, RSA keys, SSH v2, the local admin user, the VTY lines and the VTY ACL
+from your plan. Target: **10 minutes**. Then SSH from the admin PC (works) and from a user PC
+(refused), and explain why.
 
 ---
 

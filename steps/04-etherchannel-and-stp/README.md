@@ -2,6 +2,9 @@
 
 > ⏱ 2 lessons · 🎯 ministry requirements 14, 15, 22.14, 6, 13 · 📁 start from: `my-work/step03.pkt` · 💾 save as: `my-work/step04.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 03 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 - DIST1 and DIST2 joined by **two cables bundled into one logical link** (an
   **EtherChannel** called `Port-channel1`).
@@ -353,6 +356,147 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 shows the right switch as root for each of your VLANs.
 
 💾 Save as `my-project/step04.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★2 What is the advantage of EtherChannel between two switches?**
+
+<details><summary>Answer</summary>
+
+Several physical links act as one logical link: more bandwidth, and if one cable fails traffic continues on the others with no STP recalculation.
+
+**Show it:** `show etherchannel summary`
+</details>
+
+**2. ★2 Two switches are connected with 4 cables of 100 Mbps, but the speed between them is 100, not 400. Why? What is the fix?**
+
+<details><summary>Answer</summary>
+
+STP sees 4 parallel links as a loop and blocks 3 of them; only one forwards. Fix: bundle them into an EtherChannel — STP then sees one logical link and all 4 carry traffic.
+
+**Show it:** `show spanning-tree` before and after the port-channel.
+</details>
+
+**3. ★2 Which two protocols can build an EtherChannel bundle?**
+
+<details><summary>Answer</summary>
+
+LACP (IEEE 802.3ad, open standard — modes `active`/`passive`) and PAgP (Cisco — modes `desirable`/`auto`). You can also force it with mode `on` (no protocol).
+
+**Show it:** `show etherchannel summary` → Protocol column
+</details>
+
+**4. ★1 What is the role of STP in a LAN?**
+
+<details><summary>Answer</summary>
+
+To prevent Layer-2 loops in a redundant network: it blocks some ports so there is exactly one active path between any two switches, and unblocks a backup if the active path fails.
+
+**Show it:** `show spanning-tree vlan <yours>`
+</details>
+
+**5. ★2 Where is STP used in your project and which type?**
+
+<details><summary>Answer</summary>
+
+On every switch, in Rapid-PVST+ mode (`spanning-tree mode rapid-pvst`): one rapid spanning tree per VLAN.
+
+**Show it:** `show spanning-tree summary`
+</details>
+
+**6. ★2 Show me which switch is the root bridge. How do you make a non-root switch the root?**
+
+<details><summary>Answer</summary>
+
+The root has the lowest bridge ID (priority + MAC). `show spanning-tree vlan 10` → "This bridge is the root". To make another switch root: `spanning-tree vlan 10 root primary` (or `spanning-tree vlan 10 priority 4096`).
+
+**Show it:** `show spanning-tree vlan <yours>` on both distribution switches
+</details>
+
+**7. ★2 Show me the port states. What does Blocking / Forwarding mean?**
+
+<details><summary>Answer</summary>
+
+Forwarding (FWD): the port sends and receives frames. Blocking (BLK, in RSTP "discarding"): it only listens to BPDUs and drops data frames, to break a loop. Port roles: Root, Designated, Alternate/Backup.
+
+**Show it:** `show spanning-tree vlan <yours>`
+</details>
+
+**8. ★2 What is a BPDU?**
+
+<details><summary>Answer</summary>
+
+Bridge Protocol Data Unit — the message switches exchange (every 2 s) to elect the root bridge and decide which ports forward or block.
+
+**Show it:** Simulation mode with the STP filter.
+</details>
+
+**9. ★2 Which two commands are recommended on access ports, related to STP, and what do they do?**
+
+<details><summary>Answer</summary>
+
+`spanning-tree portfast` — the port goes straight to forwarding (a PC doesn't wait ~30 s). `spanning-tree bpduguard enable` — if a BPDU arrives (someone plugged in a switch), the port is shut down (err-disabled).
+
+**Show it:** `show running-config interface fa0/1`
+</details>
+
+**10. ★2 Which versions of STP exist? What is the difference between STP and PVST?**
+
+<details><summary>Answer</summary>
+
+802.1D STP (one tree for all VLANs), PVST+ (Cisco — one tree per VLAN), RSTP 802.1w (fast convergence), Rapid-PVST+ (RSTP per VLAN — what we use), MSTP 802.1s (groups VLANs into instances). PVST lets each VLAN have a different root, so different VLANs can use different links (load sharing).
+
+**Show it:** `show spanning-tree summary` → mode
+</details>
+
+**11. ★3 How long does a port take to start forwarding with classic STP? Which states?**
+
+<details><summary>Answer</summary>
+
+Blocking → Listening (15 s) → Learning (15 s) → Forwarding: 30 s for a new port, up to 50 s if it first waits max-age (20 s) after a topology change. Rapid-PVST+ and PortFast make it almost immediate.
+
+**Show it:** —
+</details>
+
+**12. ★3 How can STP be used to attack a LAN, and how do you protect it?**
+
+<details><summary>Answer</summary>
+
+An attacker plugs in a switch that sends BPDUs with a better (lower) priority, becomes the root, and traffic flows through it (man-in-the-middle) or the topology keeps changing. Protection: BPDU Guard on access ports, Root Guard on the ports facing down to the access layer.
+
+**Show it:** `show running-config | include guard`
+</details>
+
+**13. ★3 What is the difference between BPDU Guard and Root Guard?**
+
+<details><summary>Answer</summary>
+
+BPDU Guard shuts the port if **any** BPDU arrives — for ports with end devices. Root Guard allows BPDUs but blocks the port (root-inconsistent) if a **superior** BPDU arrives — for switch-to-switch ports where a new root must never appear.
+
+**Show it:** `show running-config` on a downlink → `spanning-tree guard root`; `show spanning-tree vlan <yours>`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-03 file, remove the port-channel and the root/priority commands.
+Without this page: rebuild the EtherChannel between your distribution switches, set the root per
+VLAN according to your plan, and add PortFast + BPDU Guard on access ports and Root Guard on
+downlinks. Target: **15 minutes**. Then show `show etherchannel summary` and
+`show spanning-tree vlan <yours>` and explain which port blocks and why.
 
 ---
 

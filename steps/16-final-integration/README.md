@@ -2,6 +2,9 @@
 
 > ⏱ 3–4 lessons · 🎯 ministry requirements 20.2, 22.19 + the project book · 📁 start from: `my-work/step15.pkt` · 💾 save as: `my-work/final.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 15 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 A **submission-ready** project: every department has at least 8 PCs, every department has two
 email users, every requirement is tested with a screenshot, and the project book is drafted.
@@ -224,6 +227,57 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 where **your** project implements each one.
 
 💾 Save as `my-project/final.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★3 Show me your IP address tables and explain your plan.**
+
+<details><summary>Answer</summary>
+
+Use your project book: master block → site blocks → areas → VLANs → links/loopbacks, and why (readability, summarization, growth).
+
+**Show it:** `my-project/plan.md`, the project book
+</details>
+
+**2. ◆ Walk me through a packet from a PC in a branch to the web server in the DMZ.**
+
+<details><summary>Answer</summary>
+
+PC → its gateway (HSRP `.1`) → the branch routing protocol → the edge router (static default route, NAT) → the WAN / VPN tunnel → HQ edge → ASA (ACL, security levels) → DMZ server. Name the device and the decision at every hop.
+
+**Show it:** `tracert <server IP>` from the PC
+</details>
+
+**3. ◆ Which requirement is implemented where?**
+
+<details><summary>Answer</summary>
+
+Go through the ministry list and point to the device and the `show` command for each one. Prepare this list in advance in your project book.
+
+**Show it:** `docs/requirements-matrix.md`, your own version
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+The final rehearsal — do it twice before the exam:
+1. Ask a classmate to choose any 5 requirements; for each, show the configuration and a `show`
+   command that proves it works, and explain every line — **2 minutes per requirement**.
+2. Ask a classmate to break something in a copy of your file (shut an interface, delete a line).
+   Find it with `show` commands and fix it — **10 minutes**.
 
 ---
 

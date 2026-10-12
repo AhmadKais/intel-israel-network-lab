@@ -26,6 +26,12 @@ Before you start:
 2. In step 01, copy [docs/project-plan-template.md](docs/project-plan-template.md) to
    `my-project/plan.md` and fill it in. Get it approved **before** step 02.
 
+**3. Prepare for the exam.** Every step ends with **🎓 Explain it to the examiner** (the ministry
+question-bank questions for that topic, with answers) and **🔁 Do it again — without the guide**
+(a timed drill). At the exam you must explain what you built and configure it again in front of
+the examiner — see [docs/exam-guide.md](docs/exam-guide.md). Track your progress in
+`my-project/progress.md` (copied from [docs/progress-template.md](docs/progress-template.md)).
+
 **The rules** (from the ministry guidelines):
 - Two students may not submit the same topic or plan.
 - No branch may be a copy of another branch — each site uses different features.
@@ -99,6 +105,8 @@ and then the same step in your own project.
 
 ## Reference docs
 
+- [docs/exam-guide.md](docs/exam-guide.md) — **how the project exam works and how to prepare**
+- [docs/progress-template.md](docs/progress-template.md) — your progress table (copy it to `my-project/progress.md`)
 - [docs/project-plan-template.md](docs/project-plan-template.md) — **the plan for your own project** (copy it to `my-project/plan.md` in step 01)
 - [docs/design.md](docs/design.md) — the example's full addressing / VLAN / naming plan (the model for your own plan)
 - [docs/requirements-matrix.md](docs/requirements-matrix.md) — every ministry requirement → where it is built
@@ -125,6 +133,8 @@ steps/NN-name/README.md
   7. Common mistakes
   8. Challenge           — do it alone; answer hidden in a <details> block
   9. Your own project    — the same step in YOUR network, with values from YOUR plan
+ 10. Explain it to the examiner — question-bank questions with answers
+ 11. Do it again        — rebuild the step without the guide, against the clock
 ```
 
 ## Saving your progress with git

@@ -2,6 +2,9 @@
 
 > ⏱ 2–3 lessons · 🎯 ministry requirements 22.10, 17, 20.7, 22.11, 6 · 📁 start from: `my-work/step04.pkt` · 💾 save as: `my-work/step05.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 04 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 - The two distribution switches also work as **routers**: departments can finally talk to
   each other.
@@ -444,6 +447,182 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 two of your departments works; shut the primary switch — ping keeps working.
 
 💾 Save as `my-project/step05.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★2 What is an SVI and why do you use it? Show me where you configured one.**
+
+<details><summary>Answer</summary>
+
+Switch Virtual Interface — a virtual Layer-3 interface for a VLAN (`interface vlan 10`) on a Layer-3 switch. It is the gateway of that VLAN and routes between VLANs inside the switch, fast, without an external router.
+
+**Show it:** `show ip interface brief`, `show running-config interface vlan 10`
+</details>
+
+**2. ★1 What is router-on-a-stick? What problem does it solve? Show its commands.**
+
+<details><summary>Answer</summary>
+
+One router interface connected to a trunk and split into sub-interfaces, one per VLAN (`interface g0/0.10` → `encapsulation dot1Q 10` → `ip address …`). It gives inter-VLAN routing with a single router port. **In this project inter-VLAN routing is done with SVIs on Layer-3 switches** (faster, no single-link bottleneck) — say so, and explain router-on-a-stick as the alternative. If your own project uses it somewhere, show it there.
+
+**Show it:** Your SVIs: `show ip interface brief`
+</details>
+
+**3. ★1 What is HSRP? What are its advantages?**
+
+<details><summary>Answer</summary>
+
+Hot Standby Router Protocol (Cisco): two or more routers share one **virtual IP and virtual MAC**, which the PCs use as their gateway. If the active router fails, the standby takes over the virtual address — the PCs don't notice. Advantage: gateway redundancy without changing anything on the PCs.
+
+**Show it:** `show standby brief`
+</details>
+
+**4. ★2 How does HSRP work? What are the Active and Standby routers?**
+
+<details><summary>Answer</summary>
+
+Routers in the same group send hellos. The **Active** router answers for the virtual IP/MAC and forwards the traffic. The **Standby** router listens to the active's hellos and takes over if they stop. The others stay in Listen.
+
+**Show it:** `show standby brief` → State column
+</details>
+
+**5. ★2 What are the hello and hold times of HSRP? What happens when the active fails?**
+
+<details><summary>Answer</summary>
+
+Hello 3 s, hold 10 s. If the standby hears no hello for 10 s it becomes active, takes over the virtual IP and MAC, and a new standby is elected. PCs keep the same gateway.
+
+**Show it:** Shut down the active switch (or its SVI) and ping continuously from a PC.
+</details>
+
+**6. ★2 How is the Active router chosen? How do you make a router the Active one?**
+
+<details><summary>Answer</summary>
+
+Highest priority (default 100) wins; on a tie, the highest IP address. Set `standby 10 priority 110` and `standby 10 preempt` on the router that should be active.
+
+**Show it:** `show standby` → Priority, Preemption
+</details>
+
+**7. ★2 What does `preempt` mean?**
+
+<details><summary>Answer</summary>
+
+A router with a higher priority takes the active role back as soon as it comes up again. Without preempt, the router that is active stays active even if a better one returns.
+
+**Show it:** `show standby` → "Preemption enabled"
+</details>
+
+**8. ★2 What are the HSRP states?**
+
+<details><summary>Answer</summary>
+
+Initial → Learn → Listen → Speak → Standby → Active.
+
+**Show it:** `show standby`
+</details>
+
+**9. ★2 Which HSRP group do the routers in the branch belong to? What is a group?**
+
+<details><summary>Answer</summary>
+
+A group = the routers that share one virtual IP. In this project the group number equals the VLAN number (VLAN 10 → group 10), one group per VLAN.
+
+**Show it:** `show standby brief` → Grp column
+</details>
+
+**10. ★2 What does `track` do and where do you configure it?**
+
+<details><summary>Answer</summary>
+
+It watches an interface (usually the uplink) and lowers the HSRP priority if it goes down, so the other router (with preempt) becomes active. It is configured on the active router, under the SVI: `standby 10 track <uplink> 20`. **The example doesn't use track** — explain it, and add it to your project if you want the gateway to follow the working uplink.
+
+**Show it:** —
+</details>
+
+**11. ★2 If this router fails, what happens to routing out of the branch? Which protocol is responsible?**
+
+<details><summary>Answer</summary>
+
+HSRP moves the gateway to the other switch within the hold time (≤10 s), so the PCs keep sending. The routing protocol (OSPF/EIGRP) removes the failed router's links and reconverges the routes out of the branch.
+
+**Show it:** `show standby brief`, `show ip route` after shutting the switch.
+</details>
+
+**12. ★2 What makes HSRP go from Active to Standby?**
+
+<details><summary>Answer</summary>
+
+The router fails or its interface goes down; a tracked interface lowers its priority below the other router's (with preempt); a router with higher priority and preempt comes up; or the priority is changed manually.
+
+**Show it:** —
+</details>
+
+**13. ★3 How can HSRP provide redundancy for the LAN and for the WAN?**
+
+<details><summary>Answer</summary>
+
+LAN: two gateways for each VLAN — if one switch dies the other answers. WAN: track the WAN/uplink interface, so the active role moves to the router whose WAN link still works.
+
+**Show it:** —
+</details>
+
+**14. ★3 How can you load-balance between the routers of an HSRP setup?**
+
+<details><summary>Answer</summary>
+
+Use several groups with different active routers. In this project DIST1 is active for some VLANs and DIST2 for others, so both switches forward traffic.
+
+**Show it:** `show standby brief` on both distribution switches
+</details>
+
+**15. ★1 How do the computers in your network get their IP address?**
+
+<details><summary>Answer</summary>
+
+From DHCP: the PC broadcasts Discover → the server sends Offer → the PC sends Request → the server sends Ack (DORA). The PC gets IP, mask, gateway and DNS.
+
+**Show it:** PC → IP Configuration → DHCP; `ipconfig /all`
+</details>
+
+**16. ★1 Show me the table of physical (MAC) address ↔ IP address that devices received from the DHCP server.**
+
+<details><summary>Answer</summary>
+
+On the device that is the DHCP server (here the Layer-3 switch): the binding table.
+
+**Show it:** `show ip dhcp binding`
+</details>
+
+**17. ★2 Show me the DHCP lines in the running-config of a Cisco device and explain them.**
+
+<details><summary>Answer</summary>
+
+`ip dhcp excluded-address` (addresses DHCP must not give — gateways, servers), `ip dhcp pool NAME` → `network` (the subnet), `default-router` (the gateway `.1`), `dns-server`.
+
+**Show it:** `show running-config` → scroll (Space) to the `ip dhcp` lines
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-04 file, delete the SVIs, the HSRP lines and the DHCP pools of **one**
+VLAN. Without this page, rebuild them from your plan on both distribution switches.
+Target: **10 minutes per VLAN**. Then show the examiner: a PC gets an address by DHCP,
+`show standby brief`, and a continuous ping that survives shutting down the active switch.
 
 ---
 

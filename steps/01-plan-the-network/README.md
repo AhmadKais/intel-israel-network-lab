@@ -2,6 +2,9 @@
 
 > ⏱ 2 lessons · 📁 start from: a new file · 💾 save as: `my-work/step01.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 00 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## Goal
 Before you drag a single device, you understand **why** every address in
 [docs/design.md](../../docs/design.md) is what it is. A network built without a plan
@@ -293,6 +296,94 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
    building and site names in the notes.
 
 💾 Save as `my-project/step01.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 What is a subnet mask?**
+
+<details><summary>Answer</summary>
+
+It marks which part of an IP address is the **network** and which part is the **host**. Bits set to 1 in the mask are the network part. Example: `255.255.255.0` → the first 3 numbers are the network.
+
+**Show it:** Any PC → IP Configuration; your plan's VLAN table.
+</details>
+
+**2. ★1 What is a prefix?**
+
+<details><summary>Answer</summary>
+
+The short way to write the mask: the number of network bits. `/24` = `255.255.255.0`, `/30` = `255.255.255.252`. Addresses in the subnet = 2^(32 − prefix); usable = that − 2.
+
+**Show it:** Your plan, part C/D.
+</details>
+
+**3. ◆ Why −2 usable hosts? How many hosts in a /24, a /29, a /30?**
+
+<details><summary>Answer</summary>
+
+The first address is the network address and the last is the broadcast address; neither can be given to a device. /24 → 254, /29 → 6, /30 → 2.
+
+**Show it:** Your /30 link table: exactly two devices per link.
+</details>
+
+**4. ★1 (NAT section) What are the private address ranges of each class?**
+
+<details><summary>Answer</summary>
+
+Class A `10.0.0.0/8`, class B `172.16.0.0/12` (172.16–172.31), class C `192.168.0.0/16`. They are not routed on the internet; NAT translates them to public addresses.
+
+**Show it:** Your master block in plan part C.
+</details>
+
+**5. ★3 Show me your IP address tables and explain why you planned this structure.**
+
+<details><summary>Answer</summary>
+
+Hierarchical: one master block → one /16 per site (consecutive, req. 22.4) → one /20 per OSPF area at HQ → one /24 per VLAN, /30 per link, /32 per loopback. Why: you can read where an address is, routers can **summarize** one route per area/site, the network can grow, and the project book follows the same tables.
+
+**Show it:** `my-project/plan.md` parts C and D; on a distribution switch `show ip route` shows one summary per building (from step 08).
+</details>
+
+**6. ◆ What is route summarization and why does your plan make it possible?**
+
+<details><summary>Answer</summary>
+
+Advertising one route that covers many subnets (e.g. one /20 for a whole building). It works only because each building/site got one **contiguous** block. Smaller routing tables, and a VLAN going up and down inside a building is not seen outside it.
+
+**Show it:** From step 08: `show ip route` on the core.
+</details>
+
+**7. ◆ What is your gateway convention, and why have one?**
+
+<details><summary>Answer</summary>
+
+`.1` = the HSRP virtual gateway that PCs use, `.2`/`.3` = the real addresses of the two switches, `.4–.10` reserved, `.11+` DHCP. With one rule you never need to look up a gateway.
+
+**Show it:** Plan part D.
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+Close the plan. On a blank page, the examiner may give you numbers and ask you to calculate.
+Practise until each takes under 2 minutes, without a calculator:
+1. The /20 of OSPF area N inside your HQ /16, and its first and last address.
+2. The smallest summary that covers a list of your /24s (e.g. your 6 department subnets).
+3. How many /30 links fit in one /24, and the addresses of link number 5.
+Then explain your plan's tables out loud, top to bottom, in 3 minutes.
 
 ---
 

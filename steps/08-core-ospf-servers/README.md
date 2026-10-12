@@ -2,6 +2,9 @@
 
 > ⏱ 3 lessons · 🎯 ministry requirements 8 (start), 20.1, 20.9, 20.10, 22.5, 22.15, 22.18, 6 · 📁 start from: `my-work/step07.pkt` · 💾 save as: `my-work/step08.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 07 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 - Two **core** switches — the backbone of Haifa HQ.
 - Building A connected to the core with **routed** links (not trunks).
@@ -726,6 +729,183 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 summary route per building; login through your AAA server works; your Syslog server receives logs.
 
 💾 Save as `my-project/step08.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 What is the advantage of dividing the network into OSPF areas? What is the recommended maximum of routers in an area?**
+
+<details><summary>Answer</summary>
+
+Each router keeps a detailed map (LSDB) only of its own area; between areas only summaries are exchanged. Smaller databases, less CPU, and a change inside one area doesn't make every router recalculate. A common guideline is about **50 routers** per area.
+
+**Show it:** `show ip ospf database`
+</details>
+
+**2. ★1 Show me area 0. What is its role? What is it called?**
+
+<details><summary>Answer</summary>
+
+Area 0 is the **backbone**: every other area must connect to it, and traffic between areas passes through it. In this project it holds the core switches, the server farm and the core links.
+
+**Show it:** `show ip ospf interface` on a core switch → Area 0
+</details>
+
+**3. ★1 What are the Hello and Dead timers in OSPF?**
+
+<details><summary>Answer</summary>
+
+On Ethernet (broadcast and point-to-point): Hello 10 s, Dead 40 s. Neighbors must have the same timers to become adjacent.
+
+**Show it:** `show ip ospf interface <int>`
+</details>
+
+**4. ★1 How do you see OSPF's topology table? And the neighbor table?**
+
+<details><summary>Answer</summary>
+
+Topology (link-state database): `show ip ospf database`. Neighbors: `show ip ospf neighbor`. Routing table: `show ip route ospf`.
+
+**Show it:** those three commands
+</details>
+
+**5. ★2 How is the OSPF Router-ID chosen?**
+
+<details><summary>Answer</summary>
+
+1) the `router-id` command; 2) otherwise the highest IP on a loopback; 3) otherwise the highest IP on an active interface. This project sets it with the `router-id` command (the same value as Loopback0).
+
+**Show it:** `show ip protocols`, `show ip ospf`
+</details>
+
+**6. ★2 Which router is the DR and which the BDR? How are they chosen? What is the difference?**
+
+<details><summary>Answer</summary>
+
+On broadcast segments (Ethernet) one DR and one BDR are elected: highest OSPF priority, then highest Router-ID. Everyone exchanges updates only with the DR (and BDR), which saves traffic. The BDR is the backup and becomes DR if the DR fails.
+
+**Show it:** `show ip ospf neighbor` → State column (FULL/DR, FULL/BDR, …)
+</details>
+
+**7. ★2 If the DR fails, who takes over? What happens when the old DR comes back?**
+
+<details><summary>Answer</summary>
+
+The BDR becomes DR and a new BDR is elected. The election is **not pre-emptive**: when the old DR returns it does not take the role back — it waits until the current DR/BDR fail.
+
+**Show it:** Shut down the DR's interface, then `show ip ospf neighbor`.
+</details>
+
+**8. ★2 What is a point-to-point network and what is a broadcast network?**
+
+<details><summary>Answer</summary>
+
+Point-to-point: exactly two routers on the link — no DR/BDR election. Broadcast (Ethernet): many routers can share the segment — a DR/BDR is elected. An Ethernet /30 is type broadcast by default unless you set `ip ospf network point-to-point`.
+
+**Show it:** `show ip ospf interface <int>` → Network Type
+</details>
+
+**9. ★2 What is an LSA type 1, and how is it marked in the routing table? And type 3?**
+
+<details><summary>Answer</summary>
+
+Type 1 (Router LSA): every router describes its own links inside its area → routes marked `O`. Type 3 (Summary LSA): sent by an ABR to describe networks of another area → marked `O IA` (inter-area).
+
+**Show it:** `show ip route` on a distribution switch
+</details>
+
+**10. ★2 Show me which router is the ABR (area border router).**
+
+<details><summary>Answer</summary>
+
+A router with interfaces in area 0 and in another area. In this project the distribution switches of each building are ABRs (area 0 toward the core, area N toward the building).
+
+**Show it:** `show ip ospf` ("It is an area border router")
+</details>
+
+**11. ◆ How is OSPF secured in your project?**
+
+<details><summary>Answer</summary>
+
+MD5 authentication on the routed links (`ip ospf authentication message-digest` + `ip ospf message-digest-key 1 md5 <key>`) — a router without the key can't become a neighbor and inject routes (req. 22.18).
+
+**Show it:** `show ip ospf interface <int>` → "Message digest authentication enabled"
+</details>
+
+**12. ★1 What is the role of the NTP server? Show the configuration on the server and on a switch.**
+
+<details><summary>Answer</summary>
+
+It keeps the clocks of all devices the same (UDP 123), so log times match between devices and certificates/keys work. Server: Services → NTP → On. Device: `ntp server <IP>`.
+
+**Show it:** `show ntp status`, `show clock`
+</details>
+
+**13. ★1 What is the role of the Syslog server? Which device does it work with?**
+
+<details><summary>Answer</summary>
+
+It collects log messages from all routers and switches in one place (UDP 514), so the admin can see events of the whole network. The devices send to it with `logging host <IP>`.
+
+**Show it:** Server → Services → SYSLOG (the list of messages); `show logging`
+</details>
+
+**14. ★1 What is an AAA server? What are its advantages and disadvantages?**
+
+<details><summary>Answer</summary>
+
+Authentication (who are you), Authorization (what may you do), Accounting (what did you do). Advantage: one central user database for all devices; changes in one place; logging. Disadvantage: if it is unreachable nobody can log in — so a local user is kept as a fallback (`… group tacacs+ local`).
+
+**Show it:** `show running-config | include aaa`
+</details>
+
+**15. ★1/★2 Which AAA servers exist? What is the difference between RADIUS and TACACS+?**
+
+<details><summary>Answer</summary>
+
+RADIUS (open standard, UDP 1812/1813, encrypts only the password, combines authentication and authorization — common for network access/WiFi). TACACS+ (Cisco, TCP 49, encrypts the whole packet, separates the three A's — common for device administration). This project uses TACACS+ for device logins.
+
+**Show it:** Server → Services → AAA
+</details>
+
+**16. ★2 What are the main AAA settings? How do you secure the AAA server?**
+
+<details><summary>Answer</summary>
+
+On the device: `aaa new-model`, the server (`tacacs-server host <IP> key <key>`), and the method list (`aaa authentication login default group tacacs+ local`). On the server: the client (device name + IP + key) and the users. Secure it with a strong shared key, by placing it in the server VLAN behind an ACL, and by keeping a local fallback user.
+
+**Show it:** `show running-config` (aaa / tacacs lines) and the AAA service page
+</details>
+
+**17. ★3 Explain the AAA lines on the router and the AAA configuration on the server.**
+
+<details><summary>Answer</summary>
+
+Walk through every `aaa` and `tacacs-server` line on the device, then the AAA page on the server: client name, client IP, key (must match), server type TACACS, then the user list.
+
+**Show it:** both screens side by side
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your step-07 file, remove OSPF from one distribution switch and the AAA lines from
+one device. Without this page, configure them again from your plan (router-ID, networks/areas,
+MD5, summary, AAA with local fallback). Target: **20 minutes**. Then show
+`show ip ospf neighbor` (FULL), `show ip route` (one summary per building), an SSH login through
+the AAA server, and a log message arriving at the Syslog server.
 
 ---
 

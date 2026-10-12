@@ -2,6 +2,9 @@
 
 > ⏱ 3 lessons · 🎯 ministry requirements 11, 12, 21, 20.8, 22.13 · 📁 start from: `my-work/step10.pkt` · 💾 save as: `my-work/step11.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 10 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 An **ASA 5506-X firewall** splits Haifa HQ into three security zones, and a **DMZ** holds the
 six servers the ministry requires (DNS, Email, Web, NTP, FTP, AAA). An **edge router** waits
@@ -468,6 +471,119 @@ cannot reach inside, the outside cannot reach the DMZ; `show nameif` shows your 
 interfaces; `show ntp status` on a switch shows your NTP server.
 
 💾 Save as `my-project/step11.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 What is an ASA?**
+
+<details><summary>Answer</summary>
+
+Adaptive Security Appliance — Cisco's firewall. It inspects traffic between zones (inside, outside, DMZ) and allows only what the policy permits. It is **stateful**: return traffic of a permitted connection is allowed automatically.
+
+**Show it:** `show nameif`, `show conn`
+</details>
+
+**2. ★1 What is a DMZ?**
+
+<details><summary>Answer</summary>
+
+A separate zone for servers that the internet must reach (web, mail, DNS…). If one of them is hacked, the attacker is still outside the inside network.
+
+**Show it:** `show nameif` → dmz
+</details>
+
+**3. ★1 A firewall has 3 interfaces: inside, DMZ, outside. Which security level do you give each?**
+
+<details><summary>Answer</summary>
+
+inside 100, DMZ 50, outside 0. Traffic from a higher level to a lower level is allowed by default; from lower to higher it needs an ACL.
+
+**Show it:** `show nameif`
+</details>
+
+**4. ★1 What is the role of an HTTP server? Which port? What is HTTPS and what is the difference?**
+
+<details><summary>Answer</summary>
+
+Serves web pages. HTTP = TCP 80, clear text. HTTPS = TCP 443, HTTP encrypted with TLS (certificate) — passwords and data can't be read on the way.
+
+**Show it:** Server → Services → HTTP / HTTPS
+</details>
+
+**5. ★1 What is the role of a DNS server? Which port? Show its configuration.**
+
+<details><summary>Answer</summary>
+
+Translates names to IP addresses (`www.intel.lab` → `10.10.200.13`). UDP 53 (TCP 53 for large transfers).
+
+**Show it:** Server → Services → DNS (the records); PC → `nslookup <name>`
+</details>
+
+**6. ★1 What is the role of an FTP server? Which port? Show its configuration.**
+
+<details><summary>Answer</summary>
+
+File transfer. TCP 21 (control) and TCP 20 (data). Users and their permissions are defined on the server.
+
+**Show it:** Server → Services → FTP; PC → `ftp <IP>`
+</details>
+
+**7. ★1 What is the role of a mail server? Show its configuration.**
+
+<details><summary>Answer</summary>
+
+Sends and stores email: SMTP (TCP 25) to send, POP3 (TCP 110) to download to the client. The server has the domain name and the user accounts.
+
+**Show it:** Server → Services → EMAIL; PC → Desktop → Email
+</details>
+
+**8. ★3 How can an ACL allow internet browsing but block certain websites?**
+
+<details><summary>Answer</summary>
+
+An extended ACL: `deny tcp <users> host <site IP> eq 80` and `eq 443` for each blocked site, then `permit ip <users> any`. Applied as close to the users as possible.
+
+**Show it:** —
+</details>
+
+**9. ★3 How can ACLs help protect a network against DDoS attacks?**
+
+<details><summary>Answer</summary>
+
+On the outside interface: permit only the services you publish (e.g. TCP 80/443 to the web server), deny everything else; drop packets with private or your own source addresses arriving from outside (spoofing). An ACL reduces exposure but cannot stop a large flood alone — the ISP has to filter that.
+
+**Show it:** The ACL on the ASA outside interface
+</details>
+
+**10. ★3 In the routing table, what is the difference between E1 and E2? Which is the default?**
+
+<details><summary>Answer</summary>
+
+Both are external routes (type 5). E2 (default): the cost stays the external cost only — it doesn't grow inside OSPF. E1: the internal OSPF cost is added along the way. The default route this project sends into OSPF shows as `O*E2`.
+
+**Show it:** `show ip route` on a distribution switch → `O*E2 0.0.0.0/0`
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, replace the ASA with a new one from the device list.
+Without this page, configure the three interfaces with names, levels and addresses from your plan,
+the routes and the ACL. Target: **20 minutes**. Then run the test table of 5.3 with your
+addresses and explain each ✅ and ❌.
 
 ---
 

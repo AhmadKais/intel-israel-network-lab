@@ -2,6 +2,9 @@
 
 > ⏱ 1–2 lessons · 🎯 ministry requirement 18 · 📁 start from: `my-work/step09.pkt` · 💾 save as: `my-work/step10.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 09 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 Building A has two WiFi networks:
 - **INTEL-CORP** for employees → full access, like a wired PC;
@@ -234,6 +237,55 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 **Check:** an employee laptop reaches internal servers; a guest laptop reaches only the internet.
 
 💾 Save as `my-project/step10.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★3 How can you use an ACL to let some computers connect but block access to others?**
+
+<details><summary>Answer</summary>
+
+An extended ACL on the gateway of the guest VLAN: deny from the guest subnet to the internal blocks, then permit everything else (the internet). Applied `in` on the guest SVI (`ip access-group GUEST-IN in`). This is the guest-isolation ACL of this step.
+
+**Show it:** `show access-lists GUEST-IN`, `show running-config interface vlan <guest>`
+</details>
+
+**2. ◆ What is an SSID? Why two SSIDs?**
+
+<details><summary>Answer</summary>
+
+The name of a wireless network. Each SSID is mapped to its own VLAN — employees to the employee VLAN, guests to the guest VLAN — so guests are separated from the company (req. 18).
+
+**Show it:** AP → Config → Wireless
+</details>
+
+**3. ◆ What is the difference between WPA2-Personal (PSK) and WPA2-Enterprise?**
+
+<details><summary>Answer</summary>
+
+Personal: everyone shares one password. Enterprise: every user logs in with their own username/password, checked by a RADIUS server — a leaving employee is just disabled.
+
+**Show it:** AP → Config → Wireless → Authentication
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, delete the guest ACL and reset one AP. Without this page, configure the
+SSIDs and keys from your plan and rewrite the guest-isolation ACL. Target: **10 minutes**.
+Then show that a guest laptop reaches the internet but not an internal server.
 
 ---
 

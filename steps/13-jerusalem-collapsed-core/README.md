@@ -2,6 +2,9 @@
 
 > ⏱ 4 lessons · 🎯 ministry requirements 5, 10 (dynamic), 17, 20.x, 22.11, 22.13, 22.14, 22.15, 22.18 · 📁 start from: `my-work/step12.pkt` · 💾 save as: `my-work/step13.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 12 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 The second branch, built **differently** from Haifa (the ministry forbids copying one branch
 to another):
@@ -1143,6 +1146,146 @@ NAT type and firewall method.
 DHCP from the server; internet browsing uses the dynamic pool.
 
 💾 Save as `my-project/step13.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 Which metric parameters does EIGRP use? What is its algorithm called?**
+
+<details><summary>Answer</summary>
+
+Bandwidth and delay by default (load and reliability can be added with the K values). The algorithm is **DUAL** (Diffusing Update Algorithm).
+
+**Show it:** `show ip protocols` → K values
+</details>
+
+**2. ★1 What are the Hello and Hold times of EIGRP? To which address are updates sent?**
+
+<details><summary>Answer</summary>
+
+On fast links Hello 5 s, Hold 15 s. Updates go to the multicast address **224.0.0.10**.
+
+**Show it:** `show ip eigrp neighbors` → Hold column
+</details>
+
+**3. ★1 Explain Feasible Distance and Reported Distance, Successor and Feasible Successor, and the feasibility condition.**
+
+<details><summary>Answer</summary>
+
+Reported Distance = the neighbor's own cost to the destination. Feasible Distance = the best total cost from this router. Successor = the neighbor of the best route (in the routing table). Feasible Successor = a backup neighbor that meets the **feasibility condition**: its RD is lower than the current FD. The condition guarantees the backup path has no loop, so it can be used immediately.
+
+**Show it:** `show ip eigrp topology`
+</details>
+
+**4. ★2 Which three tables does EIGRP keep, and which commands show them?**
+
+<details><summary>Answer</summary>
+
+Neighbor table `show ip eigrp neighbors`, topology table `show ip eigrp topology`, routing table `show ip route eigrp`.
+
+**Show it:** those three commands
+</details>
+
+**5. ★2 What is `passive-interface` and where do you configure it?**
+
+<details><summary>Answer</summary>
+
+Under `router eigrp`: the interface's network is still advertised, but no hellos are sent on it, so no neighbor can form there — used on user-facing interfaces/SVIs. This project uses `passive-interface default` and then `no passive-interface` only on the links to neighbors.
+
+**Show it:** `show ip protocols` → Passive Interface(s)
+</details>
+
+**6. ★2 What are EIGRP's three administrative distances?**
+
+<details><summary>Answer</summary>
+
+Internal 90, external (redistributed) 170, summary 5.
+
+**Show it:** `show ip route` → [90/…]
+</details>
+
+**7. ★2 How do you do unequal-cost load balancing in EIGRP?**
+
+<details><summary>Answer</summary>
+
+`variance N` under `router eigrp`: routes through feasible successors whose metric is up to N times the best are also used, in proportion to their cost.
+
+**Show it:** —
+</details>
+
+**8. ★2 How do you connect two different routing protocols, e.g. OSPF and EIGRP?**
+
+<details><summary>Answer</summary>
+
+Redistribution on a router that runs both: under `router eigrp` → `redistribute ospf 1 metric …`, and under `router ospf` → `redistribute eigrp 100 subnets`.
+
+**Show it:** —
+</details>
+
+**9. ◆ How did you summarize and secure EIGRP?**
+
+<details><summary>Answer</summary>
+
+Summary on the interface toward the edge: `ip summary-address eigrp 100 <network> <mask>` (req. 22.15). Security: a key chain and `ip authentication mode eigrp 100 md5` (req. 22.18).
+
+**Show it:** `show ip route` on the edge router → one summary
+</details>
+
+**10. ★2 What does `ip helper-address` mean? Why is it used, and on which interface?**
+
+<details><summary>Answer</summary>
+
+DHCP Discover is a broadcast and doesn't cross a router. `ip helper-address <server IP>` on the gateway interface **of the clients' VLAN** (the SVI) forwards their DHCP broadcasts as unicast to the DHCP server in another subnet.
+
+**Show it:** `show running-config interface vlan <x>`
+</details>
+
+**11. ★1 Show me the DHCP configuration on the dedicated server and explain the fields.**
+
+<details><summary>Answer</summary>
+
+Services → DHCP: one pool per VLAN — pool name, default gateway (`.1`), DNS server, start IP, subnet mask, maximum users. The server answers relayed requests according to the gateway address in the request.
+
+**Show it:** Server → Services → DHCP
+</details>
+
+**12. ◆ What is CBAC?**
+
+<details><summary>Answer</summary>
+
+Context-Based Access Control (`ip inspect`): the router remembers sessions that started inside and opens the return traffic for them only; everything else from outside is blocked by the ACL (req. 22.13).
+
+**Show it:** `show running-config` → `ip inspect` lines on the edge router
+</details>
+
+**13. ◆ PAgP vs LACP?**
+
+<details><summary>Answer</summary>
+
+Both negotiate an EtherChannel. PAgP is Cisco-only (`desirable`/`auto`); LACP is the open standard (`active`/`passive`). This branch uses PAgP so it differs from HQ.
+
+**Show it:** `show etherchannel summary` → Protocol
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, remove EIGRP from one collapsed-core switch and the `ip helper-address`
+lines. Without this page, configure them again from your plan (AS, networks, passive
+interfaces, summary, authentication, helper). Target: **15 minutes**. Then show the three EIGRP
+tables and a PC getting an address from the DHCP server.
 
 ---
 

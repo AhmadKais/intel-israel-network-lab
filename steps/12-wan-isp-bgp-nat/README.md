@@ -2,6 +2,9 @@
 
 > ⏱ 3–4 lessons · 🎯 ministry requirements 1, 3, 4, 9, 10 (static), 22.12, 22.17, 23.1, 23.2, 23.3 · 📁 start from: `my-work/step11.pkt` · 💾 save as: `my-work/step12.pkt`
 
+> ✅ **Before you start:** every box in the checkpoint of step 11 is ticked, and you did its
+> 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
+
 ## What you will have at the end
 A small **internet**: three providers (ISPs) that exchange routes with **BGP**, each running
 **OSPF** inside. Haifa is connected: employees browse the internet (**PAT**), the internet can
@@ -579,6 +582,110 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 web page; `show ip nat translations` shows your addresses.
 
 💾 Save as `my-project/step12.pkt`.
+
+---
+
+## 🎓 Explain it to the examiner
+
+At the exam, the examiner points at **your** project and asks you to **explain** and to **show**.
+Practise every question **out loud**, then show the answer in your own project — not in the
+example. Cover the answer, say yours, then open it and compare.
+
+★1–★3 = a question from the ministry question bank (difficulty 1–3).
+◆ = not in the bank, but examiners often ask it.
+
+**1. ★1 What is the role of NAT? What are the 3 types and how do they differ?**
+
+<details><summary>Answer</summary>
+
+NAT translates private addresses to public ones (and back), so private networks can reach the internet and public addresses are saved. **Static**: one private ↔ one public, permanent — for a server that the internet must reach. **Dynamic**: private addresses take a free address from a pool of public ones. **Overload (PAT)**: many private addresses share one public address, separated by port numbers.
+
+**Show it:** `show running-config | include nat`, `show ip nat translations`
+</details>
+
+**2. ★1 What is PAT?**
+
+<details><summary>Answer</summary>
+
+Port Address Translation (NAT overload): many inside hosts share one public IP; the router tells their sessions apart by the source port number.
+
+**Show it:** `show ip nat translations` → the same public IP with different ports
+</details>
+
+**3. ★1 Show the NAT configuration in your project.**
+
+<details><summary>Answer</summary>
+
+`ip nat inside` / `ip nat outside` on the interfaces; `ip nat inside source static …` for each published server; the ACL of the inside addresses + `ip nat inside source list … interface … overload` for browsing.
+
+**Show it:** `show running-config`, `show ip nat translations`
+</details>
+
+**4. ★2 Which command shows the BGP routing table?**
+
+<details><summary>Answer</summary>
+
+`show ip bgp` (the BGP table); `show ip bgp summary` (the neighbors and their state).
+
+**Show it:** on an ISP router
+</details>
+
+**5. ★2 What is the difference between an IGP and an EGP? What is an Autonomous System?**
+
+<details><summary>Answer</summary>
+
+An AS is a network under one administration with one routing policy, identified by an AS number. An IGP (OSPF, EIGRP) routes **inside** an AS; an EGP (BGP) routes **between** ASes.
+
+**Show it:** `show ip bgp summary` → AS numbers
+</details>
+
+**6. ★2 What is the difference between iBGP and eBGP?**
+
+<details><summary>Answer</summary>
+
+eBGP: between routers in **different** ASes (administrative distance 20). iBGP: between routers in the **same** AS (administrative distance 200).
+
+**Show it:** `show ip bgp summary`
+</details>
+
+**7. ★2 Which BGP attribute prevents loops?**
+
+<details><summary>Answer</summary>
+
+AS_PATH: the list of ASes the route passed through. A router that sees its own AS number in the path rejects the route.
+
+**Show it:** `show ip bgp` → Path column
+</details>
+
+**8. ★3 Which attribute decides the exit point out of the AS? What are MED and Weight?**
+
+<details><summary>Answer</summary>
+
+LOCAL_PREF decides which router is the **exit** from your AS (higher wins, shared inside the AS). MED tells a **neighbor AS** which entry into your AS you prefer (lower wins). Weight is Cisco-only, local to one router, and checked first (higher wins).
+
+**Show it:** —
+</details>
+
+**9. ◆ Why is routing from the site to the WAN static and not through the IGP? What is a floating static route?**
+
+<details><summary>Answer</summary>
+
+So the internal routing information is not exposed to the provider, and the provider can't inject routes into the company (req. 22.17). A floating static route is a backup route with a higher administrative distance (e.g. `… 10`): it is used only when the main route disappears — here, the DSL backup line.
+
+**Show it:** `show ip route static`; shut the main link and look again
+</details>
+
+---
+
+## 🔁 Do it again — without the guide
+
+The examiner may ask you to configure something again, in front of them. You can only do that
+if you have done it **without the guide** before. Do this drill in your own project:
+
+In a copy of your file, remove the NAT lines from the edge router. Without this page, write them
+again from your plan (inside/outside, static NAT for your server, PAT for browsing). Target:
+**10 minutes**. Then browse from a PC and open your server from the internet side, and show
+`show ip nat translations`. Explain one BGP neighbor with `show ip bgp summary`.
 
 ---
 
