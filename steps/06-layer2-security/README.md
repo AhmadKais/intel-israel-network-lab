@@ -370,7 +370,7 @@ It checks ARP replies against the DHCP-snooping binding table and drops fake one
 The examiner may ask you to configure something again, in front of them. You can only do that
 if you have done it **without the guide** before. Do this drill in your own project:
 
-In a copy of your step-05 file, remove port-security and DHCP snooping from one access switch.
+In a copy of your finished step-06 file, remove port-security and DHCP snooping from one access switch.
 Without this page, configure them again from your plan. Target: **10 minutes**. Then repeat the
 attack lab of this step in front of the examiner and show that it is blocked.
 

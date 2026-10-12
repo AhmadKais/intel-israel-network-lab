@@ -1022,8 +1022,9 @@ R-KG-EDGE#     show ip nat translations          <- 200.3.1.2:port  10.30.199.10
 | PC-KG-FAB-01 | `ssh -l admin 2001:DB8:30:99::11` | ❌ refused (MGMT6) |
 | SWL3-KG-DIST1 | `show ntp status` | synchronized to 200.1.10.4 (after Fast Forward) |
 
-**HSRPv6 failover:** `ping -t 2001:DB8:30:100::10` from a PC, power off DIST1 → DIST2 becomes
-Active for `FE80::1`, pings continue.
+**HSRPv6 failover:** **File → Save** first. Then `ping -t 2001:DB8:30:100::10` from a PC, and
+simulate a dead DIST1 by deleting it (**Delete** tool → click DIST1) → DIST2 becomes Active for
+`FE80::1`, pings continue. Afterwards **File → Open** your saved file to get DIST1 back.
 
 ---
 

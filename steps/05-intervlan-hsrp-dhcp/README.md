@@ -386,14 +386,29 @@ On a PC → Command Prompt → `ipconfig /all`:
 | PC-HFA-ADMIN-01 | `ping 10.10.19.11` and `10.10.19.12` | ✅ the access switches' management IPs |
 
 ### 5.5 Failover test — HSRP in action
-1. On an **ENG PC**: `ping -t` a **FIN PC**.
-2. Click **DIST1** → **Physical** → click its **power button** (switch it off).
-3. Watch the ping: a few timeouts, then replies continue — DIST2 took over `.1`.
-4. On DIST2: `show standby brief` → now **Active** for every group.
-5. While DIST1 is off, on another PC: `ipconfig /release` then `ipconfig /renew` → you get a
-   **.131+** address — from DIST2. Split scope works!
-6. Switch DIST1 back on (power button). Wait for it to boot (Fast Forward Time).
-   `show standby brief` on DIST1 → Active again for 10/30/99/110 — that's **preempt**.
+We make DIST1's gateway for VLAN 10 fail, and watch DIST2 take over.
+1. On an **ENG PC**: `ping -t` a **FIN PC** (continuous ping).
+2. On **DIST1**, shut down its door into VLAN 10:
+```
+configure terminal
+interface vlan 10
+ shutdown
+ end
+```
+3. Watch the ping: a few timeouts (up to 10 seconds — the HSRP hold time), then replies
+   continue — DIST2 took over `.1`.
+4. On **DIST2**: `show standby brief` → now **Active** for group 10 too.
+5. On another **ENG PC** → Command Prompt: `ipconfig /release`, then `ipconfig /renew` → you
+   get a **.131+** address — from DIST2, because DIST1 can't hear VLAN 10 now. Split scope works!
+6. On **DIST1**, open the door again:
+```
+configure terminal
+interface vlan 10
+ no shutdown
+ end
+```
+   After a few seconds `show standby brief` on DIST1 → **Active** again for group 10 — that's
+   **preempt**.
 7. Stop the ping with **Ctrl+C**.
 
 ---
@@ -405,7 +420,7 @@ On a PC → Command Prompt → `ipconfig /all`:
 - [ ] `show standby brief` correct on both DIST switches
 - [ ] User PCs get DHCP addresses with gateway `.1`
 - [ ] Engineering ↔ Finance ping works
-- [ ] Failover test passed (ping survives DIST1 off; preempt returns it)
+- [ ] Failover test passed (ping survives DIST1's VLAN 10 gateway going down; preempt returns it)
 
 ## If something doesn't work
 | Problem | Fix |
@@ -444,7 +459,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 | DHCP on the L3 switches | plan part E (DHCP row) — the ministry wants DHCP on routers/L3 at one site and on a server at another (req. 22.11) |
 
 **Check:** PCs set to DHCP get an address from **your** subnet with gateway `.1`; ping between
-two of your departments works; shut the primary switch — ping keeps working.
+two of your departments works; shut the primary switch's SVI (`shutdown`) — ping keeps working.
 
 💾 Save as `my-project/step05.pkt`.
 
@@ -619,10 +634,11 @@ On the device that is the DHCP server (here the Layer-3 switch): the binding tab
 The examiner may ask you to configure something again, in front of them. You can only do that
 if you have done it **without the guide** before. Do this drill in your own project:
 
-In a copy of your step-04 file, delete the SVIs, the HSRP lines and the DHCP pools of **one**
+In a copy of your finished step-05 file, delete the SVIs, the HSRP lines and the DHCP pools of **one**
 VLAN. Without this page, rebuild them from your plan on both distribution switches.
 Target: **10 minutes per VLAN**. Then show the examiner: a PC gets an address by DHCP,
-`show standby brief`, and a continuous ping that survives shutting down the active switch.
+`show standby brief`, and a continuous ping that survives shutting down the active gateway
+(`interface vlan <x>` → `shutdown` on the Active switch).
 
 ---
 
@@ -632,7 +648,7 @@ Target: **10 minutes per VLAN**. Then show the examiner: a PC gets an address by
 - **Lesson 2 (90 min):** HSRP (two receptionists, one phone number) → add HSRP on both →
   `show standby brief` → failover test on the projector.
 - **Lesson 3 (60–90 min):** DHCP and DORA (show it in Simulation mode with the **DHCP**
-  filter) → split scope → pools on both → switch PCs to DHCP → release/renew test with DIST1 off.
+  filter) → split scope → pools on both → switch PCs to DHCP → release/renew test with DIST1's VLAN 10 SVI shut down.
 - **Common student questions**
   - *"Why does DHCP give `.1` and not `.2` as gateway?"* — `.2` is DIST1 itself; if DIST1 dies,
     `.2` dies. `.1` moves to whichever switch is alive.

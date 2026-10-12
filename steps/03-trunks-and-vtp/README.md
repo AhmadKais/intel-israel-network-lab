@@ -425,7 +425,8 @@ Gig1/0/1    10,20,30,99,110,120,998
    `VTP VLAN configuration not allowed when device is in CLIENT mode.` ✅
 
 ### 5.5 See the tag (Simulation mode)
-1. Click **Simulation** (bottom right). In the panel: **Edit Filters** → only **ICMP**.
+1. Click **Simulation** (bottom right). In the panel click **Show All/None** to clear all
+   filters, then **Edit Filters** → on the **IPv4** tab tick only **ICMP**. Close the filter window.
 2. **Add Simple PDU** (envelope) → click PC-HFA-ENG-01 → click PC-HFA-ENG-03.
 3. Press **Capture / Forward** until the envelope is on an uplink cable. Click the envelope.
 4. In **Outbound PDU Details** you see an **802.1Q** header with `VLAN: 10`. On the PC's own

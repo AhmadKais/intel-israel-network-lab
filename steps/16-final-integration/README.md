@@ -140,7 +140,7 @@ logging host, NTP server. Also check `show running-config | section vty` → `tr
 | 10 | PC-HOME-01 | VPN client → `ping 10.10.1.10` | remote-access VPN |
 | 11 | PC-HFA-IT-01 | `ssh` to devices in Haifa and Jerusalem | SSH + AAA + management ACL |
 | 12 | PC-HFA-RND-01 | `ssh` to a switch ❌ | management ACL blocks non-admins |
-| 13 | power off A-DIST1 | `ping -t` from an ENG PC keeps going | HSRP + STP + OSPF redundancy |
+| 13 | **File → Save**, then delete A-DIST1 (**Delete** tool) to simulate a dead switch; re-open the saved file afterwards | `ping -t` from an ENG PC keeps going | HSRP + STP + OSPF redundancy |
 | 14 | shut R-HFA-EDGE Gi0/1 | `show ip route` → default via 200.2.9.1 | DSL floating static |
 | 15 | shut ISPA-BR ↔ ISPC-BR link | PC-HOME-01 → www.intel.lab still works | BGP redundancy |
 | 16 | rogue DHCP server on an access port | PC still gets the real lease | DHCP snooping |

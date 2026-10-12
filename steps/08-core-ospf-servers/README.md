@@ -901,7 +901,7 @@ Walk through every `aaa` and `tacacs-server` line on the device, then the AAA pa
 The examiner may ask you to configure something again, in front of them. You can only do that
 if you have done it **without the guide** before. Do this drill in your own project:
 
-In a copy of your step-07 file, remove OSPF from one distribution switch and the AAA lines from
+In a copy of your finished step-08 file, remove OSPF from one distribution switch and the AAA lines from
 one device. Without this page, configure them again from your plan (router-ID, networks/areas,
 MD5, summary, AAA with local fallback). Target: **20 minutes**. Then show
 `show ip ospf neighbor` (FULL), `show ip route` (one summary per building), an SSH login through

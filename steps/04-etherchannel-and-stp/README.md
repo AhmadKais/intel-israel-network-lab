@@ -297,7 +297,7 @@ That's the load sharing: VLAN 10 goes up via DIST1, VLAN 20 via DIST2.
 1. Drag a new **2960** next to ACC1 (leave it named `Switch…`).
 2. Connect it with **Copper Cross-Over**: new switch **Fa0/1** → ACC1 **Fa0/9**.
 3. Watch ACC1's CLI: `%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Fa0/9 with BPDU Guard enabled. Disabling port.`
-4. `show interfaces status err-disabled` → Fa0/9 is listed. The link light is red.
+4. `show interfaces status` → Fa0/9 shows `err-disabled`. The link light is red.
 5. Delete the rogue switch. Recover the port:
 ```
 configure terminal
@@ -321,10 +321,10 @@ interface fa0/9
 ## If something doesn't work
 | Problem | Fix |
 |---|---|
-| `Po1(SD)` or ports `(s)` / `(I)` | The two cables are configured differently, or the other switch isn't configured yet. Reset both members on **both** switches: `default interface range gi1/0/23 - 24`, then retype 4.1/4.2 |
+| `Po1(SD)` or ports `(s)` / `(I)` | The two cables are configured differently, or the other switch isn't configured yet. On **both** switches: `interface range gi1/0/23 - 24` → `no channel-group 1` → `exit` → `no interface port-channel 1`, then retype the EtherChannel part of 4.1/4.2 |
 | One switch uses `active`, other `desirable` | Mixed LACP/PAgP — use `active` on both |
 | Wrong switch is root | Check `show run \| include spanning-tree vlan` — maybe you typed `primary` on both for the same VLAN |
-| PCs on ACC1 lose connectivity after Root Guard | `show spanning-tree inconsistentports` — an access switch has a lower priority than DIST1/2. Remove any `spanning-tree vlan ... priority` from access switches |
+| PCs on ACC1 lose connectivity after Root Guard | `show spanning-tree vlan 10` on DIST1 — the port to the access switch is blocked by Root Guard because an access switch has a lower priority than DIST1/2. Remove any `spanning-tree vlan ... priority` from the access switches |
 | Fa0/9 stays red after removing the rogue switch | You need `shutdown` + `no shutdown` on it |
 
 ## Challenge
@@ -492,7 +492,7 @@ BPDU Guard shuts the port if **any** BPDU arrives — for ports with end devices
 The examiner may ask you to configure something again, in front of them. You can only do that
 if you have done it **without the guide** before. Do this drill in your own project:
 
-In a copy of your step-03 file, remove the port-channel and the root/priority commands.
+In a copy of your finished step-04 file, remove the port-channel and the root/priority commands.
 Without this page: rebuild the EtherChannel between your distribution switches, set the root per
 VLAN according to your plan, and add PortFast + BPDU Guard on access ports and Root Guard on
 downlinks. Target: **15 minutes**. Then show `show etherchannel summary` and
