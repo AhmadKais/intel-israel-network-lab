@@ -266,7 +266,7 @@ learned) → **File → Save**.
 |---|---|
 | PCs get `169.254.x.x` after this step | Missing `no ip dhcp snooping information option`, or uplinks not `trust`ed |
 | `% Command rejected: Fa0/x is a dynamic port` | The port isn't `switchport mode access` — set it first |
-| A real PC's port went into violation | Too many MACs (e.g. you moved PCs around). `clear port-security sticky interface fa0/x`, then `shutdown` / `no shutdown` |
+| A real PC's port went into violation | Too many MACs (e.g. you moved PCs around). Clear the learned MACs: on the port `no switchport port-security`, then type its port-security lines from 4.1 again, then `shutdown` / `no shutdown` |
 | Printer port down after you only moved the printer cable | Sticky remembered the old port's MAC; recover as in Attack 2 step 5 |
 
 ## Challenge (bonus — careful!)

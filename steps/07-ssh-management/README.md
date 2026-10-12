@@ -142,7 +142,8 @@ copy running-config startup-config
 ```
 
 > **PT note:** if `line vty 0 15` is refused, configure `line vty 0 4`, then repeat the same
-> lines under `line vty 5 15`.
+> lines under `line vty 5 15`. If a switch rejects `login block-for ...` with
+> `% Invalid input`, skip that one line on that switch — everything else still works.
 
 > After `line console 0` → `login local`, the console asks for **Username: admin** and
 > **Password: Intel#Adm1n**. The old console password `Intel#Con` is no longer used.
@@ -197,7 +198,6 @@ SW-HFA-A-ACC1#
 show ip ssh                     -> SSH Enabled - version 2.0
 show access-lists MGMT-ONLY     -> the "deny any log" line shows (N match(es)) after the ENG PC tried
 show users                      -> who is connected right now (vty 0 admin ...)
-show login                      -> the block-for settings and whether the switch is in "quiet mode"
 ```
 
 ---
@@ -216,13 +216,14 @@ show login                      -> the block-for settings and whether the switch
 |---|---|
 | `crypto key generate rsa` → `% Please define a domain-name first` | Type `ip domain-name intel.lab` first |
 | `% Please define a hostname other than Switch` | Set the hostname first |
-| SSH refused from the admin PC too | ACL name typo: `access-class` points to a name that doesn't exist = **deny all**. Compare `show run \| section vty` with `show access-lists` |
+| SSH refused from the admin PC too | ACL name typo: `access-class` points to a name that doesn't exist = **deny all**. Compare the `line vty` part of `show running-config` with `show access-lists` |
 | `% Connection timed out` from the admin PC | No network path: can it `ping 10.10.19.11`? Check its IP/gateway, and that the switch has `interface vlan 99` up and `ip default-gateway` (step 05) |
 | Locked out of everything | The console still works with `admin` / `Intel#Adm1n` |
 
 ## Challenge — see why Telnet is dangerous
 1. On ACC1 allow Telnet **temporarily**: `line vty 0 15` → `transport input ssh telnet`.
-2. Click **Simulation** → **Edit Filters** → only **Telnet** and **SSH**.
+2. Click **Simulation** → **Show All/None** to clear the filters → **Edit Filters** → tick only
+   **Telnet** and **SSH**. Close the filter window.
 3. From PC-HFA-ADMIN-01: `telnet 10.10.19.11`, type the username and password.
 4. Click the Telnet envelopes → look at the application layer. What do you see?
 5. Do the same with `ssh -l admin 10.10.19.11`. Compare.

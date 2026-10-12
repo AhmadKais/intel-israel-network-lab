@@ -289,6 +289,8 @@ line console 0
 copy running-config startup-config
 ```
 
+> As in step 07: if a switch rejects `login block-for ...`, skip that one line on that switch.
+
 > **What does `network 10.10.0.0 0.0.15.255 area 0` mean?** "Every interface whose address is
 > inside 10.10.0.0/20 joins OSPF area 0." It catches the /30 links (10.10.4.x), Loopback0
 > (10.10.5.x) and VLAN 100 (10.10.1.x) in **one line** — the payoff of planning one block per
@@ -607,8 +609,9 @@ end
 copy running-config startup-config
 ```
 > PT older syntax: if `logging host` is refused, type `logging 10.10.1.10`.
-> If `ip tacacs source-interface` is refused, register the L3 switches in the AAA server by their
-> uplink IPs instead (DIST1 10.10.4.1, DIST2 10.10.4.9, CORE1 10.10.1.2, CORE2 10.10.1.3).
+> If `ip tacacs source-interface` is refused, register the L3 switches in the AAA server by the
+> IPs they send from instead. DIST1 and DIST2 have two equal uplinks, so add **both** for each:
+> DIST1 10.10.4.1 and 10.10.4.5, DIST2 10.10.4.9 and 10.10.4.13, CORE1 10.10.1.2, CORE2 10.10.1.3.
 
 ### 4.8 What the new commands mean
 | Command | In simple English |
@@ -640,7 +643,8 @@ Neighbor ID     Pri   State           Dead Time   Address         Interface
 10.10.5.12        1   FULL/DR         00:00:36    10.10.4.9       GigabitEthernet1/0/2
 10.10.5.2         1   FULL/BDR        00:00:33    10.10.4.50      GigabitEthernet1/0/23
 ```
-✅ Three neighbours, all **FULL**. (DR/BDR are roles on shared links — ignore them for now.)
+✅ Three neighbours, all **FULL**. (DR/BDR are roles on shared links — ignore them for now. Which
+switch is DR depends on which one came up first, so your DR/BDR labels may differ.)
 
 On **DIST1**: `show ip ospf neighbor` → CORE1, CORE2 **and** DIST2 (over Vlan99).
 
@@ -656,7 +660,8 @@ O       10.10.5.11/32 [110/2] via 10.10.4.1, ...
 ✅ **O IA** = OSPF route from **another area** (Inter-Area). **One** summary for all of building
 A, reachable through **two** paths (DIST1 and DIST2) — load sharing.
 
-On **DIST1**: `show ip ospf interface brief` → Gi1/1/1, Gi1/1/2 and Lo0 in **area 0**; the VLANs in **area 1**.
+On **DIST1**: `show ip ospf interface` → for each interface look at the `Area` line: Gi1/1/1,
+Gi1/1/2 and Loopback0 are in **area 0**; the VLANs are in **area 1**.
 
 ### 5.3 Pings
 | From | Type | Expected |
@@ -673,7 +678,8 @@ On **DIST1**: `show ip ospf interface brief` → Gi1/1/1, Gi1/1/2 and Lo0 in **a
    from ACC1 are listed, with time and source IP. ✅
 
 ### 5.5 See the passive interfaces (Simulation mode)
-**Simulation** → **Edit Filters** → only **OSPF**. Press **Capture / Forward** a few times:
+**Simulation** → **Show All/None** to clear the filters → **Edit Filters** → tick only **OSPF**.
+Press **Capture / Forward** a few times:
 Hello envelopes travel only on the routed links and VLAN 99 — **never** toward the PCs.
 Back to **Realtime**.
 
@@ -700,14 +706,16 @@ Back to **Realtime**.
 | Syslog server shows nothing | Server's SYSLOG service off, or wrong `logging host` IP, or the device can't ping 10.10.1.10 |
 
 ## Challenge
-Power off CORE1 completely. Prove — with `ping -t` from an ENG PC to the Syslog server and
-`show ip route` on DIST1 — that HQ survives. What happens to the servers' gateway 10.10.1.1?
+**File → Save** first. Then make CORE1 fail completely by deleting it (**Delete** tool → click
+CORE1). Prove — with `ping -t` from an ENG PC to the Syslog server and `show ip route` on DIST1 —
+that HQ survives. What happens to the servers' gateway 10.10.1.1? Afterwards **File → Open** your
+saved file to get CORE1 back.
 
 <details><summary>Answer</summary>
 
 DIST1's two equal routes become one (via CORE2); a few pings are lost while OSPF notices the
 dead neighbour. CORE2 becomes HSRP **Active** for VLAN 100, so the servers' gateway 10.10.1.1
-keeps working. When CORE1 returns, `preempt` gives VLAN 100 back to it.
+keeps working. (Had CORE1 only rebooted, `preempt` would give VLAN 100 back to it when it returns.)
 </details>
 
 ---
