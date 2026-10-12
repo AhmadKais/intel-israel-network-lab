@@ -48,7 +48,8 @@ the examiner — see [docs/exam-guide.md](docs/exam-guide.md). Track your progre
 > including upper/lower case. Before typing in Packet Tracer, make sure your keyboard is set
 > to **English** (Alt+Shift or Win+Space).
 
-> **Hebrew edition:** steps 00–02 are also available in Hebrew (`intel-israel-network-lab-he`).
+> **Hebrew edition:** steps 00–02 are also available in Hebrew:
+> [github.com/AhmadKais/intel-israel-network-lab-he](https://github.com/AhmadKais/intel-israel-network-lab-he).
 > Both editions use the same devices, ports, addresses and passwords, so a student can switch
 > between them at any point.
 
