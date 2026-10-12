@@ -1,5 +1,9 @@
 # Design — Intel Israel network (source of truth)
 
+> **This is the plan of the worked example (Intel Israel).** Your own project needs its own
+> plan — use [project-plan-template.md](project-plan-template.md) and copy this page's
+> **structure**, never its values.
+
 Every step in this repo uses the numbers on this page. If you change something here,
 change it everywhere.
 

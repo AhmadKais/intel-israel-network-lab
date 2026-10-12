@@ -218,6 +218,25 @@ worked — it shows understanding.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| SSIDs `INTEL-CORP`, `INTEL-GUEST` | your SSIDs (company name) |
+| WiFi keys | plan part F |
+| VLANs 110 / 120 and their subnets | plan part D (your WiFi VLANs) |
+| Guest-isolation ACL | written for **your** guest subnet and **your** internal blocks |
+| Wireless at HQ | plan part E (the ministry needs employee + guest WiFi in at least one site — req. 18) |
+
+**Check:** an employee laptop reaches internal servers; a guest laptop reaches only the internet.
+
+💾 Save as `my-project/step10.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson plan (~90 min):** 15 min AP/SSID/VLAN mapping + WiFi security table → 15 min guest
   isolation story ("a visitor in the lobby scanning your network") → 30 min build (the laptop card

@@ -1120,6 +1120,32 @@ the book (fix: `ntp server 10.20.5.2` as a second server everywhere, with CC2 al
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+This is the example's **second branch**. Build **your** second site from plan parts C–E:
+
+| In the example | In your project — take it from |
+|---|---|
+| Collapsed core on 2 L3 switches | the ministry requires collapsed core in at least one site (req. 5) — plan part E |
+| `10.20.0.0/16`, VLANs 41–46, 99, 100, 130 | plan parts C and D (site 2) |
+| EIGRP AS 100, summary `10.20.8.0/21` | your AS number; the summary that covers **your** department subnets |
+| PAgP port-channel | plan part E (EtherChannel row) |
+| DHCP server + `ip helper-address` | plan part E (DHCP row) |
+| Dynamic NAT pool `JLM-POOL`, CBAC `JLM-FW` | your pool (your public block), your names |
+
+This site must **not** be a copy of your HQ (ministry rule ג): different design model, IGP,
+NAT type and firewall method.
+
+**Check:** `show ip eigrp neighbors`; `show ip route` on the edge shows your summary; PCs get
+DHCP from the server; internet browsing uses the dynamic pool.
+
+💾 Save as `my-project/step13.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** collapsed core vs 3-tier (cost vs scale); EIGRP vs OSPF table; build and cable.
 - **Lesson 2:** CC1 and CC2 (long — split the class in pairs: one types CC1, the other CC2, then

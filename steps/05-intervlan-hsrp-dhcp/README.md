@@ -427,6 +427,26 @@ carries traffic it shouldn't. Rule: **HSRP Active = STP root**, per VLAN.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| SVIs `.2` / `.3`, virtual gateway `.1` | plan part D (your subnets, same `.1/.2/.3` rule) |
+| HSRP group number = VLAN number | keep the rule, with **your** VLAN numbers |
+| HSRP primary (priority + preempt) per VLAN | plan part D ("primary" column — same switch as the STP root in step 04) |
+| DHCP pools `HFA-ENGINEERING`… and excluded addresses | your pool names `<SITE>-<DEPT>`, your subnets, your reserved range |
+| DHCP on the L3 switches | plan part E (DHCP row) — the ministry wants DHCP on routers/L3 at one site and on a server at another (req. 22.11) |
+
+**Check:** PCs set to DHCP get an address from **your** subnet with gateway `.1`; ping between
+two of your departments works; shut the primary switch — ping keeps working.
+
+💾 Save as `my-project/step05.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** why VLANs can't talk → SVIs as "doors into the router" → `ip routing`
   → configure DIST1 SVIs without HSRP first if the class is slow, test inter-VLAN ping.

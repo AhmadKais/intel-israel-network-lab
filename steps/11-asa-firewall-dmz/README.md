@@ -450,6 +450,27 @@ PT doesn't support it well, so mention it as a known limit.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| DMZ `10.10.200.0/24` and the 6 servers | plan part C/D — your DMZ subnet and server addresses (the server **list** is set by the ministry, req. 21) |
+| inside / outside / dmz, levels 100 / 0 / 50 | keep (this is the standard ASA model) |
+| ASA link `10.10.7.0/30` | your own /30 |
+| ACL rules | rewritten for **your** addresses |
+| Main NTP server in the DMZ | your NTP server address; all your sites sync from it (req. 20.8) |
+
+**Check:** run the table of 5.3 with **your** addresses — inside reaches the DMZ, the DMZ
+cannot reach inside, the outside cannot reach the DMZ; `show nameif` shows your three
+interfaces; `show ntp status` on a switch shows your NTP server.
+
+💾 Save as `my-project/step11.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** firewall vs router; zones and the office-building comparison; stateful; DMZ purpose
   → build and cable → configure the ASA.

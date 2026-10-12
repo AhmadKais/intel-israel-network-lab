@@ -234,6 +234,25 @@ requirement 13 asks for SSH, and why Telnet is never allowed in our network.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| Management VLAN 99 and its subnet | plan part D (your MGMT VLAN) |
+| Switch management IPs `.11`, `.12`, admin PC `.100` | plan part D (fixed addresses) |
+| `ip domain-name intel.lab` | plan part A (your domain name) |
+| User `admin` / `Intel#Adm1n` | plan part F (your local admin user) |
+| VTY ACL permitting the admin PC / management subnet | your admin PC address / your MGMT subnet |
+
+**Check:** SSH from your admin PC works; SSH from a user PC is refused; Telnet is refused.
+
+💾 Save as `my-project/step07.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson plan (~90 min):** 15 min console vs remote, Telnet vs SSH (postcard vs sealed
   envelope) → 20 min ACLs and wildcard masks on the board (do 5 examples together) → 35 min

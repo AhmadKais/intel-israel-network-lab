@@ -709,6 +709,26 @@ keeps working. When CORE1 returns, `preempt` gives VLAN 100 back to it.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| Area 0 block `10.10.0.0/20`, area 1 `10.10.16.0/20` | plan part C (your HQ areas) |
+| /30 links `10.10.4.x`, loopbacks `10.10.5.x` | plan part C — make your own link and loopback table from your area-0 block |
+| Server VLAN 100 and server IPs (Syslog, AAA) | plan part D (your server VLAN and fixed addresses) |
+| OSPF MD5 key `Intel#Ospf`, TACACS+ key `Intel#Tac` | plan part F |
+| `area 1 range 10.10.16.0 255.255.240.0` | your building's /20 (summarization — req. 22.15) |
+
+**Check:** `show ip ospf neighbor` shows FULL on every link; `show ip route` shows **one**
+summary route per building; login through your AAA server works; your Syslog server receives logs.
+
+💾 Save as `my-project/step08.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** 3-tier model and routed links → static vs dynamic routing → OSPF in
   simple words (neighbours, map, shortest path) → build and cable → configure CORE1/CORE2.

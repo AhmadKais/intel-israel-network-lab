@@ -289,6 +289,23 @@ table) would be dropped.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| Port-security on the user ports | your user ports from the port plan |
+| DHCP snooping VLAN list | plan part D (your user VLANs) |
+| Trusted ports = the uplinks to DIST1/DIST2 | your uplink ports |
+
+**Check:** repeat the attack lab of this step against **your** network — it must be blocked.
+
+💾 Save as `my-project/step06.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson plan (~90–120 min):** 25 min the attacks table — tell it as stories ("a visitor in
   the meeting room…") → 10 min bouncer + trusted-port explanations → 30 min configuration →

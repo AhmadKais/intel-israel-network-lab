@@ -1061,6 +1061,31 @@ support NAT64 — document it as a design trade-off caused by the "one branch en
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+This is the example's **IPv6 branch**. Build **your** third site from plan parts C–E:
+
+| In the example | In your project — take it from |
+|---|---|
+| `2001:DB8:30::/48`, rule "VLAN number = 4th group" | plan part C (your /48 — keep a simple rule like this one) |
+| VLANs 31–36, 99, 100 | plan part D (site 3) |
+| OSPFv3 router-IDs 3.3.3.x | your own router-IDs |
+| HSRP for IPv6, virtual gateway `FE80::1` | keep the method, your groups |
+| SLAAC / stateless DHCPv6 | plan part E (DHCP row) |
+| Legacy IPv4 VLAN 199 with PAT | plan part E (NAT row) — check this interpretation with your mentor, as the design note in design.md says |
+
+The ministry requires one site that is **entirely IPv6** (req. 7).
+
+**Check:** `show ipv6 ospf neighbor`; PCs get an IPv6 address from your prefix; ping from this
+site to an IPv6 internet server works.
+
+💾 Save as `my-project/step14.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** IPv6 — why, how to read and shorten addresses (practise 10 on the board), /64, link-local,
   our VLAN-number plan → build and cable.

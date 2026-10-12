@@ -1,12 +1,38 @@
-# Intel Israel — Enterprise Network Lab (Cisco Packet Tracer)
+# Enterprise Network Lab — a step-by-step course (Cisco Packet Tracer)
 
-A **learn-by-building** final project for the Ministry of Education network-engineering
-track (**שאלון 735918 — פרויקט גמר הנדסאים, רשתות תקשורת**).
+A **learn-by-building** course for the Ministry of Education network-engineering final
+project (**שאלון 735918 — פרויקט גמר הנדסאים, רשתות תקשורת**).
 
-You will build a 3-branch enterprise network for **Intel Israel** in Cisco Packet Tracer,
-one small mini-project at a time. Every step explains the *why*, gives you the exact
-devices, cables and commands, tells you how to **verify** it works, and ends with a
-**challenge** you solve on your own.
+The course teaches every topic of the final project on **one worked example**: a 3-branch
+network for **Intel Israel**. Every step explains the *why*, gives you the exact devices,
+cables and commands, tells you how to **verify** it works, and ends with a **challenge** you
+solve on your own.
+
+**Intel Israel is only the example.** Your final project is **your own company**, with your
+own sites, departments, addresses and passwords. You learn each topic on the example, then
+build the same thing in your own project.
+
+## How this course works
+
+Every step has two parts:
+
+| | Where | What you do |
+|---|---|---|
+| **1. Learn** | `my-work/stepNN.pkt` | Follow the step exactly, with the Intel values. Type every command as shown, verify, solve the challenge. This is practice — nobody grades it. |
+| **2. Build your own** | `my-project/` | Do the same step again in **your** project, with the values from **your** plan. The section **🛠 Your own project** at the end of every step lists exactly what to take from your plan. |
+
+Before you start:
+1. In step 00, choose your company (one topic per student — your teacher approves it).
+2. In step 01, copy [docs/project-plan-template.md](docs/project-plan-template.md) to
+   `my-project/plan.md` and fill it in. Get it approved **before** step 02.
+
+**The rules** (from the ministry guidelines):
+- Two students may not submit the same topic or plan.
+- No branch may be a copy of another branch — each site uses different features.
+- Every ministry requirement must be in your project. Each step's first line (🎯) lists the
+  requirements it covers.
+- You may keep the example's **structure and method**; you may **not** keep its **values**
+  (names, VLANs, addresses, passwords). The template has the full list.
 
 > Rule of thumb: **type the commands, don't paste them** — at least the first time you
 > meet a new command. Typing is how your fingers learn IOS. Paste only what you have
@@ -22,7 +48,7 @@ devices, cables and commands, tells you how to **verify** it works, and ends wit
 
 ---
 
-## The company
+## The worked example: Intel Israel
 
 | Site | City | Role | Design style |
 |---|---|---|---|
@@ -48,12 +74,13 @@ flowchart LR
 
 ## Roadmap — 17 mini-projects
 
-Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint.
+Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint of the example,
+and then the same step in your own project.
 
 | # | Step | You learn | Time |
 |---|---|---|---|
-| 00 | [Getting started](steps/00-getting-started) | Packet Tracer, the CLI modes, how to use this repo | 30 min |
-| 01 | [Plan the network](steps/01-plan-the-network) | IP planning, VLAN tables, naming — **on paper first** | 1–2 h |
+| 00 | [Getting started](steps/00-getting-started) | Packet Tracer, the CLI modes, choosing your project | 2 × 90 min |
+| 01 | [Plan the network](steps/01-plan-the-network) | IP planning, VLAN tables, naming — **your project plan, on paper first** | 2 × 90 min |
 | 02 | [First switch & VLANs](steps/02-first-switch-vlans) | Basic hardening, VLANs, access ports | 1 h |
 | 03 | [Trunks & VTP](steps/03-trunks-and-vtp) | 802.1Q trunks, native VLAN, VTP | 1 h |
 | 04 | [EtherChannel & STP](steps/04-etherchannel-and-stp) | LACP, Rapid-PVST+, root bridge, PortFast, BPDU/Root guard | 1.5 h |
@@ -61,28 +88,29 @@ Do them **in order**. Each one ends with a working, saved `.pkt` checkpoint.
 | 06 | [Layer-2 security](steps/06-layer2-security) | Port-security, DHCP snooping, hardening | 1 h |
 | 07 | [SSH management](steps/07-ssh-management) | Management VLAN, SSH, VTY ACL | 1 h |
 | 08 | [Core, OSPF, servers](steps/08-core-ospf-servers) | Routed links, OSPF areas, MD5, AAA/TACACS+, Syslog | 2 h |
-| 09 | [Buildings B & C + virtual link](steps/09-buildings-b-c-virtual-link) | **You** build 2 buildings; OSPF virtual link, summarization | 3 h |
+| 09 | [Buildings B & C + virtual link](steps/09-buildings-b-c-virtual-link) | **You** build 2 buildings alone; OSPF virtual link, summarization | 3 h |
 | 10 | [Wireless](steps/10-wireless) | Employee + guest WiFi, guest isolation ACL | 1 h |
 | 11 | [ASA firewall & DMZ](steps/11-asa-firewall-dmz) | inside/outside/DMZ, security levels, ACLs, 6 DMZ servers, NTP | 2 h |
 | 12 | [WAN: ISPs, BGP, NAT](steps/12-wan-isp-bgp-nat) | eBGP, OSPF inside an AS, static NAT + PAT, DSL backup | 2.5 h |
-| 13 | [Jerusalem — collapsed core](steps/13-jerusalem-collapsed-core) | EIGRP + summarization + auth, PAgP, DHCP server, dynamic NAT, CBAC | 3 h |
-| 14 | [Kiryat Gat — IPv6](steps/14-kiryat-gat-ipv6) | IPv6 addressing, SLAAC + DHCPv6, OSPFv3, HSRPv6, PAT | 3 h |
+| 13 | [Branch 2 (example: Jerusalem) — collapsed core](steps/13-jerusalem-collapsed-core) | EIGRP + summarization + auth, PAgP, DHCP server, dynamic NAT, CBAC | 3 h |
+| 14 | [Branch 3 (example: Kiryat Gat) — IPv6](steps/14-kiryat-gat-ipv6) | IPv6 addressing, SLAAC + DHCPv6, OSPFv3, HSRPv6, PAT | 3 h |
 | 15 | [VPN](steps/15-vpn) | GRE over IPsec site-to-site, remote-access VPN | 2 h |
 | 16 | [Final integration](steps/16-final-integration) | Email accounts, scale to 8 PCs/dept, full test plan, project book | 3 h |
 
 ## Reference docs
 
-- [docs/design.md](docs/design.md) — the full addressing / VLAN / naming plan (your "source of truth")
+- [docs/project-plan-template.md](docs/project-plan-template.md) — **the plan for your own project** (copy it to `my-project/plan.md` in step 01)
+- [docs/design.md](docs/design.md) — the example's full addressing / VLAN / naming plan (the model for your own plan)
 - [docs/requirements-matrix.md](docs/requirements-matrix.md) — every ministry requirement → where it is built
-- [docs/passwords.md](docs/passwords.md) — password table (also needed in the project book)
-- [docs/project-book-draft-he.md](docs/project-book-draft-he.md) — **Hebrew draft of the project book** (ספר הפרויקט), in the ministry's chapter order
+- [docs/passwords.md](docs/passwords.md) — the example's password table (your project needs its own)
+- [docs/project-book-draft-he.md](docs/project-book-draft-he.md) — **example project book in Hebrew** (ספר הפרויקט) for Intel Israel, in the ministry's chapter order. Use it to see the structure; write your own book about your own company
 - [docs/glossary.md](docs/glossary.md) — every networking term in simple English
 - [docs/cheatsheet.md](docs/cheatsheet.md) — the `show` commands you will use 100 times
 - [docs/pt-gotchas.md](docs/pt-gotchas.md) — Packet Tracer quirks and how to get past them
 
 > **Status:** all 17 steps (00–16) are in the full *guided* format — every click and every
 > command for every device, simple-English explanations, break/attack labs and teacher notes.
-> A Hebrew draft of the project book is in [docs/project-book-draft-he.md](docs/project-book-draft-he.md).
+> An example project book (Hebrew) is in [docs/project-book-draft-he.md](docs/project-book-draft-he.md).
 
 ## How each step is organised
 
@@ -96,6 +124,7 @@ steps/NN-name/README.md
   6. Checkpoint          — save as my-work/stepNN.pkt and commit
   7. Common mistakes
   8. Challenge           — do it alone; answer hidden in a <details> block
+  9. Your own project    — the same step in YOUR network, with values from YOUR plan
 ```
 
 ## Saving your progress with git
@@ -104,7 +133,7 @@ steps/NN-name/README.md
 git clone <this repo>
 cd intel-israel-network-lab
 # after each step:
-git add my-work/step05.pkt
+git add my-work/step05.pkt my-project/
 git commit -m "Step 05: inter-VLAN routing + HSRP working"
 git push
 ```

@@ -469,6 +469,26 @@ in step 04 by choosing the root ourselves.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| Native VLAN `998` | plan part D (your NATIVE VLAN) |
+| Allowed VLAN list on the trunks | plan part D (only **your** VLANs of that building) |
+| VTP domain `HFA-A` | your own domain name per building, e.g. `<SITE>-A` |
+| VTP password `Intel#Vtp` | plan part F |
+| Device names and uplink ports | plan parts B and D |
+
+**Check:** `show interfaces trunk` lists your native VLAN and only your VLANs;
+`show vtp status` shows your domain on every switch of the building.
+
+💾 Save as `my-project/step03.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** trunks (draw the highway with coloured stickers), native VLAN,
   allowed list, DTP → build: 3650s + power supplies, cabling with the right cable types →

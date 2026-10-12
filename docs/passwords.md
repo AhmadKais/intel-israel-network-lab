@@ -1,5 +1,8 @@
 # Password table (טבלת סיסמאות)
 
+> **These are the example's passwords.** Your project must use its own — fill in part F of
+> [project-plan-template.md](project-plan-template.md).
+
 The project book must include a password table. These are **lab** passwords — never reuse
 them on a real network.
 

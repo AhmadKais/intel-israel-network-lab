@@ -368,6 +368,18 @@ just press **Enter**.
 
 ---
 
+## 🛠 Your own project
+
+Nothing to build yet — but choose your project now:
+1. Choose your company. It must be different from every other student's (ministry rule:
+   two students may not submit the same topic). Your teacher approves the choice.
+2. Choose its 3 sites (cities): one HQ and two branches.
+3. Write down 6 departments for every site (ministry requirement 20.2).
+4. Open [docs/project-plan-template.md](../../docs/project-plan-template.md) and read it once.
+   You will fill it in during step 01.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** device table, MAC vs IP (ID number vs home address), mask and
   gateway on the board (30 min) → install + tour of the PT window, preferences (30 min) →

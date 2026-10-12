@@ -261,6 +261,7 @@ This is the file you will keep building in for the whole project.
 - [ ] You read every table in design.md once
 - [ ] You can explain to someone why VLAN 998 exists
 - [ ] You can explain "/24" and "/30" without looking
+- [ ] **Your own plan** (`my-project/plan.md`) is filled in and approved by your teacher
 
 ## Challenge
 Kiryat Gat uses IPv6 with "VLAN number = 4th group". Write the /64 of VLAN 35 and the
@@ -271,6 +272,26 @@ address of DIST2 in it. How many /64s fit in the /48?
 `2001:DB8:30:35::/64`, DIST2 = `2001:DB8:30:35::3`. A /48 holds 2^(64−48) = **65,536** /64s.
 (IPv6 is explained properly in step 14 — for now just notice the pattern.)
 </details>
+
+---
+
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+1. Copy [docs/project-plan-template.md](../../docs/project-plan-template.md) to
+   `my-project/plan.md`.
+2. Fill in parts **A–F**. Use the method of this step: a /16 per site from one master block,
+   a /20 per OSPF area at HQ, a /24 per VLAN, the `.1/.2/.3` gateway rule, the naming pattern.
+3. Use **your own** numbers and names. Do not copy `10.10.x.x`, VLAN 10/20/30 or the Intel
+   department names.
+4. Check yourself: redo exercises 1–4 of this step with **your** blocks.
+5. **Show the plan to your teacher. Do not start step 02 until it is approved.**
+6. Prepare your Packet Tracer file exactly as in "Prepare your project file", but with your
+   building and site names in the notes.
+
+💾 Save as `my-project/step01.pkt`.
 
 ---
 

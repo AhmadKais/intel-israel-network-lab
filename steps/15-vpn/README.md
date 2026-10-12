@@ -335,6 +335,24 @@ Only what is published on the internet **and** reachable over IPv4 from Kiryat G
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| GRE tunnel `172.16.12.0/30` between HQ and branch 2 | your own tunnel /30, between **your** two IPv4 sites (req. 2) |
+| Pre-shared key `Intel#S2S-Key` | plan part F |
+| Remote-access group `HQ-RA`, pool `RA-POOL 172.16.250.10–100`, user `remote1` | your group name, your pool, your user and passwords (req. 23.4) |
+
+**Check:** `show crypto isakmp sa` shows `QM_IDLE`; ping between the two sites goes through the
+tunnel; the home PC connects with the VPN client and reaches HQ.
+
+💾 Save as `my-project/step15.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** why VPN (armoured box comparison), IPsec phases, GRE, *why GRE over IPsec* (the static-NAT
   story) → licence + reload on both edges.

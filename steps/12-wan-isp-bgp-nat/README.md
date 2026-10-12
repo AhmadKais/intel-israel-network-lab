@@ -562,6 +562,26 @@ real-world solution.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| ISP AS numbers 100 / 200 / 300 | your own AS numbers |
+| Public blocks `200.1/2/3.0.0/16`, inter-ISP `200.0.0.0/16` | plan part C (your ISP blocks) |
+| Static NAT for the web and NTP servers, PAT for browsing | plan part E (NAT row — static at one site, dynamic at another, overload at the third — req. 10) |
+| DSL backup with a floating static route | plan part E (WAN backup row) |
+| Static routing from the site to the WAN | keep — required by the ministry (req. 22.17) |
+
+**Check:** `show ip bgp summary` shows every neighbor established; an inside PC opens an internet
+web page; `show ip nat translations` shows your addresses.
+
+💾 Save as `my-project/step12.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** the internet as a network of ASes; BGP vs OSPF (international vs city roads);
   build and cable (14 cables!) → configure ISP-A.

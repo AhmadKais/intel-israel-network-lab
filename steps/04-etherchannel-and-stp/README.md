@@ -338,6 +338,24 @@ displays 24586 for VLAN 10: 24576 + 10.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| Port-channel between the two distribution switches, LACP | plan part E (EtherChannel row: which site uses LACP) |
+| Root bridge per VLAN: DIST1 for 10,30,99,110 — DIST2 for 20,120 | plan part D (the "primary" column — STP root must match the HSRP primary) |
+| PortFast / BPDU guard on the user ports | your access ports from the port plan |
+
+**Check:** `show etherchannel summary` shows `(SU)` and `(P)`; `show spanning-tree vlan <yours>`
+shows the right switch as root for each of your VLANs.
+
+💾 Save as `my-project/step04.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** draw a loop on the board and "pass a broadcast" around it until the
   class sees the storm; STP election as choosing a team captain; root/designated/blocked

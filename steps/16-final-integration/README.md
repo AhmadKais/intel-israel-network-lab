@@ -208,6 +208,25 @@ The examiner asks "why?" about every choice. Answer out loud without notes:
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| 6 departments × 8 PCs per site | plan part A (your departments — at least 8 PCs each, req. 20.2) |
+| Email users and the mail domain | your domain, 2 users per department per site (req. 22.19) |
+| End-to-end test plan | the same tests, run on **your** network; screenshot every ✅ |
+| Example project book (`docs/project-book-draft-he.md`) | the **structure** only — your book describes **your** company, plan and screenshots |
+
+**Final check:** go through the requirement list in `docs/requirements-matrix.md` and tick
+where **your** project implements each one.
+
+💾 Save as `my-project/final.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** scaling (pairs: each pair scales one branch) + Clusters for clean screenshots.
 - **Lesson 2:** email servers and clients; the mail test across the VPN.

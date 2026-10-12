@@ -376,6 +376,27 @@ which traffic may cross.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+| In the example | In your project — take it from |
+|---|---|
+| `SW-HFA-A-ACC1`, `PC-HFA-ENG-01`… | plan part B (your hostnames) |
+| VLANs 10, 20, 30, 99, 110, 120, 998, 999 and their names | plan part D (your HQ VLAN table) |
+| Ports Fa0/1–10, Fa0/11–20, Fa0/21… | plan part D (your port plan) |
+| Banner text "Intel Israel …" | plan part A (your banner — English, no `#`) |
+| `Intel#En4ble`, `Intel#Con` | plan part F (your passwords) |
+| PC addresses `10.10.16.101`… | plan part D (your subnets) |
+
+**Check:** `show vlan brief` shows **your** VLAN names on **your** ports; same-VLAN ping works,
+cross-VLAN ping fails.
+
+💾 Save as `my-project/step02.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson plan (~90–120 min):** 20 min VLAN concept (draw one switch with coloured rooms on
   the board) → 15 min hardening table → 15 min build & cable together on the projector →

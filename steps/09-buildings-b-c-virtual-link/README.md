@@ -1307,6 +1307,27 @@ why we numbered them 10.10.36.x and not 10.10.4.x.
 
 ---
 
+## 🛠 Your own project
+
+You did this step on the Intel example. Now do it again in **your** project, with the values
+from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+This step is already "do it yourself" on the example. In your project:
+
+| In the example | In your project — take it from |
+|---|---|
+| Buildings B and C, their VLANs 40–90 | plan part D (your other HQ buildings / departments) |
+| VTP domains `HFA-B`, `HFA-C` | one domain per building, your names |
+| Area 3 not touching area 0 → virtual link through area 2 | the ministry requires an OSPF virtual link (req. 8): your design must have one area that reaches area 0 only through another area |
+| Summaries per area | your /20 per area |
+
+**Check:** `show ip ospf virtual-links` shows the link **up**; every department at HQ can ping
+every other.
+
+💾 Save as `my-project/step09.pkt`.
+
+---
+
 ## 👩‍🏫 Teacher notes
 - **Lesson 1:** revision game — students say which step each block of B-DIST1's config comes
   from (hardening = 02, VTP = 03, STP/EtherChannel = 04, SVIs/HSRP/DHCP = 05, …). Then build
