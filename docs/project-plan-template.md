@@ -43,6 +43,9 @@ The example's full plan is [docs/design.md](design.md). Use it as a model for th
 
 ## A. The company
 
+> Parts A and E come from your **project proposal** — copy them from there. If your plan and
+> your proposal disagree, ask your teacher which one to change.
+
 | Field | Your answer |
 |---|---|
 | Company name | |

@@ -12,6 +12,56 @@
 192.168.1.1                      192.168.1.2
 ```
 
+## What you hand in at the end of this step
+1. The file `my-work/step00.pkt`.
+2. A screenshot of a successful ping (4.4) and a screenshot of the MAC table (4.5).
+3. A one-sentence answer to each: what is the difference between `Switch>` and `Switch#`?
+   What is the difference between a MAC address and an IP address?
+
+---
+
+## Part 0 — How this course works, and getting the course files
+
+**Why?** Before you start, you need to know where the explanations are, where to save your
+work, and how this course leads to your final project.
+
+### 0.1 How this course works
+The course teaches every topic on **one worked example** — the network of Intel Israel. Your
+final project is **your own** company (the one in the project proposal you submitted). In every
+step you do two things:
+
+| | What you do | Where you save |
+|---|---|---|
+| **1. Learn** | Follow the step exactly, with the Intel values. Type every command, check it works, solve the challenge | `my-work/` |
+| **2. Build your own** | Do the same step in your project, with your values. The **🛠 Your own project** section at the end of every step says exactly what to change | `my-project/` |
+
+Why this way? You first see the topic working on an example that has already been checked.
+Then, when something doesn't work in your project, you know the problem is in your values,
+not in the commands.
+
+### 0.2 Download the course files
+1. Open the course link your teacher gave you.
+2. Click the green **Code** button → **Download ZIP**.
+3. Open the downloaded ZIP (right-click → **Extract All**) into your **Documents** folder.
+4. You now have a folder whose name starts with `intel-israel-network-lab`. This is the
+   **course folder**. Inside it:
+
+| Folder | What is in it |
+|---|---|
+| `steps/` | The steps (lessons). One per topic, in order |
+| `docs/` | Reference: the example's plan, the password table, the plan template for your project |
+| `my-work/` | Save your practice files on the example here (`step00.pkt`, `step01.pkt`…) |
+| `my-project/` | Save your own project here |
+
+> **Tip:** read the steps on the website (in the browser) — tables and pictures display
+> properly there. Save your `.pkt` files in the course folder on your computer.
+
+### 0.3 How every step is organised
+Every step follows the same order: **What you will have at the end** → **Understand it first**
+(the theory) → **Build** → **Configure** → **Check your work** → **Save** → **If something
+doesn't work** → **Challenge** → **🛠 Your own project**.
+Don't skip "Understand it first" — without it, the commands are just text you copy.
+
 ---
 
 ## Part 1 — Understand it first (simple English)
@@ -74,6 +124,9 @@ works **in both directions**. It is the test you will use most in this project.
 
 ## Part 2 — Install Packet Tracer
 
+**Why?** You build the whole project in Packet Tracer — a simulator in which Cisco routers and
+switches behave like real equipment.
+
 1. Go to **netacad.com** and create a free account (or log in).
 2. After logging in, look in the top menu for **Resources → Download Packet Tracer**.
    If you can't find it, go straight to `https://www.netacad.com/resources/lab-downloads`.
@@ -88,6 +141,9 @@ works **in both directions**. It is the test you will use most in this project.
 ---
 
 ## Part 3 — A tour of the Packet Tracer window
+
+**Why?** Every later step says "click …" with the name of a button. If you know the window now,
+you won't get stuck hunting for buttons when you need to concentrate on the network.
 
 Open Packet Tracer. You see an empty white area. Here is every part you will use.
 
@@ -178,6 +234,10 @@ To delete a cable: choose the **Delete** tool (X) and click the cable, or select
 
 ## Part 4 — Your first network (click by click)
 
+**Why?** The smallest possible network — two PCs and a switch — shows the ideas the whole
+project is built on: addresses, the mask, how a switch learns where each PC is, and why a
+router is needed.
+
 ### 4.1 Place the devices
 1. In the device-type box (bottom left), click **Network Devices** → **Switches**.
 2. In the model box, find **2960** (its label says `2960-24TT`). **Drag** it into the middle of
@@ -237,7 +297,7 @@ Vlan    Mac Address       Type        Ports
 
 The switch **learned** which PC sits on which port.
 
-### 4.6 What just happened? (explain this to students)
+### 4.6 What just happened? Why did it work?
 1. PC0 knew PC1's **IP** (you typed it) but not its **MAC**. The switch delivers by MAC, so
    PC0 first shouted to everyone: *"Who has 192.168.1.2? Tell me your MAC."*
    This shout is called an **ARP broadcast**.
@@ -271,6 +331,9 @@ That's why the **first** ping sometimes times out — PC0 was still waiting for 
 ---
 
 ## Part 5 — The CLI: modes and the basic keys
+
+**Why?** From now on, every router and switch is configured by typing commands. If you don't
+know which "mode" you are in, correct commands will fail.
 
 Think of a building with doors you open one after another:
 
@@ -320,9 +383,12 @@ whiteboard is wiped — unless you copied it into the notebook:
 
 ## Part 6 — Save your work
 
+**Why?** Every step continues from the file of the step before. A file you didn't save = building
+everything again.
+
 1. **File → Save As**.
-2. Go to the repo folder → `my-work` → name it `step00.pkt` → **Save**.
-3. (Optional, if you use git) in a terminal in the repo folder:
+2. Go to the course folder (section 0.2) → `my-work` → name it `step00.pkt` → **Save**.
+3. (Optional, if you use git) in a terminal in the course folder:
    `git add my-work/step00.pkt` → `git commit -m "Step 00 done"` → `git push`.
 
 > Saving the `.pkt` file saves the whole drawing. Saving inside each device (`wr`) makes the
@@ -336,6 +402,7 @@ whiteboard is wiped — unless you copied it into the notebook:
 - [ ] You watched ARP in Simulation mode
 - [ ] You did the "different network" test
 - [ ] You can explain `Switch>` vs `Switch#`, and MAC vs IP, in one sentence each
+- [ ] You have prepared what you hand in (see "What you hand in" at the top)
 
 ## If something doesn't work
 | Problem | Fix |
@@ -370,18 +437,29 @@ just press **Enter**.
 
 ## 🛠 Your own project
 
-Nothing to build yet — but choose your project now:
-1. Choose your company. It must be different from every other student's (ministry rule:
-   two students may not submit the same topic). Your teacher approves the choice.
-2. Choose its 3 sites (cities): one HQ and two branches.
-3. Write down 6 departments for every site (ministry requirement 20.2).
+In this step you don't build your project yet — you prepare its foundation.
+
+1. Open the **project proposal** you submitted. Your company, its 3 sites and its departments
+   are already written there.
+2. Check that the proposal follows the rules, and tick each one:
+   - [ ] 3 sites, one of them defined as the **main branch** (requirement 19)
+   - [ ] **6 different departments** in every site, with at least **8 PCs** in each
+     (requirement 20.2)
+   - [ ] No site is a copy of another — each site has its own design model and features (rule ג)
+   - [ ] One site is **collapsed core** (requirement 5) and one site is entirely **IPv6**
+     (requirement 7)
+3. If something is missing or unclear — write it down and ask your teacher next lesson.
 4. Open [docs/project-plan-template.md](../../docs/project-plan-template.md) and read it once.
-   You will fill it in during step 01.
+   In step 01 you will fill it in from your proposal.
+
+> **Important:** don't save files containing an ID number (such as the proposal form) in the
+> course folder. This folder may be shared.
 
 ---
 
 ## 👩‍🏫 Teacher notes
-- **Lesson 1 (90 min):** device table, MAC vs IP (ID number vs home address), mask and
+- **Lesson 1 (90 min):** Part 0 — download the course files, explain the learn / build-your-own
+  workflow (10 min) → device table, MAC vs IP (ID number vs home address), mask and
   gateway on the board (30 min) → install + tour of the PT window, preferences (30 min) →
   2-PC lab and MAC table (30 min).
 - **Lesson 2 (90 min):** Simulation mode ARP demo on the projector (20 min) → students repeat

@@ -282,7 +282,8 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 
 1. Copy [docs/project-plan-template.md](../../docs/project-plan-template.md) to
    `my-project/plan.md`.
-2. Fill in parts **A–F**. Use the method of this step: a /16 per site from one master block,
+2. Fill in parts **A–F**. Take the company, sites, departments and which site gets which
+   feature (part E) from your **project proposal**. Use the method of this step: a /16 per site from one master block,
    a /20 per OSPF area at HQ, a /24 per VLAN, the `.1/.2/.3` gateway rule, the naming pattern.
 3. Use **your own** numbers and names. Do not copy `10.10.x.x`, VLAN 10/20/30 or the Intel
    department names.
