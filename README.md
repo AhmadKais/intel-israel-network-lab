@@ -12,6 +12,14 @@ devices, cables and commands, tells you how to **verify** it works, and ends wit
 > meet a new command. Typing is how your fingers learn IOS. Paste only what you have
 > already typed before.
 
+> **Important:** type every command, device name, address and password **exactly as shown** —
+> including upper/lower case. Before typing in Packet Tracer, make sure your keyboard is set
+> to **English** (Alt+Shift or Win+Space).
+
+> **Hebrew edition:** steps 00–02 are also available in Hebrew (`intel-israel-network-lab-he`).
+> Both editions use the same devices, ports, addresses and passwords, so a student can switch
+> between them at any point.
+
 ---
 
 ## The company

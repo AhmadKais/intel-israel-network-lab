@@ -75,11 +75,13 @@ works **in both directions**. It is the test you will use most in this project.
 ## Part 2 — Install Packet Tracer
 
 1. Go to **netacad.com** and create a free account (or log in).
-2. Click **Resources → Download Packet Tracer**. Choose the version for your computer.
+2. After logging in, look in the top menu for **Resources → Download Packet Tracer**.
+   If you can't find it, go straight to `https://www.netacad.com/resources/lab-downloads`.
+   Choose the version for your computer (8.2 or newer).
 3. Install it:
    - **Windows:** double-click the `.exe`, click *Next* until it finishes.
    - **Linux (Ubuntu):** open a terminal in the download folder and type
-     `sudo apt install ./CiscoPacketTracer_*_Ubuntu_64bit.deb`
+     `sudo apt install ./CiscoPacketTracer*.deb`
 4. Start Packet Tracer. The first time, it asks you to **log in** with your netacad account.
    Tick "Keep me logged in".
 
@@ -110,7 +112,7 @@ Open Packet Tracer. You see an empty white area. Here is every part you will use
 |---|---|---|
 | ① | **Menu bar** | *File → Save As* (save your work), *Options → Preferences* (settings) |
 | ② | **Main toolbar** | Shortcuts: New, Open, Save, Zoom in/out |
-| ③ | **Common tools** | **Select** (arrow — the normal mouse), **Inspect** (magnifying glass — look at tables inside a device), **Delete** (X — delete a device or cable), **Note** (write a text label on the workspace), **Draw** (rectangles/ellipses to mark buildings), **Add Simple PDU** (closed envelope — a quick ping between two devices) |
+| ③ | **Common tools** | **Select** (arrow — the normal mouse), **Inspect** (magnifying glass — look at tables inside a device), **Delete** (X — delete a device or cable), **Place Note** (write a text label on the workspace), **Drawing Palette** (rectangles/ellipses to mark buildings), **Add Simple PDU** (closed envelope — a quick ping between two devices) |
 | ④ | **Logical / Physical** | *Logical* = the network diagram (you work here 99% of the time). *Physical* = cities, buildings, racks |
 | ⑤ | **Workspace** | Drag devices here and connect them |
 | ⑥ | **Time bar** | **Fast Forward Time** — makes simulated time pass quickly (links come up, protocols finish). Press it whenever you are waiting for something to turn green. **Power Cycle Devices** — reboots *all* devices (careful: unsaved configs are lost) |
@@ -168,9 +170,9 @@ To delete a cable: choose the **Delete** tool (X) and click the cable, or select
 |---|---|
 | Place many devices of the same type | Hold **Ctrl** while clicking the model, then click in the workspace several times. Press **Esc** to stop |
 | Copy devices (with their settings) | Select them with a box (drag a rectangle with the mouse), **Ctrl+C**, **Ctrl+V** |
-| Move the workspace | Drag on an empty area, or use the scroll bars |
+| Move the workspace | Use the scroll bars or the mouse wheel (dragging on an empty area draws a selection box instead) |
 | Zoom | Ctrl + mouse wheel, or the zoom buttons in the toolbar |
-| Rename a device | Click it → **Config** tab → **Display Name** (or double-click the name label under the icon) |
+| Rename a device | Click it → **Config** tab → **Display Name** |
 
 ---
 
@@ -211,6 +213,8 @@ Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 ```
+(The first line may or may not be `Request timed out` — both are fine. Section 4.6 explains why.)
+
 🎉 Your first working network!
 
 ### 4.5 Look inside the switch — your first CLI
@@ -221,11 +225,16 @@ Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 ```
           Mac Address Table
 -------------------------------------------
+
 Vlan    Mac Address       Type        Ports
 ----    -----------       --------    -----
+
    1    0001.4211.aa01    DYNAMIC     Fa0/1
    1    0060.2f3b.cc02    DYNAMIC     Fa0/2
 ```
+(Your MAC addresses will be different — that's normal. What matters: two lines, one with
+`Fa0/1` and one with `Fa0/2`.)
+
 The switch **learned** which PC sits on which port.
 
 ### 4.6 What just happened? (explain this to students)
@@ -242,7 +251,8 @@ That's why the **first** ping sometimes times out — PC0 was still waiting for 
 ### 4.7 Watch it in slow motion (Simulation mode)
 1. PC0 → Command Prompt → type `arp -d` (clears PC0's memory of MACs). Close the window.
 2. Bottom right: click **Simulation**. A *Simulation Panel* opens.
-3. In the panel, click **Edit Filters** (or **Show All/None**) → leave only **ARP** and **ICMP** ticked.
+3. In the panel, click **Show All/None** to clear all filters, then **Edit Filters** → on the
+   **IPv4** tab tick only **ARP** and **ICMP**. Close the filter window.
 4. Click the closed **envelope** tool (*Add Simple PDU*) in the toolbar → click **PC0** → click **PC1**.
 5. Press **Capture / Forward** (▶|) step by step. Watch:
    - the ARP envelope goes from PC0 to the switch, then to **all** other ports (broadcast);
@@ -336,6 +346,7 @@ whiteboard is wiped — unless you copied it into the notebook:
 | CLI shows nothing | Click inside the black area and press **Enter** |
 | Typed a wrong command → `% Invalid input detected at '^' marker` | The `^` points to the mistake. Use **↑** to get the line back and fix it |
 | Typed a typo in `Switch#` and it waits for 30 s ("Translating…") | It thinks the typo is a hostname. Press **Ctrl+Shift+6**. (We switch this off in step 02) |
+| No command works and the letters look strange | The keyboard is set to Hebrew/Arabic. Switch to English (Alt+Shift) |
 
 ## Challenge
 On the switch, run `show running-config`. Find the line `hostname Switch`. Change the
@@ -370,6 +381,7 @@ just press **Enter**.
     room number to reach the right desk in the building.
   - *"Why does my first ping fail?"* — ARP. Ping again.
   - *"I typed a command and the device forgot it."* — they didn't save (`wr`).
-  - *"Why not the automatic cable?"* — it picks ports randomly; the project needs exact ports.
+  - *"Why not the automatic cable?"* — it picks ports itself; the project needs exact ports.
+  - *"Nothing is accepted."* — almost always the keyboard is on Hebrew or Arabic.
 - **Check understanding:** each student explains to a neighbour why the 192.168.1.x ↔
   192.168.2.x ping fails.

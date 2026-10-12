@@ -211,7 +211,7 @@ Do these **without looking** at design.md, then compare.
 4. Jerusalem has 6 department subnets `10.20.10.0/24`…`10.20.15.0/24`. What is the
    **smallest** single prefix that covers all six?
 5. Write the hostname for: the 2nd access switch on floor 3 in Jerusalem; the web server
-   in Haifa's DMZ; the 5th PC in Kiryat Gat's QUALITY department.
+   in Haifa's DMZ; the 5th PC in Kiryat Gat's QUALITY department (department code: `QUA`).
 
 <details><summary>Answers (with the reasoning)</summary>
 
@@ -238,10 +238,13 @@ This is the file you will keep building in for the whole project.
 
 1. Open Packet Tracer → **File → New**.
 2. Mark the three Haifa buildings on the workspace:
-   1. In the common tools, click **Draw Rectangle** (the square icon in the drawing tools).
-   2. Pick a light colour, then drag a big rectangle on the left part of the workspace.
+   1. In the common tools, click **Drawing Palette** (the pencil icon). In the window that
+      opens, choose **Rectangle** and a light colour.
+      (Older PT versions have a **Draw Rectangle** button instead — use that.)
+   2. Drag a big rectangle on the left part of the workspace.
    3. Draw two more rectangles next to it. Leave space at the top for the core (step 08) and at
       the right for the firewall and the internet (steps 11–12).
+   4. Close the Drawing Palette window.
 3. Label them:
    1. Click the **Place Note** tool (the notepad icon).
    2. Click inside the first rectangle and type `HAIFA - BUILDING A (OSPF area 1)`.

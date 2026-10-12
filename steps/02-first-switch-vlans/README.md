@@ -136,8 +136,12 @@ device is plugged in:
 2. Click in the black area and press **Enter**. You see `Switch>`.
 
 > Type **each line** and press **Enter**. The lines starting with `!` are **comments** — don't
-> type them, they explain the next command. If you mistype, IOS shows
+> type them, they explain the next command. The space at the start of some lines is only
+> for readability — you don't have to type it. If you mistype, IOS shows
 > `% Invalid input detected at '^' marker` — press **↑**, fix the line, press **Enter**.
+
+> Make sure the keyboard is set to **English**. Passwords are case-sensitive:
+> `Intel#En4ble` ≠ `intel#en4ble`.
 
 ### 4.2 Hardening
 ```
@@ -167,6 +171,9 @@ banner motd #
 *********************************************************
 #
 ```
+> Write the banner text in English (IOS can't show Hebrew or Arabic). The `#` character must
+> not appear inside the text — it ends the message.
+
 Console line:
 ```
 line console 0
@@ -221,7 +228,8 @@ interface fa0/22
  switchport mode access
  switchport access vlan 99
 ```
-> ⚠️ Type `fa0/1 - 10` with **spaces around the dash**. Without spaces PT rejects it.
+> ⚠️ Type `fa0/1 - 10` **with a space before and after the dash**, exactly as shown. That
+> form works in every version.
 
 ### 4.5 Park and shut the unused ports
 ```
@@ -256,9 +264,14 @@ It asks `Destination filename [startup-config]?` → press **Enter**. You see `[
 ---
 
 ## Part 5 — Give the end devices their addresses
-For each device: click it → **Desktop** → **IP Configuration** → **Static** → fill in → close.
-(The printer has no Desktop tab: click it → **Config** → **FastEthernet0** → fill in IP and mask;
-the gateway is under **Config → Settings**.)
+For each PC: click it → **Desktop** → **IP Configuration** → **Static** → fill in → close.
+
+**The printer has no Desktop tab.** On the printer:
+1. Click it → **Config** tab → on the left **Settings** (under GLOBAL) → in the **Gateway**
+   field type `10.10.18.1`.
+2. On the left click **FastEthernet0** (under INTERFACE) → choose **Static** → **IPv4 Address**
+   `10.10.18.10`, **Subnet Mask** `255.255.255.0`.
+3. Close the window.
 
 | Device | IPv4 Address | Subnet Mask | Default Gateway |
 |---|---|---|---|
@@ -294,6 +307,9 @@ VLAN Name                             Status    Ports
 998  NATIVE                           active
 999  PARKING                          active    Fa0/23, Fa0/24
 ```
+(At the end of the list you will also see four built-in VLANs: 1002, 1003, 1004, 1005 —
+`fddi-default` etc. Every Cisco switch has them, they can't be deleted, and you can ignore them.)
+
 ✅ VLAN 1 has **only** the two Gi uplinks (they become trunks in step 03).
 
 ### 6.2 Ping tests
@@ -311,6 +327,8 @@ VLAN Name                             Status    Ports
 4. Type `show running-config` (press **Space** to page down). Find:
    - `enable secret 5 $1$...` → hashed ✅
    - under `line con 0`: `password 7 0822455D0A16...` → scrambled ✅
+     (The digits after `7` may be different for you — what matters is the `7` and that the
+     clear-text password is gone.)
 
 ### 6.4 What just happened? Why does ENG → FIN fail?
 Two reasons, both on purpose:
@@ -338,9 +356,10 @@ which traffic may cross.
 | Problem | Fix |
 |---|---|
 | Ping in the same VLAN fails | `show vlan brief`: is the PC's port in the right VLAN? Check the cable goes to the right port (port labels!). Check the PC's IP/mask |
-| `% Invalid input` on `interface range fa0/1-10` | Add spaces: `fa0/1 - 10` |
+| `% Invalid input` on `interface range` | Type it exactly with spaces: `interface range fa0/1 - 10` |
 | VLAN name shows `VLAN0010` | You assigned a port before creating/naming the VLAN — go back: `vlan 10` → `name ENGINEERING` |
 | Banner never ends | You must type a line with just `#` |
+| Password not accepted | Check the keyboard is on English and Caps Lock is off. Passwords are case-sensitive |
 | Forgot the console password | Click **Physical** → power off/on won't help (it's saved). Re-open your saved `step01.pkt` and redo, or practise "password recovery" with the teacher |
 
 ## Challenge
@@ -371,4 +390,4 @@ which traffic may cross.
     the physical cable; enable secret = the key to the manager's office (`#` mode).
 - **Typical errors:** typing a VLAN command while still inside an interface (prompt shows
   `(config-if)#` — that's fine actually, `vlan 10` works from there too, but explain the
-  prompt); forgetting `switchport mode access`; not saving.
+  prompt); forgetting `switchport mode access`; not saving; keyboard left on Hebrew/Arabic.
