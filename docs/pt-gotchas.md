@@ -28,9 +28,9 @@ before assuming you made a mistake.
 | ASA keeps giving 192.168.1.x addresses | The default config has a DHCP server on `inside`: `no dhcpd enable inside`. |
 | `standby 31 ipv6 FE80::1` rejected | Use `standby 31 ipv6 autoconfig`, then read the virtual link-local with `show standby brief` and use that as the static gateway on servers. |
 | HSRP for IPv6 not supported on your PT build | IPv6 already has built-in gateway redundancy: both DIST switches send Router Advertisements, so hosts learn two default routers. Document this in the book. |
-| OSPFv3 `passive-interface default` rejected | Don't enable `ipv6 ospf 1 area 0` on the user SVIs at all; advertise them by enabling OSPFv3 only on the SVIs you want and accept it. |
+| OSPFv3 `passive-interface default` rejected | Leave out the `passive-interface` lines. OSPFv3 then also sends hellos into the user VLANs — nothing breaks, because no router listens there, and the VLAN prefixes are still advertised. Note in the book that passive interfaces were not available. |
 | `ip summary-address eigrp` rejected on the switch | Put the command on the physical routed interface (`Gi1/1/1`), not on the SVI. |
-| `spanning-tree guard root` not shown | It is there — check with `show spanning-tree inconsistentports` after testing. |
+| `spanning-tree guard root` not shown | It is there — check with `show running-config interface gi1/0/1`; when it acts, `show spanning-tree vlan 10` shows the port blocked. |
 
 ## Behaviour
 

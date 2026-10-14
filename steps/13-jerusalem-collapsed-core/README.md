@@ -1110,8 +1110,9 @@ Write this observation in the book.
 | No internet from Jerusalem | ISP-B's route to 200.2.10.0/29 (step 12, 4.4); NAT inside/outside; pool exhausted |
 
 ## Challenge
-Power off CC1. Which still works, and why: DHCP for a Sales PC, browsing from a QA PC, SSH from
-PC-JLM-ADMIN-01 to SW-JLM-F2-ACC1?
+**File → Save** first. Then simulate a dead CC1 by deleting it (**Delete** tool → click CC1).
+Which still works, and why: DHCP for a Sales PC, browsing from a QA PC, SSH from
+PC-JLM-ADMIN-01 to SW-JLM-F2-ACC1? Afterwards **File → Open** your saved file to get CC1 back.
 
 <details><summary>Answer</summary>
 
