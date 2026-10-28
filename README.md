@@ -106,6 +106,7 @@ and then the same step in your own project.
 
 ## Reference docs
 
+- [docs/basic-moves.md](docs/basic-moves.md) — **the basic moves M1–M23, click by click** (open/save, place, rename, cable, CLI, IP settings, DHCP, Simulation…). Every step links to them as "(how? → Mn)"
 - [docs/exam-guide.md](docs/exam-guide.md) — **how the project exam works and how to prepare**
 - [docs/progress-template.md](docs/progress-template.md) — your progress table (copy it to `my-project/progress.md`)
 - [docs/project-plan-template.md](docs/project-plan-template.md) — **the plan for your own project** (copy it to `my-project/plan.md` in step 01)
@@ -117,26 +118,35 @@ and then the same step in your own project.
 - [docs/cheatsheet.md](docs/cheatsheet.md) — the `show` commands you will use 100 times
 - [docs/pt-gotchas.md](docs/pt-gotchas.md) — Packet Tracer quirks and how to get past them
 
-> **Status:** all 17 steps (00–16) are in the full *guided* format — every click and every
-> command for every device, simple-English explanations, break/attack labs and teacher notes.
+> **Status:** all 17 steps (00–16) are in the *mission* format — a checklist of small missions,
+> every click and every command for every device, a check after every block, exercises with hints
+> and hidden answers, and teacher notes.
 > An example project book (Hebrew) is in [docs/project-book-draft-he.md](docs/project-book-draft-he.md).
 
 ## How each step is organised
 
 ```
 steps/NN-name/README.md
-  1. Goal                — what works at the end
-  2. Concepts            — the theory you need, short
-  3. Build               — devices to drag + cabling table
-  4. Configure           — commands, explained line by line
-  5. Verify              — show/ping commands and what "good" looks like
-  6. Checkpoint          — save as my-work/stepNN.pkt and commit
-  7. Common mistakes
-  8. Challenge           — do it alone; answer hidden in a <details> block
-  9. Your own project    — the same step in YOUR network, with values from YOUR plan
- 10. Explain it to the examiner — question-bank questions with answers
- 11. Do it again        — rebuild the step without the guide, against the clock
+  🗺 Your missions       — a checklist of the step's missions, with minutes
+  Part 1 — Understand it — the theory you need, in simple English, + the step's tables
+  Mission 1, 2, 3 …      — small jobs, each with:
+       🧠 Why            — one line: what this mission is for
+       👉 Where          — which device, which window, which prompt
+       ⌨️ Type           — a short command block (long configs are split into a, b, c …)
+       ✅ You should see — what "good" looks like
+       ❌ If not         — the usual cause and the fix
+       🔍 Check now      — a show/ping command before you go on
+  Checkpoint             — tick every box before the next step
+  If something doesn't work
+  🏋 Exercises           — 🎯 task · 📁 start from · 👣 steps · ✅ done when · 💡 hint · ✔ answer
+  🛠 Your own project    — the same step in YOUR network, as a checklist, with values from YOUR plan
+  🎓 Explain it to the examiner — question-bank questions with answers
+  🔁 Do it again         — rebuild the step without the guide, against the clock
+  👩‍🏫 Teacher notes
 ```
+
+> **Golden rule:** never start a mission before the 🔍 check of the previous one passes. A
+> mistake found after 2 minutes takes 2 minutes to fix; after 2 hours it takes 2 hours.
 
 ## Saving your progress with git
 

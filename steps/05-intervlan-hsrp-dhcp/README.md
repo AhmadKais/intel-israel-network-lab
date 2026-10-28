@@ -5,6 +5,20 @@
 > ✅ **Before you start:** every box in the checkpoint of step 04 is ticked, and you did its
 > 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
 
+## 🗺 Your missions in this step
+- [ ] **Mission 1** — Open step 04 and save as step 05 (2 min)
+- [ ] **Mission 2** — DIST1: switch on routing + the first gateway (VLAN 10) (10 min)
+- [ ] **Mission 3** — DIST1: the other five gateways (15 min)
+- [ ] **Mission 4** — DIST2: the six gateways, mirrored (20 min)
+- [ ] **Mission 5** — Check HSRP and test inter-VLAN routing with fixed addresses (10 min)
+- [ ] **Mission 6** — DHCP on DIST1 (15 min)
+- [ ] **Mission 7** — DHCP on DIST2 (10 min)
+- [ ] **Mission 8** — Management address on the access switches (10 min)
+- [ ] **Mission 9** — Switch the user PCs to DHCP and test (15 min)
+- [ ] **Mission 10** — Failover test: kill a gateway, keep pinging (15 min)
+- [ ] **Exercises** A and B
+- [ ] **🛠 Your own project**
+
 ## What you will have at the end
 - The two distribution switches also work as **routers**: departments can finally talk to
   each other.
@@ -61,6 +75,17 @@ leaves (**Standby**).
 DIST1 is also HSRP Active of VLAN 10. Then a frame from a PC goes straight up to the switch
 that routes it — the shortest path. (DIST2 does the same for VLAN 20 and 120.)
 
+The full plan for this step:
+
+| VLAN | Subnet | DIST1 IP | DIST2 IP | Virtual `.1` | DIST1 priority | DIST2 priority | Active |
+|---|---|---|---|---|---|---|---|
+| 10 | 10.10.16.0/24 | .2 | .3 | 10.10.16.1 | **110** | 90 | DIST1 |
+| 20 | 10.10.17.0/24 | .2 | .3 | 10.10.17.1 | 90 | **110** | DIST2 |
+| 30 | 10.10.18.0/24 | .2 | .3 | 10.10.18.1 | **110** | 90 | DIST1 |
+| 99 | 10.10.19.0/24 | .2 | .3 | 10.10.19.1 | **110** | 90 | DIST1 |
+| 110 | 10.10.20.0/24 | .2 | .3 | 10.10.20.1 | **110** | 90 | DIST1 |
+| 120 | 10.10.21.0/24 | .2 | .3 | 10.10.21.1 | 90 | **110** | DIST2 |
+
 ### 1.4 DHCP — automatic addresses
 Typing an IP on 50 PCs is slow and full of mistakes. A **DHCP server** hands out IP settings
 automatically — like a hotel reception giving each guest a free room number, plus the
@@ -97,21 +122,21 @@ dies the other still serves:
 
 ---
 
-## Part 2 — Prepare
+## Mission 1 — Open step 04 and save as step 05 (how? → M1)
 **File → Open** → `my-work/step04.pkt` → **File → Save As** → `my-work/step05.pkt`.
 
----
-
-## Part 3 — Build
-Nothing to build — no new devices or cables in this step. Everything happens in the CLI.
+Nothing to build in this step — no new devices or cables. Everything happens in the CLI.
 
 ---
 
-## Part 4 — Configure (type every line)
+## Mission 2 — DIST1: switch on routing + the first gateway (VLAN 10)
+🧠 **Why:** do **one** VLAN first and check it. If it works, the other five are the same pattern.
 
-### 4.1 SWL3-HFA-A-DIST1 — routing + gateways (Active for 10, 30, 99, 110)
+👉 **Where:** **SWL3-HFA-A-DIST1** → CLI → log in (`Intel#Con`, `enable`, `Intel#En4ble`) →
+`SWL3-HFA-A-DIST1#`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 ! switch the router brain on
 ip routing
@@ -124,6 +149,27 @@ interface vlan 10
  standby 10 priority 110
  standby 10 preempt
  no shutdown
+ end
+```
+Press **Fast Forward Time** (M18).
+
+✅ You see `%LINK-5-CHANGED: Interface Vlan10, changed state to up` and, a few seconds later,
+`%HSRP-6-STATECHANGE: Vlan10 Grp 10 state Standby -> Active`.
+🔍 **Check now:** `show standby brief` → one line: `Vl10  10  110 P Active  local  unknown  10.10.16.1`.
+(`Standby` says `unknown` because DIST2 isn't configured yet — correct.)
+❌ The SVI stays `down` → VLAN 10 must exist and be carried on a trunk: `show vlan brief`.
+
+---
+
+## Mission 3 — DIST1: the other five gateways
+👉 **Where:** DIST1, prompt `SWL3-HFA-A-DIST1#`.
+
+Same pattern as Mission 2. **Watch the priority:** 110 where DIST1 is Active (30, 99, 110),
+**90** where DIST2 will be Active (20, 120) — see the table in 1.3.
+
+⌨️ Type:
+```
+configure terminal
 interface vlan 20
  description GW FINANCE
  ip address 10.10.17.2 255.255.255.0
@@ -164,51 +210,22 @@ interface vlan 120
  standby 120 priority 90
  standby 120 preempt
  no shutdown
- exit
-```
-You'll see messages like `%HSRP-6-STATECHANGE: Vlan10 Grp 10 state Standby -> Active`.
-
-DHCP on DIST1 — it hands out `.11 – .130`, so it excludes `.1 – .10` and `.131 – .254`:
-```
-ip dhcp excluded-address 10.10.16.1 10.10.16.10
-ip dhcp excluded-address 10.10.16.131 10.10.16.254
-ip dhcp excluded-address 10.10.17.1 10.10.17.10
-ip dhcp excluded-address 10.10.17.131 10.10.17.254
-ip dhcp excluded-address 10.10.20.1 10.10.20.10
-ip dhcp excluded-address 10.10.20.131 10.10.20.254
-ip dhcp excluded-address 10.10.21.1 10.10.21.10
-ip dhcp excluded-address 10.10.21.131 10.10.21.254
-
-ip dhcp pool HFA-ENGINEERING
- network 10.10.16.0 255.255.255.0
- default-router 10.10.16.1
- dns-server 10.10.200.11
- domain-name intel.lab
-ip dhcp pool HFA-FINANCE
- network 10.10.17.0 255.255.255.0
- default-router 10.10.17.1
- dns-server 10.10.200.11
- domain-name intel.lab
-ip dhcp pool HFA-WIFI-EMP
- network 10.10.20.0 255.255.255.0
- default-router 10.10.20.1
- dns-server 10.10.200.11
- domain-name intel.lab
-ip dhcp pool HFA-WIFI-GUEST
- network 10.10.21.0 255.255.255.0
- default-router 10.10.21.1
- dns-server 200.1.100.10
  end
 copy running-config startup-config
 ```
-> Guests get the **internet provider's** DNS (200.1.100.10), never our internal one.
-> Both DNS servers are built later (steps 11–12) — until then names won't resolve; IPs work.
+🔍 **Check now:** `show ip interface brief` → at the bottom: Vlan10, 20, 30, 99, 110, 120 with
+addresses `10.10.16.2` … `10.10.21.2`, all `up up`.
 
-> No pool for VLAN 30 (printers) and VLAN 99 (management): those devices get **fixed** addresses.
+---
 
-### 4.2 SWL3-HFA-A-DIST2 — routing + gateways (Active for 20, 120)
+## Mission 4 — DIST2: the six gateways, mirrored
+👉 **Where:** **SWL3-HFA-A-DIST2** → CLI → log in → `SWL3-HFA-A-DIST2#`.
+
+Differences from DIST1: the address ends in **`.3`**, and the priorities are the **opposite**
+(110 for 20 and 120, 90 for the others).
+
+⌨️ Type:
 ```
-enable
 configure terminal
 ip routing
 
@@ -260,10 +277,122 @@ interface vlan 120
  standby 120 priority 110
  standby 120 preempt
  no shutdown
- exit
+ end
+copy running-config startup-config
 ```
-DHCP on DIST2 — it hands out `.131 – .254`, so it excludes `.1 – .130`:
+Press **Fast Forward Time** 2–3 times.
+
+✅ `%HSRP-6-STATECHANGE` messages: Vl20 and Vl120 become **Active**, the others **Standby**.
+
+---
+
+## Mission 5 — Check HSRP and test inter-VLAN routing
+
+### 5a — HSRP
+👉 On **DIST1**: `show standby brief`
+
+✅ You should see:
 ```
+                     P indicates configured to preempt.
+Interface   Grp  Pri P State    Active          Standby         Virtual IP
+Vl10        10   110 P Active   local           10.10.16.3      10.10.16.1
+Vl20        20   90  P Standby  10.10.17.3      local           10.10.17.1
+Vl30        30   110 P Active   local           10.10.18.3      10.10.18.1
+Vl99        99   110 P Active   local           10.10.19.3      10.10.19.1
+Vl110       110  110 P Active   local           10.10.20.3      10.10.20.1
+Vl120       120  90  P Standby  10.10.21.3      local           10.10.21.1
+```
+Active for 10/30/99/110, Standby for 20/120. On DIST2 the same command shows the opposite.
+
+❌ Both switches say **Active** for the same group → `standby version` differs, or the VLAN
+isn't carried between them (check the Po1 allowed list from step 04).
+
+### 5b — Routing table
+👉 On **DIST1**: `show ip route`
+
+✅ You should see lines like:
+```
+C    10.10.16.0/24 is directly connected, Vlan10
+C    10.10.17.0/24 is directly connected, Vlan20
+...
+```
+`C` = **C**onnected: the switch knows every VLAN because it has a door (SVI) in each.
+
+### 5c — The first inter-VLAN ping
+The user PCs still have fixed addresses **without a gateway**. Give two of them a gateway
+for this test (how? → M14):
+- **PC-HFA-ENG-01**: Default Gateway `10.10.16.1`
+- **PC-HFA-FIN-01**: Default Gateway `10.10.17.1`
+
+Then from PC-HFA-ENG-01 → Command Prompt → `ping 10.10.17.101`.
+
+✅ Replies — **Engineering can finally talk to Finance!** (The first one or two may time out — ARP.)
+❌ Each PC reaches its own gateway (`ping 10.10.16.1`) but not the other VLAN → `ip routing` is
+missing on the switch.
+
+---
+
+## Mission 6 — DHCP on DIST1
+👉 **Where:** DIST1, prompt `SWL3-HFA-A-DIST1#`.
+
+DIST1 hands out `.11 – .130`, so it excludes `.1 – .10` and `.131 – .254`.
+
+### 6a — Excluded addresses
+⌨️ Type:
+```
+configure terminal
+ip dhcp excluded-address 10.10.16.1 10.10.16.10
+ip dhcp excluded-address 10.10.16.131 10.10.16.254
+ip dhcp excluded-address 10.10.17.1 10.10.17.10
+ip dhcp excluded-address 10.10.17.131 10.10.17.254
+ip dhcp excluded-address 10.10.20.1 10.10.20.10
+ip dhcp excluded-address 10.10.20.131 10.10.20.254
+ip dhcp excluded-address 10.10.21.1 10.10.21.10
+ip dhcp excluded-address 10.10.21.131 10.10.21.254
+```
+
+### 6b — The pools
+⌨️ Type:
+```
+ip dhcp pool HFA-ENGINEERING
+ network 10.10.16.0 255.255.255.0
+ default-router 10.10.16.1
+ dns-server 10.10.200.11
+ domain-name intel.lab
+ip dhcp pool HFA-FINANCE
+ network 10.10.17.0 255.255.255.0
+ default-router 10.10.17.1
+ dns-server 10.10.200.11
+ domain-name intel.lab
+ip dhcp pool HFA-WIFI-EMP
+ network 10.10.20.0 255.255.255.0
+ default-router 10.10.20.1
+ dns-server 10.10.200.11
+ domain-name intel.lab
+ip dhcp pool HFA-WIFI-GUEST
+ network 10.10.21.0 255.255.255.0
+ default-router 10.10.21.1
+ dns-server 200.1.100.10
+ end
+copy running-config startup-config
+```
+✅ After `ip dhcp pool …` the prompt is `(dhcp-config)#`. `[OK]` at the end.
+
+> Guests get the **internet provider's** DNS (200.1.100.10), never our internal one.
+> Both DNS servers are built later (steps 11–12) — until then names won't resolve; IPs work.
+
+> No pool for VLAN 30 (printers) and VLAN 99 (management): those devices get **fixed** addresses.
+
+---
+
+## Mission 7 — DHCP on DIST2
+👉 **Where:** DIST2, prompt `SWL3-HFA-A-DIST2#`.
+
+DIST2 hands out `.131 – .254`, so it excludes `.1 – .130`. The pools are **identical** to DIST1.
+
+⌨️ Type:
+```
+configure terminal
 ip dhcp excluded-address 10.10.16.1 10.10.16.130
 ip dhcp excluded-address 10.10.17.1 10.10.17.130
 ip dhcp excluded-address 10.10.20.1 10.10.20.130
@@ -291,15 +420,20 @@ ip dhcp pool HFA-WIFI-GUEST
  end
 copy running-config startup-config
 ```
+✅ `[OK]`.
 
-### 4.3 Access switches — a management address
-Access switches are Layer-2: they don't route. But we want to reach them over the network
-(SSH in step 07), so each gets **one** IP address in the management VLAN 99, and a
+---
+
+## Mission 8 — Management address on the access switches
+🧠 **Why:** access switches are Layer-2: they don't route. But we want to reach them over the
+network (SSH in step 07), so each gets **one** IP address in the management VLAN 99, and a
 gateway (like a PC).
 
-**SW-HFA-A-ACC1:**
+### 8a — SW-HFA-A-ACC1
+👉 ACC1 → CLI → log in → `SW-HFA-A-ACC1#`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 interface vlan 99
  description MANAGEMENT
@@ -310,18 +444,26 @@ ip default-gateway 10.10.19.1
 end
 copy running-config startup-config
 ```
-**SW-HFA-A-ACC2:** the same with `ip address 10.10.19.12 255.255.255.0`.
 
-### 4.4 PCs → DHCP
-For every **user PC** (ENG-01/02/03, FIN-01/02/03): click it → **Desktop** → **IP
-Configuration** → select **DHCP**. After a few seconds you see `DHCP request successful` and
-the fields fill in by themselves. (If you see `DHCP failed. APIPA is being used`, press
-**Fast Forward Time** and click **DHCP** again.)
+### 8b — SW-HFA-A-ACC2
+👉 ACC2 → CLI → log in → `SW-HFA-A-ACC2#`. The same, with **`.12`**:
 
-Keep **static**: the printer (10.10.18.10, gw 10.10.18.1) and the admin PC (10.10.19.100,
-gw 10.10.19.1).
+⌨️ Type:
+```
+configure terminal
+interface vlan 99
+ description MANAGEMENT
+ ip address 10.10.19.12 255.255.255.0
+ no shutdown
+ exit
+ip default-gateway 10.10.19.1
+end
+copy running-config startup-config
+```
+🔍 **Check now:** PC-HFA-ADMIN-01 → Command Prompt → `ping 10.10.19.11` and `ping 10.10.19.12`.
+✅ Both reply.
 
-### 4.5 What the new commands mean
+### What the new commands mean
 | Command | In simple English |
 |---|---|
 | `ip routing` | "Switch on the router inside this switch" |
@@ -338,36 +480,27 @@ gw 10.10.19.1).
 
 ---
 
-## Part 5 — Check your work
+## Mission 9 — Switch the user PCs to DHCP and test
 
-### 5.1 HSRP
-On **DIST1**: `show standby brief`
-```
-                     P indicates configured to preempt.
-Interface   Grp  Pri P State    Active          Standby         Virtual IP
-Vl10        10   110 P Active   local           10.10.16.3      10.10.16.1
-Vl20        20   90  P Standby  10.10.17.3      local           10.10.17.1
-Vl30        30   110 P Active   local           10.10.18.3      10.10.18.1
-Vl99        99   110 P Active   local           10.10.19.3      10.10.19.1
-Vl110       110  110 P Active   local           10.10.20.3      10.10.20.1
-Vl120       120  90  P Standby  10.10.21.3      local           10.10.21.1
-```
-✅ Active for 10/30/99/110, Standby for 20/120. DIST2 shows the opposite.
+### 9a — DHCP on the six user PCs (how? → M16)
+For **each** of PC-HFA-ENG-01, ENG-02, ENG-03, FIN-01, FIN-02, FIN-03:
+1. Click it → **Desktop** → **IP Configuration**.
+2. Select **DHCP** at the top.
+3. Wait for `DHCP request successful`.
 
-### 5.2 Routing table
-On **DIST1**: `show ip route`
-```
-C    10.10.16.0/24 is directly connected, Vlan10
-C    10.10.17.0/24 is directly connected, Vlan20
-...
-```
-`C` = **C**onnected: the switch knows every VLAN because it has a door (SVI) in each.
+✅ The fields fill in by themselves: an address `.11`–`.254`, mask `255.255.255.0`, gateway
+`.1` of its VLAN, DNS `10.10.200.11`.
+❌ `DHCP failed. APIPA is being used` → press **Fast Forward Time**, click **Static** and then
+**DHCP** again.
 
-### 5.3 DHCP
-On **DIST1**: `show ip dhcp binding` → addresses between .11 and .130 with the PCs' MACs.
-On **DIST2**: `show ip dhcp binding` → maybe some .131+ addresses (whoever answered first).
+Keep **static**: the printer (10.10.18.10, gw 10.10.18.1) and the admin PC (10.10.19.100,
+gw 10.10.19.1).
 
-On a PC → Command Prompt → `ipconfig /all`:
+### 9b — Check the leases
+👉 On **DIST1**: `show ip dhcp binding` → ✅ addresses between .11 and .130 with the PCs' MACs.
+👉 On **DIST2**: `show ip dhcp binding` → maybe some .131+ addresses (whoever answered first).
+
+👉 On a PC → Command Prompt → `ipconfig /all` → ✅ for example:
 ```
    IPv4 Address......: 10.10.16.11
    Subnet Mask.......: 255.255.255.0
@@ -376,18 +509,25 @@ On a PC → Command Prompt → `ipconfig /all`:
    DNS Servers.......: 10.10.200.11
 ```
 
-### 5.4 Pings
-| From | Type | Expected |
-|---|---|---|
-| an ENG PC | `ping 10.10.16.1` | ✅ its gateway |
-| an ENG PC | `ping` a FIN PC's address | ✅ **inter-VLAN routing works!** |
-| an ENG PC | `ping 10.10.18.10` (printer) | ✅ |
-| an ENG PC | `tracert` a FIN PC | first hop `10.10.16.2` (DIST1 — the Active for VLAN 10) |
-| PC-HFA-ADMIN-01 | `ping 10.10.19.11` and `10.10.19.12` | ✅ the access switches' management IPs |
+### 9c — Pings
+Write down the address each PC got (hover over it). Then (how? → M17):
 
-### 5.5 Failover test — HSRP in action
-We make DIST1's gateway for VLAN 10 fail, and watch DIST2 take over.
-1. On an **ENG PC**: `ping -t` a **FIN PC** (continuous ping).
+| # | From | Type | Expected |
+|---|---|---|---|
+| 1 | an ENG PC | `ping 10.10.16.1` | ✅ its gateway |
+| 2 | an ENG PC | `ping` a FIN PC's address | ✅ **inter-VLAN routing works!** |
+| 3 | an ENG PC | `ping 10.10.18.10` (printer) | ✅ |
+| 4 | an ENG PC | `tracert` a FIN PC | first hop `10.10.16.2` (DIST1 — the Active for VLAN 10) |
+| 5 | PC-HFA-ADMIN-01 | `ping 10.10.19.11` and `10.10.19.12` | ✅ the access switches' management IPs |
+
+✅ All five as expected.
+
+---
+
+## Mission 10 — Failover test: kill a gateway, keep pinging
+🧠 **Why:** prove that HSRP and split-scope DHCP really protect the users.
+
+1. On an **ENG PC**: `ping -t` a **FIN PC's** address (continuous ping). Leave it running.
 2. On **DIST1**, shut down its door into VLAN 10:
 ```
 configure terminal
@@ -395,11 +535,14 @@ interface vlan 10
  shutdown
  end
 ```
-3. Watch the ping: a few timeouts (up to 10 seconds — the HSRP hold time), then replies
-   continue — DIST2 took over `.1`.
-4. On **DIST2**: `show standby brief` → now **Active** for group 10 too.
-5. On another **ENG PC** → Command Prompt: `ipconfig /release`, then `ipconfig /renew` → you
-   get a **.131+** address — from DIST2, because DIST1 can't hear VLAN 10 now. Split scope works!
+3. Watch the ping.
+   ✅ A few timeouts (up to 10 seconds — the HSRP hold time), then replies continue — DIST2
+   took over `.1`.
+4. On **DIST2**: `show standby brief`.
+   ✅ Now **Active** for group 10 too.
+5. On **another ENG PC** → Command Prompt: `ipconfig /release`, then `ipconfig /renew`.
+   ✅ You get a **.131+** address — from DIST2, because DIST1 can't hear VLAN 10 now. Split
+   scope works!
 6. On **DIST1**, open the door again:
 ```
 configure terminal
@@ -407,14 +550,12 @@ interface vlan 10
  no shutdown
  end
 ```
-   After a few seconds `show standby brief` on DIST1 → **Active** again for group 10 — that's
-   **preempt**.
-7. Stop the ping with **Ctrl+C**.
+7. Wait a few seconds (Fast Forward Time), then on DIST1 `show standby brief`.
+   ✅ DIST1 is **Active** again for group 10 — that's **preempt**.
+8. Stop the ping with **Ctrl+C**.
+9. Save all 4 switches (`copy running-config startup-config`) → **File → Save**.
 
 ---
-
-## Part 6 — Save
-`copy running-config startup-config` on all 4 switches → **File → Save**.
 
 ## Checkpoint
 - [ ] `show standby brief` correct on both DIST switches
@@ -430,17 +571,54 @@ interface vlan 10
 | Both switches say **Active** for the same group | `standby version` differs, or the VLAN isn't carried between them (check Po1 trunk allowed list) |
 | PCs get `169.254.x.x` (APIPA) | No DHCP answer: pool `network` typo, all addresses excluded, or the PC's port is in the wrong VLAN. Press Fast Forward Time and retry |
 | PC gets an address but no gateway | `default-router` missing in the pool |
+| A typo in the virtual IP (e.g. `10.10.16.11`) | On that SVI: `no standby 10 ip 10.10.16.11` → `standby 10 ip 10.10.16.1` |
 
-## Challenge
-Load-sharing question: VLAN 10 traffic goes through DIST1, VLAN 20 through DIST2. Imagine you
-made DIST1 the HSRP Active for VLAN 20 **but** DIST2 stays STP root for VLAN 20. Draw the path a
-FIN PC on ACC1 takes to reach its gateway. Why is it worse?
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercises
+
+### Exercise A — The wrong boss ⭐⭐
+- 🎯 **Task:** explain why the HSRP Active of a VLAN should be the same switch as its STP root.
+- 📁 **Start from:** paper (no Packet Tracer needed).
+- 👣 **Steps:**
+  1. Imagine DIST1 is HSRP Active for VLAN 20, **but** DIST2 stays STP root for VLAN 20.
+  2. Draw ACC1, DIST1, DIST2 and Po1.
+  3. Draw the path a FIN PC on ACC1 takes to reach its gateway. (Remember from step 04: on ACC1,
+     VLAN 20 goes up through the port toward the STP root.)
+- ✅ **Done when:** your drawing shows the path, and you can say in one sentence why it is worse.
+
+<details><summary>💡 Hint</summary>
+
+Which uplink of ACC1 forwards VLAN 20? Where does the frame arrive? Is that the switch that
+answers for `.1`?
+</details>
+<details><summary>✔ Answer</summary>
 
 PC → ACC1 → (STP forwards toward the root DIST2) → DIST2 → Po1 → DIST1 (HSRP Active) →
 routed. The frame crosses the EtherChannel for nothing: an extra hop, and the inter-DIST link
 carries traffic it shouldn't. Rule: **HSRP Active = STP root**, per VLAN.
+</details>
+
+### Exercise B — Who gave me this address? ⭐⭐
+- 🎯 **Task:** prove which switch gave each PC its address.
+- 📁 **Start from:** your `step05.pkt`.
+- 👣 **Steps:**
+  1. On every user PC run `ipconfig /all` and write down **IPv4 Address** and **DHCP Servers**.
+  2. On DIST1 and DIST2 run `show ip dhcp binding`.
+  3. Match each PC to a line in one of the two tables.
+- ✅ **Done when:** you have a small table "PC → address → server" and every address is in the
+  right half (.11–.130 from DIST1, .131–.254 from DIST2).
+
+<details><summary>💡 Hint</summary>
+
+`DHCP Servers` shows `.2` (DIST1) or `.3` (DIST2) of the PC's own VLAN. The binding table shows
+the PC's MAC — compare it with `Physical Address` in `ipconfig /all`.
+</details>
+<details><summary>✔ Answer</summary>
+
+Every PC whose `DHCP Servers` is `10.10.x.2` has an address .11–.130 and appears in DIST1's
+binding table; every PC served by `10.10.x.3` has .131+ and appears in DIST2's. If one switch
+answered all the PCs, that's fine — the other is the backup (you saw it work in Mission 10).
 </details>
 
 ---
@@ -449,6 +627,13 @@ carries traffic it shouldn't. Rule: **HSRP Active = STP root**, per VLAN.
 
 You did this step on the Intel example. Now do it again in **your** project, with the values
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+- [ ] Open `my-project/step04.pkt` → **Save As** `my-project/step05.pkt`
+- [ ] `ip routing` + one SVI with HSRP on both distribution switches → `show standby brief` OK
+- [ ] All the other SVIs; priorities per **your** "primary" column
+- [ ] DHCP split scope on both switches (or wherever your plan part E puts DHCP)
+- [ ] Management IP + default gateway on every access switch
+- [ ] User PCs on DHCP; Mission 9 and Mission 10 tests pass
 
 | In the example | In your project — take it from |
 |---|---|
@@ -644,11 +829,12 @@ Target: **10 minutes per VLAN**. Then show the examiner: a PC gets an address by
 
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** why VLANs can't talk → SVIs as "doors into the router" → `ip routing`
-  → configure DIST1 SVIs without HSRP first if the class is slow, test inter-VLAN ping.
-- **Lesson 2 (90 min):** HSRP (two receptionists, one phone number) → add HSRP on both →
-  `show standby brief` → failover test on the projector.
+  → Missions 2–3 (DIST1). Mission 2 deliberately does **one** VLAN and checks it before the rest
+  — insist on the check.
+- **Lesson 2 (90 min):** HSRP (two receptionists, one phone number) → Mission 4 (DIST2) →
+  Mission 5 checks → Mission 10 failover on the projector.
 - **Lesson 3 (60–90 min):** DHCP and DORA (show it in Simulation mode with the **DHCP**
-  filter) → split scope → pools on both → switch PCs to DHCP → release/renew test with DIST1's VLAN 10 SVI shut down.
+  filter) → split scope → Missions 6–9 → students repeat Mission 10 including release/renew.
 - **Common student questions**
   - *"Why does DHCP give `.1` and not `.2` as gateway?"* — `.2` is DIST1 itself; if DIST1 dies,
     `.2` dies. `.1` moves to whichever switch is alive.
@@ -657,4 +843,4 @@ Target: **10 minutes per VLAN**. Then show the examiner: a PC gets an address by
   - *"Why do access switches need an IP?"* — Only to be managed remotely. They don't route.
 - **Typical errors:** typo in the HSRP virtual IP on one switch (two different "phone
   numbers"); forgetting `no shutdown` on SVIs; the same priority on both (then the highest IP
-  wins — unpredictable for students).
+  wins — unpredictable for students); copying DIST1's priorities onto DIST2 unchanged.

@@ -5,6 +5,31 @@
 > ✅ **Before you start:** every box in the checkpoint of step 13 is ticked, and you did its
 > 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
 
+## 🗺 Your missions in this step
+**Lesson 1 — IPv6 basics and build**
+- [ ] **Mission 1** — IPv6 warm-up on paper (15 min)
+- [ ] **Mission 2** — Open step 13, save as step 14, place the devices (15 min)
+- [ ] **Mission 3** — Cable the branch (15 min)
+- [ ] **Mission 4** — Make the switches speak IPv6 (SDM template) (10 min)
+
+**Lesson 2 — the distribution switches**
+- [ ] **Mission 5** — DIST1, part 1: hardening, VLANs, STP, trunks (10 min)
+- [ ] **Mission 6** — DIST1, part 2: DHCPv6, OSPFv3, uplink, user gateways (15 min)
+- [ ] **Mission 7** — DIST1, part 3: MGMT, servers, legacy VLAN, management (10 min)
+- [ ] **Mission 8** — DIST2: the mirror of DIST1 (25 min)
+
+**Lesson 3 — access, edge, servers**
+- [ ] **Mission 9** — The three access switches (25 min)
+- [ ] **Mission 10** — SW-KG-SRV (5 min)
+- [ ] **Mission 11** — R-KG-EDGE and the ISP route (20 min)
+- [ ] **Mission 12** — Servers and end devices (IPv6 click by click) (20 min)
+
+**Lesson 4 — test it**
+- [ ] **Mission 13** — Checks and tests (15 min)
+- [ ] **Mission 14** — HSRPv6 failover (10 min)
+- [ ] **Exercises** A and B
+- [ ] **🛠 Your own project**
+
 ## What you will have at the end
 The third branch runs **IPv6** for all users, servers and management: automatic addresses
 (SLAAC + stateless DHCPv6), **OSPFv3** routing, **HSRP for IPv6**. One small legacy IPv4 VLAN
@@ -89,53 +114,96 @@ DHCPv6 on the distribution switches**.
 | EtherChannel | LACP | PAgP | **none** (single trunk between DISTs) |
 | NAT | static (+PAT) | dynamic | **PAT (overload)** |
 
+> ⚠️ **VTP transparent** means **every** switch creates its own VLANs with `vlan` commands —
+> nothing is copied. Forget a VLAN on one switch and its ports stay dead.
+
 ### 1.8 Why there is still a little IPv4
 NAT exists only in IPv4. The ministry asks for one IPv6 branch **and** NAT in every branch. Our
 answer: one **legacy VLAN 199** for old devices that only speak IPv4 (badge readers, cameras). Only
 it uses PAT to reach the internet. Everything else is IPv6. **Confirm this interpretation with your
 mentor.**
 
+### 1.9 Link addresses
+| Link | IPv6 | IPv4 |
+|---|---|---|
+| R-KG-EDGE Gi0/0 ↔ DIST1 Gi1/1/1 | 2001:DB8:30:FF01::1 / ::2 (/64) | 10.30.4.1 / 10.30.4.2 (/30) |
+| R-KG-EDGE Gi0/2 ↔ DIST2 Gi1/1/1 | 2001:DB8:30:FF02::1 / ::2 (/64) | — |
+| R-KG-EDGE Gi0/1 ↔ R-ISPC-PE Gi0/1 | 2001:DB8:C:1::2 / ::1 (/64) | 200.3.1.2 / 200.3.1.1 (/30) |
+
+| Device | OSPFv3 router-ID | Mgmt IPv6 |
+|---|---|---|
+| R-KG-EDGE | 3.3.3.1 | 2001:DB8:30:FF01::1 |
+| SWL3-KG-DIST1 / DIST2 | 3.3.3.2 / 3.3.3.3 | 2001:DB8:30:99::2 / ::3 |
+| SW-KG-ACC1 / ACC2 / ACC3 / SRV | — | 2001:DB8:30:99::11 / ::12 / ::13 / ::14 |
+| PC-KG-ADMIN-01 | — | 2001:DB8:30:99::100 |
+
+> ⌨️ **Typing IPv6:** capital or small letters both work (`FE80::1` = `fe80::1`). Read each
+> address group by group before pressing Enter — a missing `:` is the #1 error in this step.
+
 ---
 
-## Part 2 — Prepare
+## Mission 1 — IPv6 warm-up on paper
+Shorten these addresses (answers hidden):
+
+1. `2001:0DB8:0030:0099:0000:0000:0000:0011`
+2. `2001:0DB8:000C:0001:0000:0000:0000:0002`
+3. `FE80:0000:0000:0000:0000:0000:0000:0001`
+
+<details><summary>✔ Answers</summary>
+
+1. `2001:DB8:30:99::11`
+2. `2001:DB8:C:1::2`
+3. `FE80::1`
+</details>
+
+4. Which VLAN is `2001:DB8:30:35::/64`? Which department?
+
+<details><summary>✔ Answer</summary>
+
+The 4th group is `35` → VLAN 35, PLANNING.
+</details>
+
+---
+
+## Mission 2 — Open step 13, save as step 14, place the devices (how? → M1, M2, M4, M8)
 **File → Open** → `my-work/step13.pkt` → **File → Save As** → `my-work/step14.pkt`.
 Draw a rectangle labelled `KIRYAT GAT BRANCH (IPv6)`.
 
----
-
-## Part 3 — Build (click by click)
-
-### 3.1 Devices
 | Model | Display Name |
 |---|---|
 | 2911 | `R-KG-EDGE` |
-| 3650-24PS (+ **AC-POWER-SUPPLY**!) | `SWL3-KG-DIST1`, `SWL3-KG-DIST2` |
+| 3650-24PS | `SWL3-KG-DIST1`, `SWL3-KG-DIST2` |
 | 2960 | `SW-KG-ACC1`, `SW-KG-ACC2`, `SW-KG-ACC3`, `SW-KG-SRV` |
 | Server ×4 | `SRV-KG-DNS`, `SRV-KG-MAIL`, `SRV-KG-SYSLOG`, `SRV-KG-AAA` |
 | PC ×12 | `PC-KG-FAB-01/02`, `PC-KG-QUA-01/02`, `PC-KG-MNT-01/02`, `PC-KG-SAF-01/02`, `PC-KG-PLN-01/02`, `PC-KG-TRN-01/02` |
 | PC ×3 | `PC-KG-ADMIN-01`, `PC-KG-LEGACY-01`, `PC-KG-LEGACY-02` |
 | Printer ×2 | `PRN-KG-ACC2-01`, `PRN-KG-ACC3-01` |
-| Server ×1 (at ISP-C's home LAN) | `SRV-ISPC-WEB6` |
+| Server ×1 — place it near **SW-ISPC-HOME** (ISP-C's home LAN) | `SRV-ISPC-WEB6` |
 
-### 3.2 Cables
-| Click first | Port | Click second | Port | Cable |
-|---|---|---|---|---|
-| SWL3-KG-DIST1 | Gi1/0/1 | SW-KG-ACC1 | Gi0/1 | Cross-Over |
-| SWL3-KG-DIST2 | Gi1/0/1 | SW-KG-ACC1 | Gi0/2 | Cross-Over |
-| SWL3-KG-DIST1 | Gi1/0/2 | SW-KG-ACC2 | Gi0/1 | Cross-Over |
-| SWL3-KG-DIST2 | Gi1/0/2 | SW-KG-ACC2 | Gi0/2 | Cross-Over |
-| SWL3-KG-DIST1 | Gi1/0/3 | SW-KG-ACC3 | Gi0/1 | Cross-Over |
-| SWL3-KG-DIST2 | Gi1/0/3 | SW-KG-ACC3 | Gi0/2 | Cross-Over |
-| SWL3-KG-DIST1 | Gi1/0/4 | SW-KG-SRV | Gi0/1 | Cross-Over |
-| SWL3-KG-DIST2 | Gi1/0/4 | SW-KG-SRV | Gi0/2 | Cross-Over |
-| SWL3-KG-DIST1 | Gi1/0/24 | SWL3-KG-DIST2 | Gi1/0/24 | Cross-Over |
-| SWL3-KG-DIST1 | Gi1/1/1 | R-KG-EDGE | Gi0/0 | Straight-Through |
-| SWL3-KG-DIST2 | Gi1/1/1 | R-KG-EDGE | Gi0/2 | Straight-Through |
-| R-KG-EDGE | Gi0/1 | R-ISPC-PE | Gi0/1 | Cross-Over |
-| SRV-ISPC-WEB6 | Fa0 | SW-ISPC-HOME | Fa0/2 | Straight-Through |
+⚠️ Power supplies (M8): - [ ] DIST1  - [ ] DIST2
 
-End devices (Straight-Through):
+---
 
+## Mission 3 — Cable the branch (how? → M5)
+
+### 3a — Network devices
+| # | Cable | Click first | Port | Click second | Port |
+|---|---|---|---|---|---|
+| 1 | Cross-Over | SWL3-KG-DIST1 | Gi1/0/1 | SW-KG-ACC1 | Gi0/1 |
+| 2 | Cross-Over | SWL3-KG-DIST2 | Gi1/0/1 | SW-KG-ACC1 | Gi0/2 |
+| 3 | Cross-Over | SWL3-KG-DIST1 | Gi1/0/2 | SW-KG-ACC2 | Gi0/1 |
+| 4 | Cross-Over | SWL3-KG-DIST2 | Gi1/0/2 | SW-KG-ACC2 | Gi0/2 |
+| 5 | Cross-Over | SWL3-KG-DIST1 | Gi1/0/3 | SW-KG-ACC3 | Gi0/1 |
+| 6 | Cross-Over | SWL3-KG-DIST2 | Gi1/0/3 | SW-KG-ACC3 | Gi0/2 |
+| 7 | Cross-Over | SWL3-KG-DIST1 | Gi1/0/4 | SW-KG-SRV | Gi0/1 |
+| 8 | Cross-Over | SWL3-KG-DIST2 | Gi1/0/4 | SW-KG-SRV | Gi0/2 |
+| 9 | Cross-Over | SWL3-KG-DIST1 | Gi1/0/24 | SWL3-KG-DIST2 | Gi1/0/24 |
+| 10 | Straight | SWL3-KG-DIST1 | Gi1/1/1 | R-KG-EDGE | Gi0/0 |
+| 11 | Straight | SWL3-KG-DIST2 | Gi1/1/1 | R-KG-EDGE | Gi0/2 |
+| 12 | Cross-Over | R-KG-EDGE | Gi0/1 | R-ISPC-PE | Gi0/1 |
+| 13 | Straight | SRV-ISPC-WEB6 | Fa0 | SW-ISPC-HOME | Fa0/2 |
+
+### 3b — End devices (all Straight-Through)
 | Device | Switch | Port |
 |---|---|---|
 | PC-KG-FAB-01 / 02 | SW-KG-ACC1 | Fa0/1 / Fa0/2 |
@@ -150,28 +218,26 @@ End devices (Straight-Through):
 | PRN-KG-ACC3-01 | SW-KG-ACC3 | Fa0/21 |
 | SRV-KG-DNS / MAIL / SYSLOG / AAA | SW-KG-SRV | Fa0/1 / 2 / 3 / 4 |
 
-### 3.3 Link addresses
-| Link | IPv6 | IPv4 |
-|---|---|---|
-| R-KG-EDGE Gi0/0 ↔ DIST1 Gi1/1/1 | 2001:DB8:30:FF01::1 / ::2 (/64) | 10.30.4.1 / 10.30.4.2 (/30) |
-| R-KG-EDGE Gi0/2 ↔ DIST2 Gi1/1/1 | 2001:DB8:30:FF02::1 / ::2 (/64) | — |
-| R-KG-EDGE Gi0/1 ↔ R-ISPC-PE Gi0/1 | 2001:DB8:C:1::2 / ::1 (/64) | 200.3.1.2 / 200.3.1.1 (/30) |
-
-| Device | OSPFv3 router-ID | Mgmt IPv6 |
-|---|---|---|
-| R-KG-EDGE | 3.3.3.1 | 2001:DB8:30:FF01::1 |
-| SWL3-KG-DIST1 / DIST2 | 3.3.3.2 / 3.3.3.3 | 2001:DB8:30:99::2 / ::3 |
-| SW-KG-ACC1 / ACC2 / ACC3 / SRV | — | 2001:DB8:30:99::11 / ::12 / ::13 / ::14 |
-| PC-KG-ADMIN-01 | — | 2001:DB8:30:99::100 |
+✅ 13 + 21 cables. **File → Save**.
 
 ---
 
-## Part 4 — Configure
+## Mission 4 — Make the switches speak IPv6 (SDM template)
+🧠 **Why:** some PT switches start with a memory template that has **no room for IPv6**. Then
+every `ipv6 ...` command says `% Invalid input`.
 
-### 4.0 Before you start — IPv6 on the switches
-Try `configure terminal` → `ipv6 unicast-routing` on a 3650, and `interface vlan 1` →
-`ipv6 address 2001:DB8::1/64` on a 2960. If a command is **refused**, enable IPv6 in the switch's
-memory template (once per switch), then reboot it:
+### 4a — Test one 3650 and one 2960
+1. **SWL3-KG-DIST1** → CLI → **Enter** → `enable` → `configure terminal` → `ipv6 unicast-routing`.
+2. **SW-KG-ACC1** → CLI → **Enter** → `enable` → `configure terminal` → `interface vlan 1` →
+   `ipv6 address 2001:DB8::1/64`.
+
+✅ **Both accepted?** Go on. On SW-KG-ACC1 remove the test address: `no ipv6 address 2001:DB8::1/64`
+→ `end`. Skip 4b.
+
+❌ **Refused?** Do 4b on **every** switch of this branch (6 switches).
+
+### 4b — Change the template (only if 4a was refused), once per switch
+⌨️ Type:
 ```
 configure terminal
 sdm prefer dual-ipv4-and-ipv6 default
@@ -179,14 +245,19 @@ end
 copy running-config startup-config
 reload
 ```
-(Press Enter to confirm the reload. If you tested with `interface vlan 1`, remove the test address
-afterwards: `no ipv6 address 2001:DB8::1/64`.)
+Press **Enter** to confirm the reload. Wait until the switch boots again (press Fast Forward Time).
+Tick: - [ ] DIST1  - [ ] DIST2  - [ ] ACC1  - [ ] ACC2  - [ ] ACC3  - [ ] SRV
 
-### 4.1 SWL3-KG-DIST1 — complete
+---
+
+## Mission 5 — DIST1, part 1: hardening, VLANs, STP, trunks
+👉 **Where:** **SWL3-KG-DIST1** → CLI → `Switch>` (or `Switch(config)#` if you came from Mission 4
+— type `end` first).
+
+⌨️ Type:
 ```
 enable
 configure terminal
-! ===== hardening =====
 hostname SWL3-KG-DIST1
 no ip domain-lookup
 enable secret Intel#En4ble
@@ -194,10 +265,8 @@ service password-encryption
 banner motd #
 *  Intel Israel - AUTHORIZED ACCESS ONLY - all activity is logged  *
 #
-! ===== routing for both IP versions =====
 ip routing
 ipv6 unicast-routing
-! ===== VTP transparent: VLANs are created here, locally =====
 vtp mode transparent
 vlan 31
  name FAB-OPS
@@ -224,7 +293,6 @@ vlan 999
  exit
 spanning-tree mode rapid-pvst
 spanning-tree vlan 31-36,99,100,199 root primary
-! ===== trunks =====
 interface range gi1/0/1 - 4
  description TRUNK to access switch
  switchport mode trunk
@@ -246,16 +314,28 @@ interface range gi1/0/5 - 23
  switchport access vlan 999
  shutdown
  exit
-! ===== stateless DHCPv6: only DNS + domain =====
+```
+| Command | In simple English |
+|---|---|
+| `ipv6 unicast-routing` | "Route IPv6 and send Router Advertisements" |
+
+🔍 **Check now:** `do show vlan brief` → 11 VLANs.
+
+---
+
+## Mission 6 — DIST1, part 2: DHCPv6, OSPFv3, uplink, user gateways
+👉 **Where:** DIST1, prompt `SWL3-KG-DIST1(config)#`.
+
+### 6a — Stateless DHCPv6 pool, OSPFv3 process, uplink
+⌨️ Type:
+```
 ipv6 dhcp pool KG-STATELESS
  dns-server 2001:DB8:30:100::10
  domain-name intel.lab
  exit
-! ===== OSPFv3 process =====
 ipv6 router ospf 1
  router-id 3.3.3.2
  exit
-! ===== uplink to the edge (dual-stack) =====
 interface gi1/1/1
  description to R-KG-EDGE Gi0/0
  no switchport
@@ -263,7 +343,23 @@ interface gi1/1/1
  ipv6 address 2001:DB8:30:FF01::2/64
  ipv6 ospf 1 area 0
  no shutdown
-! ===== user VLAN gateways: IPv6 + RA flags + DHCPv6 + HSRPv6 =====
+ exit
+```
+| Command | In simple English |
+|---|---|
+| `ipv6 dhcp pool KG-STATELESS` + `dns-server` | The extras handed out by stateless DHCPv6 |
+| `ipv6 router ospf 1` / `router-id 3.3.3.2` | Start OSPFv3, with this ID |
+| `ipv6 address 2001:DB8:30:FF01::2/64` | This interface's IPv6 address |
+| `ipv6 ospf 1 area 0` | "This interface joins OSPFv3 process 1, area 0" |
+
+> The uplink also has an IPv4 address (10.30.4.2) — only for the legacy VLAN 199.
+
+### 6b — The six user VLAN gateways
+Every block is the same 9 lines; only the **VLAN number** changes (in 4 places: `vlan 31`,
+`:31::2`, `standby 31` ×3).
+
+⌨️ Type:
+```
 interface vlan 31
  description GW FAB-OPS
  ipv6 address 2001:DB8:30:31::2/64
@@ -330,7 +426,24 @@ interface vlan 36
  standby 36 priority 110
  standby 36 preempt
  no shutdown
-! ===== management and servers: static addresses, no DHCPv6 =====
+ exit
+```
+| Command | In simple English |
+|---|---|
+| `ipv6 nd other-config-flag` | Set the **O-flag** in RAs: "ask DHCPv6 for DNS" |
+| `ipv6 dhcp server KG-STATELESS` | "Answer DHCPv6 questions on this VLAN" |
+| `standby 31 ipv6 FE80::1` | HSRP for IPv6: shared gateway FE80::1 |
+
+❌ **`standby 31 ipv6 FE80::1` refused?** Use `standby 31 ipv6 autoconfig` instead, and see
+"If something doesn't work".
+
+---
+
+## Mission 7 — DIST1, part 3: MGMT, servers, legacy VLAN, management
+
+### 7a — MGMT and SERVERS (static addresses there, so no DHCPv6)
+⌨️ Type:
+```
 interface vlan 99
  description GW MGMT
  ipv6 address 2001:DB8:30:99::2/64
@@ -349,25 +462,32 @@ interface vlan 100
  standby 100 priority 110
  standby 100 preempt
  no shutdown
-! ===== the legacy IPv4 VLAN (only on DIST1) =====
+```
+
+### 7b — The legacy IPv4 VLAN (only on DIST1) and OSPFv3 passive
+⌨️ Type:
+```
 interface vlan 199
  description GW LEGACY-IPV4
  ip address 10.30.199.1 255.255.255.0
  no shutdown
  exit
 ip route 0.0.0.0 0.0.0.0 10.30.4.1
-! ===== OSPFv3: talk only on the uplink and the server VLAN =====
 ipv6 router ospf 1
  passive-interface default
  no passive-interface gi1/1/1
  no passive-interface vlan 100
  exit
-! ===== management =====
+```
+
+### 7c — Management (IPv6 guest list)
+⌨️ Type:
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -386,13 +506,39 @@ line console 0
  exit
 service timestamps log datetime msec
 logging host ipv6 2001:DB8:30:100::12
-! branch NTP: syncs to Haifa's public NTP (static NAT, step 12) over IPv4
 ntp server 200.1.10.4
  end
 copy running-config startup-config
 ```
+| Command | In simple English |
+|---|---|
+| `ipv6 access-class MGMT6 in` | The IPv6 guest list for the VTY lines |
+| `ntp server 200.1.10.4` | Branch NTP: sync to Haifa's public NTP (static NAT, step 12) over IPv4 |
 
-### 4.2 SWL3-KG-DIST2 — complete
+> `logging host ipv6 ...` refused? Try `logging 2001:DB8:30:100::12`.
+
+🔍 **Check now:** `show ipv6 interface brief` → Vlan31–36, 99, 100 each with `2001:DB8:30:x::2`
+(and an `FE80::` line). They may be `down` until the access switches are configured.
+
+---
+
+## Mission 8 — DIST2: the mirror of DIST1
+👉 **Where:** **SWL3-KG-DIST2** → CLI.
+
+| | DIST1 | **DIST2** |
+|---|---|---|
+| hostname | SWL3-KG-DIST1 | **SWL3-KG-DIST2** |
+| `ip routing` | yes (for VLAN 199) | **no** |
+| STP | root **primary** | root **secondary** |
+| OSPFv3 router-id | 3.3.3.2 | **3.3.3.3** |
+| Gi1/1/1 | 10.30.4.2 + 2001:DB8:30:FF01::2 | **only 2001:DB8:30:FF02::2** |
+| SVI addresses | `::2` | **`::3`** |
+| HSRP priority | 110 | **90** |
+| VLAN 199 SVI + IPv4 default route | yes | **no** |
+| NTP server line | yes | **no** |
+
+### 8a — Hardening, VLANs, STP, trunks
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -451,6 +597,11 @@ interface range gi1/0/5 - 23
  switchport access vlan 999
  shutdown
  exit
+```
+
+### 8b — DHCPv6, OSPFv3, uplink
+⌨️ Type:
+```
 ipv6 dhcp pool KG-STATELESS
  dns-server 2001:DB8:30:100::10
  domain-name intel.lab
@@ -464,6 +615,11 @@ interface gi1/1/1
  ipv6 address 2001:DB8:30:FF02::2/64
  ipv6 ospf 1 area 0
  no shutdown
+```
+
+### 8c — Gateways
+⌨️ Type:
+```
 interface vlan 31
  description GW FAB-OPS
  ipv6 address 2001:DB8:30:31::3/64
@@ -554,11 +710,16 @@ ipv6 router ospf 1
  no passive-interface gi1/1/1
  no passive-interface vlan 100
  exit
+```
+
+### 8d — Management
+⌨️ Type:
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -581,7 +742,21 @@ logging host ipv6 2001:DB8:30:100::12
 copy running-config startup-config
 ```
 
-### 4.3 SW-KG-ACC1 — complete (Fab-Ops, Quality, legacy, admin PC)
+---
+
+## Mission 9 — The three access switches
+⚠️ VTP is **transparent**: each access switch creates **only the VLANs it uses**.
+
+| Switch | Its VLANs | Fa0/1–10 | Fa0/11–20 | Fa0/21 | Fa0/22 | Fa0/23 | Mgmt IPv6 |
+|---|---|---|---|---|---|---|---|
+| SW-KG-ACC1 | 31, 32, 99, 199 | 31 | 32 | 199 legacy | 199 legacy | 99 admin PC | ::11 |
+| SW-KG-ACC2 | 33, 34, 99 | 33 | 34 | 33 printer | unused | unused | ::12 |
+| SW-KG-ACC3 | 35, 36, 99 | 35 | 36 | 35 printer | unused | unused | ::13 |
+
+### 9a — SW-KG-ACC1 (Fab-Ops, Quality, legacy, admin PC)
+👉 **Where:** **SW-KG-ACC1** → CLI.
+
+⌨️ **Hardening, VLANs, ports:**
 ```
 enable
 configure terminal
@@ -648,11 +823,14 @@ interface vlan 99
  ipv6 address 2001:DB8:30:99::11/64
  no shutdown
  exit
+```
+⌨️ **Management:**
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -678,7 +856,10 @@ copy running-config startup-config
 > DHCP snooping is IPv4-only, so here the access ports are protected by port-security, BPDU Guard and
 > the parking VLAN. (Real switches add **RA Guard** and **DHCPv6 Guard** — not in PT. Mention it in the book.)
 
-### 4.4 SW-KG-ACC2 — complete (Maintenance, Safety, printer)
+### 9b — SW-KG-ACC2 (Maintenance, Safety, printer)
+👉 **Where:** **SW-KG-ACC2** → CLI.
+
+⌨️ **Hardening, VLANs, ports:**
 ```
 enable
 configure terminal
@@ -739,47 +920,85 @@ interface vlan 99
  ipv6 address 2001:DB8:30:99::12/64
  no shutdown
  exit
-ip domain-name intel.lab
-username admin privilege 15 secret Intel#Adm1n
-crypto key generate rsa
 ```
-(`1024`)
+⌨️ **Management:** the same block as 9a (from `ip domain-name intel.lab` to
+`copy running-config startup-config`).
+
+### 9c — SW-KG-ACC3 (Planning, Training, printer)
+👉 **Where:** **SW-KG-ACC3** → CLI.
+
+⌨️ **Hardening, VLANs, ports:**
 ```
-ip ssh version 2
-login block-for 120 attempts 3 within 60
-ipv6 access-list MGMT6
- permit ipv6 2001:DB8:30:99::/64 any
- deny ipv6 any any log
+enable
+configure terminal
+hostname SW-KG-ACC3
+no ip domain-lookup
+enable secret Intel#En4ble
+service password-encryption
+banner motd #
+*  Intel Israel - AUTHORIZED ACCESS ONLY - all activity is logged  *
+#
+vtp mode transparent
+vlan 35
+ name PLANNING
+vlan 36
+ name TRAINING
+vlan 99
+ name MGMT
+vlan 998
+ name NATIVE
+vlan 999
+ name PARKING
  exit
-line vty 0 15
- transport input ssh
- login local
- ipv6 access-class MGMT6 in
- exec-timeout 5 0
-line console 0
- login local
- logging synchronous
+spanning-tree mode rapid-pvst
+interface range gi0/1 - 2
+ description TRUNK uplink to DIST1 / DIST2
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 31-36,99,100,199,998
+ switchport nonegotiate
+ no shutdown
+interface range fa0/1 - 10
+ description PLANNING users
+ switchport mode access
+ switchport access vlan 35
+interface range fa0/11 - 20
+ description TRAINING users
+ switchport mode access
+ switchport access vlan 36
+interface fa0/21
+ description PRN-KG-ACC3-01
+ switchport mode access
+ switchport access vlan 35
+interface range fa0/1 - 21
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ no cdp enable
+interface range fa0/22 - 24
+ description UNUSED
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+interface vlan 99
+ description MANAGEMENT
+ ipv6 address 2001:DB8:30:99::13/64
+ no shutdown
  exit
-service timestamps log datetime msec
-logging host ipv6 2001:DB8:30:100::12
- end
-copy running-config startup-config
 ```
+⌨️ **Management:** the same block as 9a.
 
-### 4.5 SW-KG-ACC3 — complete (Planning, Training, printer)
-Type the whole block of 4.4 again with these lines different:
+🔍 **Check now (on each):** `show vlan brief` → the ports in the VLANs of the table above.
 
-| Line in 4.4 | Becomes |
-|---|---|
-| `hostname SW-KG-ACC2` | `hostname SW-KG-ACC3` |
-| `vlan 33` / `name MAINTENANCE` | `vlan 35` / `name PLANNING` |
-| `vlan 34` / `name SAFETY` | `vlan 36` / `name TRAINING` |
-| `description MAINTENANCE users` / `switchport access vlan 33` | `description PLANNING users` / `switchport access vlan 35` |
-| `description SAFETY users` / `switchport access vlan 34` | `description TRAINING users` / `switchport access vlan 36` |
-| `description PRN-KG-ACC2-01` / `switchport access vlan 33` | `description PRN-KG-ACC3-01` / `switchport access vlan 35` |
-| `ipv6 address 2001:DB8:30:99::12/64` | `ipv6 address 2001:DB8:30:99::13/64` |
+---
 
-### 4.6 SW-KG-SRV — complete
+## Mission 10 — SW-KG-SRV
+👉 **Where:** **SW-KG-SRV** → CLI.
+
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -828,7 +1047,7 @@ ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -849,7 +1068,14 @@ logging host ipv6 2001:DB8:30:100::12
 copy running-config startup-config
 ```
 
-### 4.7 R-KG-EDGE — complete
+---
+
+## Mission 11 — R-KG-EDGE and the ISP route
+
+### 11a — R-KG-EDGE: interfaces and OSPFv3
+👉 **Where:** **R-KG-EDGE** → CLI → `no` to the dialog → `Router>`.
+
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -883,19 +1109,31 @@ interface gi0/1
  ipv6 address 2001:DB8:C:1::2/64
  no shutdown
  exit
-! ===== static toward the WAN, both IP versions =====
+```
+Press **Fast Forward Time**.
+🔍 **Check now:** `do show ipv6 ospf neighbor` → `3.3.3.2` and `3.3.3.3`, both `FULL`.
+
+### 11b — Static routes toward the WAN, both IP versions
+⌨️ Type:
+```
 ipv6 route ::/0 2001:DB8:C:1::1
 ip route 0.0.0.0 0.0.0.0 200.3.1.1
 ip route 10.30.199.0 255.255.255.0 10.30.4.2
-! ===== tell the DIST switches about the IPv6 default route =====
 ipv6 router ospf 1
  default-information originate
  exit
-! ===== PAT (overload) for the legacy VLAN + DIST1's NTP =====
+```
+| Command | In simple English |
+|---|---|
+| `ipv6 route ::/0 2001:DB8:C:1::1` | IPv6 default route (`::/0` = everything) |
+| `ip route 10.30.199.0 ... 10.30.4.2` | The legacy VLAN is behind DIST1 |
+
+### 11c — PAT for the legacy VLAN, and the IPv6 inbound filter
+⌨️ Type:
+```
 access-list 1 permit 10.30.199.0 0.0.0.255
 access-list 1 permit 10.30.4.0 0.0.0.3
 ip nat inside source list 1 interface gi0/1 overload
-! ===== inbound IPv6 filter =====
 ipv6 access-list WAN6-IN
  remark --- ICMPv6 is required by IPv6 itself (neighbour discovery) ---
  permit icmp any any
@@ -907,12 +1145,20 @@ ipv6 access-list WAN6-IN
 interface gi0/1
  ipv6 traffic-filter WAN6-IN in
  exit
-! ===== management =====
+```
+| Command | In simple English |
+|---|---|
+| `ip nat inside source list 1 interface gi0/1 overload` | **PAT** — all legacy devices (and DIST1's NTP) share 200.3.1.2 |
+| `ipv6 traffic-filter WAN6-IN in` | Apply an IPv6 ACL on an interface |
+
+### 11d — Management
+⌨️ Type:
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -934,37 +1180,45 @@ logging host ipv6 2001:DB8:30:100::12
 copy running-config startup-config
 ```
 
-### 4.8 R-ISPC-PE — route Kiryat Gat's IPv6 block
+### 11e — R-ISPC-PE: route Kiryat Gat's IPv6 block
+👉 **Where:** **R-ISPC-PE** → CLI → `enable` → password `Intel#En4ble`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 ipv6 route 2001:DB8:30::/48 2001:DB8:C:1::2
 end
 copy running-config startup-config
 ```
+> No NAT for IPv6: the ISP simply routes the whole /48 to our edge.
 
-### 4.9 Servers and end devices (click by click)
-**IPv6 settings on a server or PC:** Desktop → **IP Configuration** → section **IPv6 Configuration**.
+---
 
-| Device | IPv6 setting | Address | Gateway | IPv6 DNS |
+## Mission 12 — Servers and end devices (IPv6 click by click)
+
+### 12a — Where the IPv6 settings are
+Server or PC → **Desktop** → **IP Configuration**. The window has two parts: **IPv4** at the top
+and **IPv6 Configuration** below it. For IPv6-only devices, leave the **IPv4** fields **empty**.
+
+| Device | IPv6 setting | IPv6 Address / prefix | IPv6 Gateway | IPv6 DNS Server |
 |---|---|---|---|---|
 | SRV-KG-DNS | Static | 2001:DB8:30:100::10 / 64 | FE80::1 | 2001:DB8:30:100::10 |
 | SRV-KG-MAIL | Static | 2001:DB8:30:100::11 / 64 | FE80::1 | 2001:DB8:30:100::10 |
 | SRV-KG-SYSLOG | Static | 2001:DB8:30:100::12 / 64 | FE80::1 | 2001:DB8:30:100::10 |
 | SRV-KG-AAA | Static | 2001:DB8:30:100::13 / 64 | FE80::1 | 2001:DB8:30:100::10 |
 | PC-KG-ADMIN-01 | Static | 2001:DB8:30:99::100 / 64 | FE80::1 | 2001:DB8:30:100::10 |
-| All 12 department PCs | **Automatic** | (SLAAC fills it in) | | |
 | SRV-ISPC-WEB6 | Static | 2001:DB8:C:50::80 / 64 | FE80::1 | — |
+| All 12 department PCs | click **Automatic** | (SLAAC fills it in) | | |
 
-For the IPv6-only devices, leave the **IPv4** fields empty.
+> In the IPv6 Address box type only the address; the `/64` goes in the small box after the `/`.
 
-**Legacy PCs (IPv4 only):** PC-KG-LEGACY-01 `10.30.199.10`, PC-KG-LEGACY-02 `10.30.199.11`,
-mask `255.255.255.0`, gateway `10.30.199.1`, DNS `200.1.100.10`.
+### 12b — Legacy PCs and printers
+- **Legacy PCs (IPv4 only):** PC-KG-LEGACY-01 `10.30.199.10`, PC-KG-LEGACY-02 `10.30.199.11`,
+  mask `255.255.255.0`, gateway `10.30.199.1`, DNS `200.1.100.10`.
+- **Printers:** Config → FastEthernet0 → IPv6 → **Automatic** (SLAAC).
 
-**Printers:** Config → FastEthernet0 → IPv6 → **Automatic** (SLAAC).
-
-**Services:**
-- **SRV-KG-DNS** → DNS **On** → records of type **AAAA Record**:
+### 12c — Services
+- **SRV-KG-DNS** → DNS **On** → records of type **AAAA Record** (not A!):
   `mail.kg.intel.lab → 2001:DB8:30:100::11`, `www6.isp-web.com → 2001:DB8:C:50::80`.
 - **SRV-KG-MAIL** → EMAIL → domain `kg.intel.lab` → Set (users in step 16).
 - **SRV-KG-SYSLOG** → SYSLOG **On**.
@@ -978,58 +1232,50 @@ mask `255.255.255.0`, gateway `10.30.199.1`, DNS `200.1.100.10`.
 > `aaa new-model` → `tacacs server KG-AAA` → `address ipv6 2001:DB8:30:100::13` → `key Intel#Tac`
 > → `exit` → `aaa authentication login default group tacacs+ local`, and register the switch in
 > SRV-KG-AAA by its IPv6 address. Write in the book which way worked.
->
-> Same for `logging host ipv6 ...`: if refused, try `logging 2001:DB8:30:100::12`.
 
-### 4.10 What the new commands mean
-| Command | In simple English |
-|---|---|
-| `ipv6 unicast-routing` | "Route IPv6 and send Router Advertisements" |
-| `ipv6 address 2001:DB8:30:31::2/64` | This interface's IPv6 address |
-| `ipv6 ospf 1 area 0` | "This interface joins OSPFv3 process 1, area 0" |
-| `ipv6 router ospf 1` / `router-id 3.3.3.2` | Start OSPFv3, with this ID |
-| `ipv6 nd other-config-flag` | Set the **O-flag** in RAs: "ask DHCPv6 for DNS" |
-| `ipv6 dhcp pool KG-STATELESS` + `dns-server` | The extras handed out by stateless DHCPv6 |
-| `ipv6 dhcp server KG-STATELESS` | "Answer DHCPv6 questions on this VLAN" |
-| `standby 31 ipv6 FE80::1` | HSRP for IPv6: shared gateway FE80::1 |
-| `ipv6 route ::/0 2001:DB8:C:1::1` | IPv6 default route (`::/0` = everything) |
-| `ip nat inside source list 1 interface gi0/1 overload` | **PAT** — all legacy devices share 200.3.1.2 |
-| `ipv6 traffic-filter WAN6-IN in` | Apply an IPv6 ACL on an interface |
-| `ipv6 access-class MGMT6 in` | The IPv6 guest list for the VTY lines |
+🔍 **Check now:** PC-KG-FAB-01 → Command Prompt → `ipconfig /all` → IPv6 address
+`2001:DB8:30:31:…`, gateway `FE80::1`, DNS `2001:DB8:30:100::10`.
+
+❌ **Only an `FE80::` address:** click **Automatic** again; check that VLAN 31's SVI is up on DIST1
+(`show ipv6 interface brief`).
 
 ---
 
-## Part 5 — Check your work
+## Mission 13 — Checks and tests
 
-```
-SWL3-KG-DIST1# show ipv6 interface brief         <- every VLAN up with its 2001:DB8:30:x::2
-SWL3-KG-DIST1# show standby brief
-Vl31   31  110 P Active   local   FE80::...   FE80::1
-SWL3-KG-DIST1# show ipv6 ospf neighbor           <- 3.3.3.1 (edge) and 3.3.3.3 (DIST2) FULL
-SWL3-KG-DIST2# show ipv6 route
-OE2 ::/0 [110/1] via FE80::..., GigabitEthernet1/1/1   <- default from the edge
-R-KG-EDGE#     show ip nat translations          <- 200.3.1.2:port  10.30.199.10:port
-```
+### 13a — On the switches and the edge
+| # | Where | Type | ✅ Expected |
+|---|---|---|---|
+| 1 | DIST1 | `show ipv6 interface brief` | every VLAN up with its `2001:DB8:30:x::2` |
+| 2 | DIST1 | `show standby brief` | `Vl31 31 110 P Active local FE80::... FE80::1` (and the others) |
+| 3 | DIST1 | `show ipv6 ospf neighbor` | 3.3.3.1 (edge) and 3.3.3.3 (DIST2) FULL |
+| 4 | DIST2 | `show ipv6 route` | `OE2 ::/0 [110/1] via FE80::..., GigabitEthernet1/1/1` — the default from the edge |
+| 5 | R-KG-EDGE | `show ip nat translations` (after test 5 below) | `200.3.1.2:port  10.30.199.10:port` |
 
-| From | Do | Expected |
-|---|---|---|
-| PC-KG-FAB-01 | Command Prompt → `ipconfig /all` | IPv6 `2001:DB8:30:31:…`, gateway `FE80::1`, DNS `2001:DB8:30:100::10` |
-| PC-KG-FAB-01 | `ping 2001:DB8:30:36::2` | ✅ inter-VLAN routing over IPv6 |
-| PC-KG-FAB-01 | `ping 2001:DB8:30:100::10` | ✅ the DNS server |
-| PC-KG-FAB-01 | Web Browser → `http://www6.isp-web.com` | ✅ "IPv6 works!" |
-| PC-KG-LEGACY-01 | `ping 200.1.100.11` | ✅ through PAT |
-| PC-KG-ADMIN-01 | `ssh -l admin 2001:DB8:30:99::11` | ✅ |
-| PC-KG-FAB-01 | `ssh -l admin 2001:DB8:30:99::11` | ❌ refused (MGMT6) |
-| SWL3-KG-DIST1 | `show ntp status` | synchronized to 200.1.10.4 (after Fast Forward) |
-
-**HSRPv6 failover:** **File → Save** first. Then `ping -t 2001:DB8:30:100::10` from a PC, and
-simulate a dead DIST1 by deleting it (**Delete** tool → click DIST1) → DIST2 becomes Active for
-`FE80::1`, pings continue. Afterwards **File → Open** your saved file to get DIST1 back.
+### 13b — From the end devices
+| # | From | Do | Expected |
+|---|---|---|---|
+| 1 | PC-KG-FAB-01 | `ping 2001:DB8:30:36::2` | ✅ inter-VLAN routing over IPv6 |
+| 2 | PC-KG-FAB-01 | `ping 2001:DB8:30:100::10` | ✅ the DNS server |
+| 3 | PC-KG-FAB-01 | Web Browser → `http://www6.isp-web.com` | ✅ "IPv6 works!" |
+| 4 | PC-KG-FAB-01 | `ssh -l admin 2001:DB8:30:99::11` | ❌ refused (MGMT6) |
+| 5 | PC-KG-LEGACY-01 | `ping 200.1.100.11` | ✅ through PAT |
+| 6 | PC-KG-ADMIN-01 | `ssh -l admin 2001:DB8:30:99::11` | ✅ |
+| 7 | SWL3-KG-DIST1 | `show ntp status` | synchronized to 200.1.10.4 (after Fast Forward) |
 
 ---
 
-## Part 6 — Save
-`copy running-config startup-config` everywhere → **File → Save**.
+## Mission 14 — HSRPv6 failover
+1. **File → Save** first.
+2. PC-KG-FAB-01 → Command Prompt → `ping -t 2001:DB8:30:100::10`.
+3. Delete **SWL3-KG-DIST1** (Delete tool).
+4. Watch: a few lost replies, then the pings continue. On DIST2: `show standby brief` → **Active**
+   for `FE80::1`.
+5. **File → Open** your saved file (answer **No** to saving) to get DIST1 back.
+
+💾 `copy running-config startup-config` everywhere → **File → Save**.
+
+---
 
 ## Checkpoint
 - [ ] PCs get IPv6 addresses automatically, with gateway FE80::1 and a DNS server
@@ -1041,7 +1287,7 @@ simulate a dead DIST1 by deleting it (**Delete** tool → click DIST1) → DIST2
 ## If something doesn't work
 | Problem | Fix |
 |---|---|
-| `ipv6 ...` commands refused on a switch | Part 4.0 — `sdm prefer dual-ipv4-and-ipv6 default` + reload |
+| `ipv6 ...` commands refused on a switch | Mission 4b — `sdm prefer dual-ipv4-and-ipv6 default` + reload |
 | OSPFv3 doesn't start | No `router-id` under `ipv6 router ospf 1` |
 | PCs get only an `FE80::` address | `ipv6 unicast-routing` missing → no RAs; or the VLAN SVI is down |
 | PCs have no DNS | `ipv6 nd other-config-flag` / `ipv6 dhcp server` missing; or type the DNS by hand |
@@ -1049,18 +1295,50 @@ simulate a dead DIST1 by deleting it (**Delete** tool → click DIST1) → DIST2
 | HSRP for IPv6 not supported at all | IPv6 has its own gateway redundancy: both DISTs send RAs and PCs learn two gateways. Write this in the book |
 | Everything IPv6 dies after the edge ACL | The `permit icmp any any` line is missing (IPv6 needs ICMPv6) |
 | Legacy PC has no internet | `ip route 10.30.199.0 ...` on the edge, `ip route 0.0.0.0 ... 10.30.4.1` on DIST1, NAT inside/outside |
+| Ports of one VLAN dead on an access switch | VTP is transparent — that VLAN wasn't created **on that switch** |
 
-## Challenge
-Why can't a Kiryat Gat PC open `http://www.intel.lab` (Haifa's website), even though it has
-internet? Suggest two real-world solutions.
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercises
+
+### Exercise A — Why no Haifa website? ⭐⭐
+- 🎯 **Task:** a Kiryat Gat PC has internet but can't open `http://www.intel.lab` (Haifa's
+  website). Find out why and suggest two real-world solutions.
+- 📁 **Start from:** your `step14.pkt` (nothing to change).
+- 👣 **Steps:**
+  1. PC-KG-FAB-01 → Web Browser → `http://www.intel.lab`.
+  2. `ipconfig /all` on the PC — which IP versions does it have?
+  3. What addresses does `www.intel.lab` have (step 11, step 12)?
+- ✅ **Done when:** you wrote the reason in one sentence and two solutions.
+
+<details><summary>💡 Hint</summary>
+
+Can a phone that speaks only Hebrew call someone who speaks only English without a translator?
+</details>
+<details><summary>✔ Answer</summary>
 
 `www.intel.lab` has only an **IPv4** address (200.1.10.3 public / 10.10.200.13 private) and the
 Kiryat Gat PCs speak **only IPv6**. An IPv6-only host can't talk to an IPv4-only server without a
 translator. Real solutions: (1) **NAT64 + DNS64** on the Kiryat Gat edge; (2) make Haifa's DMZ
 **dual-stack** (an IPv6 address + AAAA record for the web server); (3) a reverse proxy. PT doesn't
 support NAT64 — document it as a design trade-off caused by the "one branch entirely IPv6" requirement.
+</details>
+
+### Exercise B — Remove the O-flag ⭐
+- 🎯 **Task:** see what `ipv6 nd other-config-flag` really gives the PC.
+- 📁 **Start from:** `step14.pkt` → **Save As** `step14-exB.pkt`.
+- 👣 **Steps:**
+  1. On **DIST1 and DIST2**: `configure terminal` → `interface vlan 32` →
+     `no ipv6 nd other-config-flag` → `end`.
+  2. PC-KG-QUA-01 → IP Configuration → IPv6 → click **Static**, then **Automatic** again.
+  3. `ipconfig /all`.
+- ✅ **Done when:** you can say what the PC still has and what it lost.
+
+<details><summary>✔ Answer</summary>
+
+The PC still gets an IPv6 address and the gateway (SLAAC, from the RA) — but **no DNS server**.
+Without the O-flag the PC never asks DHCPv6 for the extras, so names like `www6.isp-web.com`
+stop working while pinging by address still works.
 </details>
 
 ---
@@ -1071,6 +1349,14 @@ You did this step on the Intel example. Now do it again in **your** project, wit
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
 
 This is the example's **IPv6 branch**. Build **your** third site from plan parts C–E:
+
+- [ ] Open `my-project/step13.pkt` → **Save As** `my-project/step14.pkt`
+- [ ] Write your IPv6 tables first (like 1.3 and 1.9)
+- [ ] Place (power supplies!), cable, check the SDM template
+- [ ] Both DIST switches: VLANs, OSPFv3, gateways with HSRPv6, stateless DHCPv6
+- [ ] Access switches (each creates its own VLANs!), server switch
+- [ ] Edge: OSPFv3, static defaults, PAT for the legacy VLAN, IPv6 filter; route on the ISP
+- [ ] Servers, PCs on Automatic; the tests of Mission 13; failover
 
 | In the example | In your project — take it from |
 |---|---|
@@ -1158,16 +1444,17 @@ with an IPv6 address from your prefix and `show ipv6 ospf neighbor`.
 ---
 
 ## 👩‍🏫 Teacher notes
-- **Lesson 1:** IPv6 — why, how to read and shorten addresses (practise 10 on the board), /64, link-local,
-  our VLAN-number plan → build and cable.
+- **Lesson 1:** IPv6 — why, how to read and shorten addresses (Mission 1 + 10 more on the board), /64,
+  link-local, our VLAN-number plan → Missions 2–4 (build, cable, SDM).
 - **Lesson 2:** SLAAC + stateless DHCPv6 (show the RA and DHCPv6 in Simulation mode, filters **ICMPv6** and
-  **DHCPv6**), OSPFv3, HSRPv6 → DIST1 and DIST2 (pairs: one types DIST1, the other DIST2).
-- **Lesson 3:** access switches, server switch, edge router, servers.
-- **Lesson 4:** tests, failover, the legacy VLAN and PAT, the challenge discussion (IPv4/IPv6 coexistence).
+  **DHCPv6**), OSPFv3, HSRPv6 → Missions 5–8 (pairs: one types DIST1, the other DIST2).
+- **Lesson 3:** Missions 9–12 — access switches, server switch, edge router, servers.
+- **Lesson 4:** Missions 13–14 — tests, failover, the legacy VLAN and PAT → Exercise A discussion
+  (IPv4/IPv6 coexistence).
 - **Common student questions**
   - *"Where is the subnet mask?"* — The `/64` is the mask. IPv6 always writes the prefix length.
   - *"Why FE80::1 as gateway and not 2001:…::1?"* — Routers advertise themselves with link-local
     addresses; it never changes even if the global prefix changes.
   - *"No NAT at all?"* — Not needed: every IPv6 address is unique. Security comes from firewalls/ACLs.
 - **Typical errors:** forgetting the SDM template + reload; typos in long IPv6 addresses (zeros); OSPFv3
-  without router-ID; forgetting `permit icmp` in IPv6 ACLs.
+  without router-ID; forgetting `permit icmp` in IPv6 ACLs; missing VLANs on transparent switches.

@@ -5,6 +5,30 @@
 > ✅ **Before you start:** every box in the checkpoint of step 07 is ticked, and you did its
 > 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
 
+## 🗺 Your missions in this step
+**Lesson 1 — the core**
+- [ ] **Mission 1** — Open step 07 and save as step 08 (2 min)
+- [ ] **Mission 2** — Place the 2 cores (with power), the server switch, 2 servers (10 min)
+- [ ] **Mission 3** — Cable everything to the exact ports (15 min)
+- [ ] **Mission 4** — CORE1: hardening, routing, VLANs, Loopback0 (10 min)
+- [ ] **Mission 5** — CORE1: routed links, server port, server gateway (15 min)
+- [ ] **Mission 6** — CORE1: OSPF + SSH (10 min)
+- [ ] **Mission 7** — CORE2: the same, with its own values (25 min)
+
+**Lesson 2 — OSPF areas**
+- [ ] **Mission 8** — DIST1: uplinks + OSPF areas 0 and 1 (15 min)
+- [ ] **Mission 9** — DIST2: the same, with its own values (10 min)
+- [ ] **Mission 10** — Check OSPF: neighbours, summary route, pings (15 min)
+
+**Lesson 3 — servers, AAA, Syslog**
+- [ ] **Mission 11** — SW-HFA-SRV: the server switch (15 min)
+- [ ] **Mission 12** — The two servers: addresses and services (10 min)
+- [ ] **Mission 13** — Fill in the AAA server (15 min)
+- [ ] **Mission 14** — AAA + Syslog on all 7 switches (25 min)
+- [ ] **Mission 15** — Test AAA, its backup, and Syslog (10 min)
+- [ ] **Exercises** A, B and C
+- [ ] **🛠 Your own project**
+
 ## What you will have at the end
 - Two **core** switches — the backbone of Haifa HQ.
 - Building A connected to the core with **routed** links (not trunks).
@@ -106,49 +130,9 @@ do?), **A**ccounting (what did you do?). With `aaa new-model` + a **TACACS+** se
 switch asks the AAA server "is this username/password OK?". The local user stays as a
 **backup** if the server is unreachable. (Requirement 20.10.)
 
----
+### 1.10 The address plan for this step
+Keep this table open — every mission takes its numbers from here.
 
-## Part 2 — Prepare
-**File → Open** → `my-work/step07.pkt` → **File → Save As** → `my-work/step08.pkt`.
-
----
-
-## Part 3 — Build (click by click)
-
-### 3.1 New devices
-| Where to find it | Model | Display Name |
-|---|---|---|
-| Network Devices → Switches | **3650-24PS** | `SWL3-HFA-CORE1` |
-| Network Devices → Switches | **3650-24PS** | `SWL3-HFA-CORE2` |
-| Network Devices → Switches | **2960** | `SW-HFA-SRV` |
-| End Devices → End Devices | **Server** | `SRV-HFA-SYSLOG` |
-| End Devices → End Devices | **Server** | `SRV-HFA-AAA` |
-
-Put the cores in the **"HAIFA HQ - CORE"** area at the top, the server switch and servers next to them.
-
-⚠️ **Power supplies:** CORE1 and CORE2 → **Physical** tab → drag **AC-POWER-SUPPLY** into the
-empty slot (exactly as in step 03, 3.2).
-
-### 3.2 Cables
-Switch ↔ switch = **Copper Cross-Over**. Server ↔ switch = **Copper Straight-Through**.
-
-| # | Click first | Port | Click second | Port |
-|---|---|---|---|---|
-| 1 | SWL3-HFA-A-DIST1 | **GigabitEthernet1/1/1** | SWL3-HFA-CORE1 | **GigabitEthernet1/0/1** |
-| 2 | SWL3-HFA-A-DIST1 | **GigabitEthernet1/1/2** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/1** |
-| 3 | SWL3-HFA-A-DIST2 | **GigabitEthernet1/1/1** | SWL3-HFA-CORE1 | **GigabitEthernet1/0/2** |
-| 4 | SWL3-HFA-A-DIST2 | **GigabitEthernet1/1/2** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/2** |
-| 5 | SWL3-HFA-CORE1 | **GigabitEthernet1/0/23** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/23** |
-| 6 | SWL3-HFA-CORE1 | **GigabitEthernet1/0/24** | SW-HFA-SRV | **GigabitEthernet0/1** |
-| 7 | SWL3-HFA-CORE2 | **GigabitEthernet1/0/24** | SW-HFA-SRV | **GigabitEthernet0/2** |
-| 8 | SRV-HFA-SYSLOG | FastEthernet0 | SW-HFA-SRV | **FastEthernet0/1** |
-| 9 | SRV-HFA-AAA | FastEthernet0 | SW-HFA-SRV | **FastEthernet0/2** |
-
-> The 3650's `Gi1/1/x` ports are the **uplink** ports (on the right side of the port list).
-> If PT refuses a copper cable on them, they are fiber ports in your version — use the
-> orange **Fiber** cable instead. Everything else stays the same.
-
-### 3.3 The address plan for this step
 | Link | Subnet | First device | Second device |
 |---|---|---|---|
 | A-DIST1 Gi1/1/1 ↔ CORE1 Gi1/0/1 | 10.10.4.0/30 | DIST1 **.1** | CORE1 **.2** |
@@ -173,14 +157,62 @@ Switch ↔ switch = **Copper Cross-Over**. Server ↔ switch = **Copper Straight
 
 ---
 
-## Part 4 — Configure
+## Mission 1 — Open step 07 and save as step 08 (how? → M1)
+**File → Open** → `my-work/step07.pkt` → **File → Save As** → `my-work/step08.pkt`.
 
-### 4.1 SWL3-HFA-CORE1 — complete configuration
-Click CORE1 → **CLI** → Enter.
+---
+
+## Mission 2 — Place the 2 cores (with power), the server switch, 2 servers
+
+### 2a — Place and name (how? → M2, M4)
+| Where to find it | Model | Display Name | Put it… |
+|---|---|---|---|
+| Network Devices → Switches | **3650-24PS** | `SWL3-HFA-CORE1` | in the **"HAIFA HQ - CORE"** area at the top, above DIST1 |
+| Network Devices → Switches | **3650-24PS** | `SWL3-HFA-CORE2` | next to CORE1, above DIST2 |
+| Network Devices → Switches | **2960** | `SW-HFA-SRV` | between and above the two cores |
+| End Devices → End Devices | **Server** | `SRV-HFA-SYSLOG` | next to SW-HFA-SRV |
+| End Devices → End Devices | **Server** | `SRV-HFA-AAA` | next to SW-HFA-SRV |
+
+### 2b — Power supplies (⚠️ don't skip — how? → M8)
+CORE1 and CORE2 → **Physical** tab → drag **AC-POWER-SUPPLY** into the empty slot → close.
+(Exactly as in step 03, Mission 2b.)
+
+✅ Both cores show green lights in the Physical tab.
+
+---
+
+## Mission 3 — Cable everything to the exact ports (how? → M5)
+Switch ↔ switch = **Copper Cross-Over**. Server ↔ switch = **Copper Straight-Through**.
+
+| # | Cable | Click first | Port | Click second | Port |
+|---|---|---|---|---|---|
+| 1 | Cross-Over | SWL3-HFA-A-DIST1 | **GigabitEthernet1/1/1** | SWL3-HFA-CORE1 | **GigabitEthernet1/0/1** |
+| 2 | Cross-Over | SWL3-HFA-A-DIST1 | **GigabitEthernet1/1/2** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/1** |
+| 3 | Cross-Over | SWL3-HFA-A-DIST2 | **GigabitEthernet1/1/1** | SWL3-HFA-CORE1 | **GigabitEthernet1/0/2** |
+| 4 | Cross-Over | SWL3-HFA-A-DIST2 | **GigabitEthernet1/1/2** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/2** |
+| 5 | Cross-Over | SWL3-HFA-CORE1 | **GigabitEthernet1/0/23** | SWL3-HFA-CORE2 | **GigabitEthernet1/0/23** |
+| 6 | Cross-Over | SWL3-HFA-CORE1 | **GigabitEthernet1/0/24** | SW-HFA-SRV | **GigabitEthernet0/1** |
+| 7 | Cross-Over | SWL3-HFA-CORE2 | **GigabitEthernet1/0/24** | SW-HFA-SRV | **GigabitEthernet0/2** |
+| 8 | Straight-Through | SRV-HFA-SYSLOG | FastEthernet0 | SW-HFA-SRV | **FastEthernet0/1** |
+| 9 | Straight-Through | SRV-HFA-AAA | FastEthernet0 | SW-HFA-SRV | **FastEthernet0/2** |
+
+> The 3650's `Gi1/1/x` ports are the **uplink** ports (near the **end** of the port list).
+> If PT refuses a copper cable on them, they are fiber ports in your version — use the
+> orange **Fiber** cable instead. Everything else stays the same.
+
+✅ Nine new cables. Check each label against the table (M6). Some dots stay orange/red until
+the ports are configured — that's normal now.
+
+---
+
+## Mission 4 — CORE1: hardening, routing, VLANs, Loopback0
+👉 **Where:** **SWL3-HFA-CORE1** → CLI → **Enter** → `Switch>` (M9).
+
+### 4a — Hardening
+⌨️ Type:
 ```
 enable
 configure terminal
-! ---------- hardening ----------
 hostname SWL3-HFA-CORE1
 no ip domain-lookup
 enable secret Intel#En4ble
@@ -188,8 +220,13 @@ service password-encryption
 banner motd #
 *  Intel Israel - AUTHORIZED ACCESS ONLY - all activity is logged  *
 #
+```
 
-! ---------- this switch routes; it keeps its own VLAN list ----------
+### 4b — Routing on, own VLAN list, Loopback0
+The core doesn't join a building's VTP domain — it keeps its own VLANs (`transparent`).
+
+⌨️ Type:
+```
 ip routing
 vtp mode transparent
 spanning-tree mode rapid-pvst
@@ -199,11 +236,24 @@ vlan 999
  name PARKING
  exit
 
-! ---------- Loopback0 = stable router-ID ----------
+! Loopback0 = stable router-ID
 interface loopback 0
  ip address 10.10.5.1 255.255.255.255
+ exit
+```
+🔍 **Check now:** `do show ip interface brief` → the last line is `Loopback0  10.10.5.1  YES manual up up`.
 
-! ---------- routed links to building A (area 0, MD5) ----------
+---
+
+## Mission 5 — CORE1: routed links, server port, server gateway
+👉 **Where:** CORE1, prompt `SWL3-HFA-CORE1(config)#`.
+
+### 5a — Routed links to building A and to CORE2 (area 0, MD5)
+Every routed link has the same 5 lines; only the description and the address change.
+`no switchport` **must** come before `ip address`.
+
+⌨️ Type:
+```
 interface gi1/0/1
  description to SWL3-HFA-A-DIST1 Gi1/1/1
  no switchport
@@ -218,8 +268,6 @@ interface gi1/0/2
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  no shutdown
-
-! ---------- routed link to CORE2 ----------
 interface gi1/0/23
  description to SWL3-HFA-CORE2 Gi1/0/23
  no switchport
@@ -227,22 +275,26 @@ interface gi1/0/23
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  no shutdown
+```
+❌ `% Invalid input` on `ip address` → you skipped `no switchport` on that interface.
 
-! ---------- to the server switch (VLAN 100) ----------
+### 5b — The server switch port, unused ports, the server gateway
+⌨️ Type:
+```
 interface gi1/0/24
  description to SW-HFA-SRV Gi0/1
  switchport mode access
  switchport access vlan 100
  no shutdown
 
-! ---------- unused ports (Gi1/0/3-4 are used in step 09) ----------
+! unused ports (Gi1/0/3-4 are used in step 09)
 interface range gi1/0/3 - 22
  description UNUSED
  switchport mode access
  switchport access vlan 999
  shutdown
 
-! ---------- gateway for the servers (HSRP, CORE1 = active) ----------
+! gateway for the servers (HSRP, CORE1 = active)
 interface vlan 100
  description GW SERVERS
  ip address 10.10.1.2 255.255.255.0
@@ -252,8 +304,19 @@ interface vlan 100
  standby 100 preempt
  no shutdown
  exit
+```
+🔍 **Check now:** `do show ip interface brief` → `GigabitEthernet1/0/1` `10.10.4.2`,
+`Gi1/0/2` `10.10.4.10`, `Gi1/0/23` `10.10.4.49`, `Vlan100` `10.10.1.2`, `Loopback0` `10.10.5.1`.
+(Status may be `down` on links whose other end isn't configured yet — fine for now.)
 
-! ---------- OSPF ----------
+---
+
+## Mission 6 — CORE1: OSPF + SSH
+👉 **Where:** CORE1, prompt `SWL3-HFA-CORE1(config)#`.
+
+### 6a — OSPF
+⌨️ Type:
+```
 router ospf 1
  router-id 10.10.5.1
  passive-interface default
@@ -262,13 +325,22 @@ router ospf 1
  no passive-interface gi1/0/23
  network 10.10.0.0 0.0.15.255 area 0
  exit
+```
+✅ The prompt was `(config-router)#` inside `router ospf 1`.
 
-! ---------- SSH management (same as step 07) ----------
+> **What does `network 10.10.0.0 0.0.15.255 area 0` mean?** "Every interface whose address is
+> inside 10.10.0.0/20 joins OSPF area 0." It catches the /30 links (10.10.4.x), Loopback0
+> (10.10.5.x) and VLAN 100 (10.10.1.x) in **one line** — the payoff of planning one block per
+> area in step 01. The `0.0.15.255` is a wildcard (like in ACLs, step 07) for a /20.
+
+### 6b — SSH management (the same as step 07)
+⌨️ Type:
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-Answer **`1024`** to the modulus question, then continue:
+→ answer **`1024`** → then:
 ```
 ip ssh version 2
 ip ssh time-out 60
@@ -288,15 +360,29 @@ line console 0
  end
 copy running-config startup-config
 ```
+✅ `[OK]`.
 
 > As in step 07: if a switch rejects `login block-for ...`, skip that one line on that switch.
 
-> **What does `network 10.10.0.0 0.0.15.255 area 0` mean?** "Every interface whose address is
-> inside 10.10.0.0/20 joins OSPF area 0." It catches the /30 links (10.10.4.x), Loopback0
-> (10.10.5.x) and VLAN 100 (10.10.1.x) in **one line** — the payoff of planning one block per
-> area in step 01. The `0.0.15.255` is a wildcard (like in ACLs, step 07) for a /20.
+---
 
-### 4.2 SWL3-HFA-CORE2 — complete configuration
+## Mission 7 — CORE2: the same, with its own values
+👉 **Where:** **SWL3-HFA-CORE2** → CLI → **Enter** → `Switch>`.
+
+The **only** differences from CORE1:
+
+| | CORE1 | **CORE2** |
+|---|---|---|
+| hostname | SWL3-HFA-CORE1 | **SWL3-HFA-CORE2** |
+| Loopback0 / router-id | 10.10.5.1 | **10.10.5.2** |
+| Gi1/0/1 | 10.10.4.2 (to DIST1 Gi1/1/1) | **10.10.4.6** (to DIST1 Gi1/1/2) |
+| Gi1/0/2 | 10.10.4.10 (to DIST2 Gi1/1/1) | **10.10.4.14** (to DIST2 Gi1/1/2) |
+| Gi1/0/23 | 10.10.4.49 | **10.10.4.50** |
+| Gi1/0/24 | to SW-HFA-SRV Gi0/1 | to SW-HFA-SRV **Gi0/2** |
+| Vlan100 | 10.10.1.2, priority 110 | **10.10.1.3, priority 90** |
+
+### 7a — Hardening, routing, VLANs, Loopback0
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -315,10 +401,14 @@ vlan 100
 vlan 999
  name PARKING
  exit
-
 interface loopback 0
  ip address 10.10.5.2 255.255.255.255
+ exit
+```
 
+### 7b — Links, server port, server gateway
+⌨️ Type:
+```
 interface gi1/0/1
  description to SWL3-HFA-A-DIST1 Gi1/1/2
  no switchport
@@ -350,7 +440,6 @@ interface range gi1/0/3 - 22
  switchport mode access
  switchport access vlan 999
  shutdown
-
 interface vlan 100
  description GW SERVERS
  ip address 10.10.1.3 255.255.255.0
@@ -360,7 +449,11 @@ interface vlan 100
  standby 100 preempt
  no shutdown
  exit
+```
 
+### 7c — OSPF and SSH
+⌨️ Type:
+```
 router ospf 1
  router-id 10.10.5.2
  passive-interface default
@@ -369,12 +462,11 @@ router ospf 1
  no passive-interface gi1/0/23
  network 10.10.0.0 0.0.15.255 area 0
  exit
-
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 ip ssh time-out 60
@@ -394,15 +486,27 @@ line console 0
  end
 copy running-config startup-config
 ```
+Press **Fast Forward Time** a few times (M18).
 
-### 4.3 SWL3-HFA-A-DIST1 — add uplinks + OSPF
-DIST1 already has everything from steps 03–07. Add (log in with `admin` / `Intel#Adm1n`):
+✅ On CORE2 you see `%OSPF-5-ADJCHG: Process 1, Nbr 10.10.5.1 on GigabitEthernet1/0/23 from
+LOADING to FULL` — **the two cores are OSPF neighbours**.
+🔍 **Check now:** `show ip ospf neighbor` → one line, `10.10.5.1`, state `FULL`.
+❌ No neighbour → compare the MD5 key on Gi1/0/23 of both cores (`show running-config interface gi1/0/23`).
+
+---
+
+## Mission 8 — DIST1: uplinks + OSPF areas 0 and 1
+👉 **Where:** **SWL3-HFA-A-DIST1** → CLI → log in (`admin` / `Intel#Adm1n` since step 07) →
+`SWL3-HFA-A-DIST1#`.
+
+DIST1 already has everything from steps 03–07. We **add** to it.
+
+### 8a — Loopback0 and the two uplinks
+⌨️ Type:
 ```
-enable
 configure terminal
 interface loopback 0
  ip address 10.10.5.11 255.255.255.255
-
 interface gi1/1/1
  description to SWL3-HFA-CORE1 Gi1/0/1
  no switchport
@@ -417,13 +521,20 @@ interface gi1/1/2
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  no shutdown
+```
 
-! DIST1 and DIST2 also become OSPF neighbours inside area 1, over VLAN 99
+### 8b — DIST1 and DIST2 are also neighbours inside area 1, over VLAN 99
+⌨️ Type:
+```
 interface vlan 99
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  exit
+```
 
+### 8c — OSPF with two areas and the summary
+⌨️ Type:
+```
 router ospf 1
  router-id 10.10.5.11
  passive-interface default
@@ -439,14 +550,24 @@ router ospf 1
  end
 copy running-config startup-config
 ```
+Press **Fast Forward Time**.
 
-### 4.4 SWL3-HFA-A-DIST2 — add uplinks + OSPF
+✅ Messages `%OSPF-5-ADJCHG: ... Nbr 10.10.5.1 ... to FULL` and `... Nbr 10.10.5.2 ... to FULL`.
+🔍 **Check now:** `show ip ospf neighbor` → CORE1 (`10.10.5.1`) and CORE2 (`10.10.5.2`), both `FULL`.
+
+---
+
+## Mission 9 — DIST2: the same, with its own values
+👉 **Where:** **SWL3-HFA-A-DIST2** → CLI → log in → `SWL3-HFA-A-DIST2#`.
+
+Differences from DIST1: Loopback0 / router-id **10.10.5.12**; Gi1/1/1 **10.10.4.9** (to CORE1
+Gi1/0/2); Gi1/1/2 **10.10.4.13** (to CORE2 Gi1/0/2).
+
+⌨️ Type:
 ```
-enable
 configure terminal
 interface loopback 0
  ip address 10.10.5.12 255.255.255.255
-
 interface gi1/1/1
  description to SWL3-HFA-CORE1 Gi1/0/2
  no switchport
@@ -461,12 +582,10 @@ interface gi1/1/2
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  no shutdown
-
 interface vlan 99
  ip ospf message-digest-key 1 md5 Intel#Ospf
  ip ospf authentication message-digest
  exit
-
 router ospf 1
  router-id 10.10.5.12
  passive-interface default
@@ -479,11 +598,81 @@ router ospf 1
  end
 copy running-config startup-config
 ```
-Press **Fast Forward Time** a few times. On the switches you'll see messages like
-`%OSPF-5-ADJCHG: Process 1, Nbr 10.10.5.1 on GigabitEthernet1/1/1 from LOADING to FULL` —
-neighbours found each other.
+Press **Fast Forward Time** a few times.
 
-### 4.5 SW-HFA-SRV — complete configuration
+✅ `%OSPF-5-ADJCHG` messages: neighbours CORE1, CORE2 and DIST1 reach `FULL`.
+
+### What the new commands mean
+| Command | In simple English |
+|---|---|
+| `no switchport` | "Stop being a switch port, become a router port" |
+| `interface loopback 0` | A virtual interface that is always up — the device's ID card |
+| `router ospf 1` | Start OSPF (process number 1 — only matters locally) |
+| `router-id 10.10.5.1` | My OSPF name |
+| `passive-interface default` | "Don't send Hellos anywhere…" |
+| `no passive-interface gi1/0/1` | "…except on this link toward another router" |
+| `network 10.10.0.0 0.0.15.255 area 0` | "Interfaces in this range join area 0" |
+| `area 1 range 10.10.16.0 255.255.240.0` | "Announce area 1 as one summary route" |
+| `ip ospf message-digest-key 1 md5 KEY` + `ip ospf authentication message-digest` | "Only talk OSPF with neighbours that know this key" |
+
+---
+
+## Mission 10 — Check OSPF: neighbours, summary route, pings
+
+### 10a — Neighbours
+👉 On **CORE1**: `show ip ospf neighbor`
+
+✅ You should see:
+```
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.10.5.11        1   FULL/DR         00:00:35    10.10.4.1       GigabitEthernet1/0/1
+10.10.5.12        1   FULL/DR         00:00:36    10.10.4.9       GigabitEthernet1/0/2
+10.10.5.2         1   FULL/BDR        00:00:33    10.10.4.50      GigabitEthernet1/0/23
+```
+Three neighbours, all **FULL**. (DR/BDR are roles on shared links — ignore them for now. Which
+switch is DR depends on which one came up first, so your DR/BDR labels may differ.)
+
+👉 On **DIST1**: `show ip ospf neighbor` → ✅ CORE1, CORE2 **and** DIST2 (over Vlan99).
+
+### 10b — The summary route
+👉 On **CORE1**: `show ip route ospf`
+
+✅ You should see:
+```
+     10.0.0.0/8 is variably subnetted, ...
+O IA    10.10.16.0/20 [110/2] via 10.10.4.1, GigabitEthernet1/0/1
+                      [110/2] via 10.10.4.9, GigabitEthernet1/0/2
+O       10.10.5.11/32 [110/2] via 10.10.4.1, ...
+...
+```
+**O IA** = OSPF route from **another area** (Inter-Area). **One** summary for all of building
+A, reachable through **two** paths (DIST1 and DIST2) — load sharing.
+
+👉 On **DIST1**: `show ip ospf interface` → for each interface look at the `Area` line.
+✅ Gi1/1/1, Gi1/1/2 and Loopback0 are in **area 0**; the VLANs are in **area 1**.
+
+### 10c — Pings (how? → M17)
+| # | From | Type | Expected |
+|---|---|---|---|
+| 1 | an ENG PC | `ping 10.10.1.1` | ✅ the servers' gateway, through the core |
+| 2 | an ENG PC | `tracert 10.10.1.1` | `10.10.16.2` → `10.10.4.2` (or `.6`) → `10.10.1.x` |
+| 3 | PC-HFA-ADMIN-01 | `ssh -l admin 10.10.5.1` | ✅ login to CORE1 (local user for now) |
+
+### 10d — See the passive interfaces (Simulation mode — how? → M21)
+**Simulation** → **Show All/None** → **Edit Filters** → tick only **OSPF** → close.
+Press **Capture / Forward** a few times.
+
+✅ Hello envelopes travel only on the routed links and VLAN 99 — **never** toward the PCs.
+
+Back to **Realtime**. **File → Save**.
+
+---
+
+## Mission 11 — SW-HFA-SRV: the server switch
+👉 **Where:** **SW-HFA-SRV** → CLI → **Enter** → `Switch>`.
+
+### 11a — Hardening and VLAN 100
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -499,7 +688,11 @@ spanning-tree mode rapid-pvst
 vlan 100
  name SERVERS
  exit
+```
 
+### 11b — Ports and management address
+⌨️ Type:
+```
 interface range gi0/1 - 2
  description uplinks to CORE1 / CORE2
  switchport mode access
@@ -514,19 +707,22 @@ interface fa0/24
  description to ASA-HFA-FW1 inside (step 11)
  switchport mode access
  switchport access vlan 100
-
 interface vlan 100
  description MANAGEMENT
  ip address 10.10.1.5 255.255.255.0
  no shutdown
  exit
 ip default-gateway 10.10.1.1
+```
 
+### 11c — SSH
+⌨️ Type:
+```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
 crypto key generate rsa
 ```
-(`1024`)
+→ **`1024`** → then:
 ```
 ip ssh version 2
 login block-for 120 attempts 3 within 60
@@ -544,8 +740,13 @@ line console 0
  end
 copy running-config startup-config
 ```
+🔍 **Check now:** `ping 10.10.1.1` → ✅ replies (the HSRP gateway on the cores).
 
-### 4.6 The servers — IP settings (click by click)
+---
+
+## Mission 12 — The two servers: addresses and services
+
+### 12a — Addresses (how? → M14)
 For each server: click → **Desktop** → **IP Configuration** → **Static**:
 
 | Server | IPv4 Address | Subnet Mask | Default Gateway | DNS Server |
@@ -553,16 +754,28 @@ For each server: click → **Desktop** → **IP Configuration** → **Static**:
 | SRV-HFA-SYSLOG | 10.10.1.10 | 255.255.255.0 | 10.10.1.1 | 10.10.200.11 |
 | SRV-HFA-AAA | 10.10.1.11 | 255.255.255.0 | 10.10.1.1 | 10.10.200.11 |
 
-**Turn off the services a server doesn't need** (a server should do one job):
-click the server → **Services** tab → for **HTTP**, **DHCP**, **DNS**, **EMAIL**, **FTP**, **NTP**
+### 12b — One job per server (how? → M20)
+On **each** server → **Services** tab → for **HTTP**, **DHCP**, **DNS**, **EMAIL**, **FTP**, **NTP**
 → set each to **Off** (HTTP: switch both HTTP and HTTPS off).
 
-**SRV-HFA-SYSLOG:** **Services** → **SYSLOG** → **On**.
+Then:
+- **SRV-HFA-SYSLOG:** **Services** → **SYSLOG** → **On**.
 
-**SRV-HFA-AAA:** **Services** → **AAA**:
-1. **Service: On**.
-2. **Network Configuration** — add one line per network device. For each line fill in
-   *Client Name*, *Client IP*, *Secret* = `Intel#Tac`, *ServerType* = **Tacacs** → click **Add**:
+✅ From an ENG PC: `ping 10.10.1.10` and `ping 10.10.1.11` → both reply.
+
+---
+
+## Mission 13 — Fill in the AAA server
+👉 **Where:** click **SRV-HFA-AAA** → **Services** tab → **AAA** (in the list on the left).
+
+1. **Service:** click **On**.
+2. **Network Configuration** (the upper part) — add one line per network device. For each row
+   of the table below:
+   1. Click in **Client Name**, type the name.
+   2. Click in **Client IP**, type the IP.
+   3. **Secret**: `Intel#Tac`
+   4. **ServerType**: choose **Tacacs**.
+   5. Click **Add**. The line appears in the list underneath.
 
    | Client Name | Client IP |
    |---|---|
@@ -574,16 +787,24 @@ click the server → **Services** tab → for **HTTP**, **DHCP**, **DNS**, **EMA
    | SWL3-HFA-CORE2 | 10.10.5.2 |
    | SW-HFA-SRV | 10.10.1.5 |
 
-3. **User Setup** — *Username* `admin`, *Password* `Intel#Adm1n` → **Add**.
+3. **User Setup** (the lower part) — **Username** `admin`, **Password** `Intel#Adm1n` → **Add**.
+
+✅ The client list has 7 lines; the user list has `admin`.
+❌ A line has a typo → click it in the list → **Remove** → add it again.
 
 > Why these client IPs? The AAA server only answers devices it knows **by the source IP of
 > their request**. Access switches send from their VLAN-99 address. L3 switches would send
-> from whichever uplink they use — so we tell them to always use Loopback0 (next section).
+> from whichever uplink they use — so we tell them to always use Loopback0 (Mission 14b).
 
-### 4.7 AAA + Syslog on every Haifa device
-Type this block on **all 7**: ACC1, ACC2, DIST1, DIST2, CORE1, CORE2, SW-HFA-SRV.
+---
+
+## Mission 14 — AAA + Syslog on all 7 switches
+
+### 14a — The block for every switch
+Type this block on **all 7**. Log in to each with `admin` / `Intel#Adm1n`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 ! ---------- Syslog ----------
 service timestamps log datetime msec
@@ -601,92 +822,64 @@ line console 0
  end
 copy running-config startup-config
 ```
-**On the 4 L3 switches only** (DIST1, DIST2, CORE1, CORE2) add:
+> PT older syntax: if `logging host` is refused, type `logging 10.10.1.10`.
+
+Tick each switch when it shows `[OK]`:
+- [ ] SW-HFA-A-ACC1
+- [ ] SW-HFA-A-ACC2
+- [ ] SWL3-HFA-A-DIST1
+- [ ] SWL3-HFA-A-DIST2
+- [ ] SWL3-HFA-CORE1
+- [ ] SWL3-HFA-CORE2
+- [ ] SW-HFA-SRV
+
+### 14b — The 4 L3 switches only: talk to AAA from Loopback0
+On **DIST1, DIST2, CORE1, CORE2**:
+
+⌨️ Type:
 ```
 configure terminal
 ip tacacs source-interface loopback 0
 end
 copy running-config startup-config
 ```
-> PT older syntax: if `logging host` is refused, type `logging 10.10.1.10`.
 > If `ip tacacs source-interface` is refused, register the L3 switches in the AAA server by the
 > IPs they send from instead. DIST1 and DIST2 have two equal uplinks, so add **both** for each:
 > DIST1 10.10.4.1 and 10.10.4.5, DIST2 10.10.4.9 and 10.10.4.13, CORE1 10.10.1.2, CORE2 10.10.1.3.
 
-### 4.8 What the new commands mean
+### What the new commands mean
 | Command | In simple English |
 |---|---|
-| `no switchport` | "Stop being a switch port, become a router port" |
-| `interface loopback 0` | A virtual interface that is always up — the device's ID card |
-| `router ospf 1` | Start OSPF (process number 1 — only matters locally) |
-| `router-id 10.10.5.1` | My OSPF name |
-| `passive-interface default` | "Don't send Hellos anywhere…" |
-| `no passive-interface gi1/0/1` | "…except on this link toward another router" |
-| `network 10.10.0.0 0.0.15.255 area 0` | "Interfaces in this range join area 0" |
-| `area 1 range 10.10.16.0 255.255.240.0` | "Announce area 1 as one summary route" |
-| `ip ospf message-digest-key 1 md5 KEY` + `ip ospf authentication message-digest` | "Only talk OSPF with neighbours that know this key" |
 | `logging host 10.10.1.10` | "Send a copy of every message to the Syslog server" |
 | `service timestamps log datetime msec` | "Put date and time on every message" |
 | `aaa new-model` | "Switch on AAA" |
 | `tacacs-server host ... key ...` | "This is the AAA server and our shared secret" |
 | `aaa authentication login default group tacacs+ local` | "Check logins with TACACS+; if it doesn't answer, use my local users" |
+| `ip tacacs source-interface loopback 0` | "When you ask the AAA server, send from Loopback0" |
 
 ---
 
-## Part 5 — Check your work
+## Mission 15 — Test AAA, its backup, and Syslog
 
-### 5.1 OSPF neighbours
-On **CORE1**: `show ip ospf neighbor`
-```
-Neighbor ID     Pri   State           Dead Time   Address         Interface
-10.10.5.11        1   FULL/DR         00:00:35    10.10.4.1       GigabitEthernet1/0/1
-10.10.5.12        1   FULL/DR         00:00:36    10.10.4.9       GigabitEthernet1/0/2
-10.10.5.2         1   FULL/BDR        00:00:33    10.10.4.50      GigabitEthernet1/0/23
-```
-✅ Three neighbours, all **FULL**. (DR/BDR are roles on shared links — ignore them for now. Which
-switch is DR depends on which one came up first, so your DR/BDR labels may differ.)
+### 15a — Login through AAA
+From **PC-HFA-ADMIN-01**: `ssh -l admin 10.10.5.1` → `Intel#Adm1n`.
+✅ You land on `SWL3-HFA-CORE1#` — this time the password was checked by the AAA server.
 
-On **DIST1**: `show ip ospf neighbor` → CORE1, CORE2 **and** DIST2 (over Vlan99).
+### 15b — The backup works
+1. Click **SRV-HFA-AAA** → **Physical** tab → click its **power button** (light goes off).
+2. SSH again from the admin PC to `10.10.5.1`.
+   ✅ Still works with `admin` / `Intel#Adm1n` — the switch used its local user (backup). (It
+   may take a few seconds longer while the switch waits for the dead server.)
+3. Power the AAA server back on.
 
-### 5.2 The routing table
-On **CORE1**: `show ip route ospf`
-```
-     10.0.0.0/8 is variably subnetted, ...
-O IA    10.10.16.0/20 [110/2] via 10.10.4.1, GigabitEthernet1/0/1
-                      [110/2] via 10.10.4.9, GigabitEthernet1/0/2
-O       10.10.5.11/32 [110/2] via 10.10.4.1, ...
-...
-```
-✅ **O IA** = OSPF route from **another area** (Inter-Area). **One** summary for all of building
-A, reachable through **two** paths (DIST1 and DIST2) — load sharing.
+### 15c — Syslog
+1. On **ACC1**: `configure terminal` → `interface fa0/24` → `no shutdown` → `shutdown` → `end`.
+2. Click **SRV-HFA-SYSLOG** → **Services** → **SYSLOG**.
+   ✅ The messages from ACC1 are listed, with time and source IP.
 
-On **DIST1**: `show ip ospf interface` → for each interface look at the `Area` line: Gi1/1/1,
-Gi1/1/2 and Loopback0 are in **area 0**; the VLANs are in **area 1**.
-
-### 5.3 Pings
-| From | Type | Expected |
-|---|---|---|
-| an ENG PC | `ping 10.10.1.10` | ✅ user → DIST → core → server |
-| an ENG PC | `tracert 10.10.1.10` | `10.10.16.2` → `10.10.4.2` (or `.6`) → `10.10.1.10` |
-| PC-HFA-ADMIN-01 | `ssh -l admin 10.10.5.1` | ✅ login to CORE1 — checked by the AAA server |
-
-### 5.4 AAA and Syslog
-1. **AAA backup test:** power off SRV-HFA-AAA (Physical → power button). SSH again from the
-   admin PC → still works with `admin` / `Intel#Adm1n` (local backup). Power it back on.
-2. **Syslog:** on ACC1 do `configure terminal` → `interface fa0/24` → `no shutdown` →
-   `shutdown` → `end`. Now click **SRV-HFA-SYSLOG** → **Services** → **SYSLOG**: the messages
-   from ACC1 are listed, with time and source IP. ✅
-
-### 5.5 See the passive interfaces (Simulation mode)
-**Simulation** → **Show All/None** to clear the filters → **Edit Filters** → tick only **OSPF**.
-Press **Capture / Forward** a few times:
-Hello envelopes travel only on the routed links and VLAN 99 — **never** toward the PCs.
-Back to **Realtime**.
+📸 Screenshot the Syslog list for your book. Then **File → Save**.
 
 ---
-
-## Part 6 — Save
-`copy running-config startup-config` on every switch → **File → Save**.
 
 ## Checkpoint
 - [ ] CORE1 has 3 OSPF neighbours in FULL state
@@ -702,20 +895,67 @@ Back to **Realtime**.
 | Neighbours never reach FULL (stuck INIT/EXSTART) or none at all | MD5 key typo on one side; or one side still passive; or IP on the wrong side of the /30 (`show ip interface brief`) |
 | `show ip ospf neighbor` empty on DIST2 → DIST1 | VLAN 99 not in `no passive-interface`, or no MD5 on Vlan99 |
 | Core doesn't see `10.10.16.0/20` | Missing `network 10.10.16.0 0.0.15.255 area 1` on the DIST switches |
-| SSH always uses the local user (AAA ignored) | Client IP in the AAA server doesn't match the request's source IP. Check 4.6/4.7 note |
+| SSH always uses the local user (AAA ignored) | Client IP in the AAA server doesn't match the request's source IP. See the note in Mission 14b |
 | Syslog server shows nothing | Server's SYSLOG service off, or wrong `logging host` IP, or the device can't ping 10.10.1.10 |
 
-## Challenge
-**File → Save** first. Then make CORE1 fail completely by deleting it (**Delete** tool → click
-CORE1). Prove — with `ping -t` from an ENG PC to the Syslog server and `show ip route` on DIST1 —
-that HQ survives. What happens to the servers' gateway 10.10.1.1? Afterwards **File → Open** your
-saved file to get CORE1 back.
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercises
+
+### Exercise A — Kill a core switch ⭐⭐
+- 🎯 **Task:** prove that Haifa HQ survives the complete loss of CORE1.
+- 📁 **Start from:** your `step08.pkt` — **File → Save** first (you will need it back).
+- 👣 **Steps:**
+  1. From an ENG PC start `ping -t 10.10.1.10` (the Syslog server).
+  2. Delete CORE1 (Delete tool → click CORE1).
+  3. Watch the ping. Then on DIST1 run `show ip route ospf` and on CORE2 `show standby brief`.
+  4. **File → Open** your saved `step08.pkt` to get CORE1 back (answer **No** to "save changes").
+- ✅ **Done when:** you can explain what happened to (a) the ping, (b) DIST1's routes,
+  (c) the servers' gateway 10.10.1.1.
+
+<details><summary>💡 Hint</summary>
+
+Before: how many paths did DIST1 have to `10.10.1.0/24`? Which core was HSRP Active for VLAN 100?
+</details>
+<details><summary>✔ Answer</summary>
 
 DIST1's two equal routes become one (via CORE2); a few pings are lost while OSPF notices the
 dead neighbour. CORE2 becomes HSRP **Active** for VLAN 100, so the servers' gateway 10.10.1.1
 keeps working. (Had CORE1 only rebooted, `preempt` would give VLAN 100 back to it when it returns.)
+</details>
+
+### Exercise B — The wrong key ⭐⭐
+- 🎯 **Task:** see what a wrong MD5 key does to an OSPF neighbour.
+- 📁 **Start from:** your `step08.pkt` (Save As `step08-exB.pkt`).
+- 👣 **Steps:**
+  1. On CORE2: `interface gi1/0/23` → `no ip ospf message-digest-key 1 md5 Intel#Ospf` →
+     `ip ospf message-digest-key 1 md5 WRONG` → `end`.
+  2. Press Fast Forward Time for a while (the dead timer is 40 s).
+  3. On CORE1: `show ip ospf neighbor`. Is CORE2 still there?
+  4. Put the right key back.
+- ✅ **Done when:** you saw the neighbour disappear and come back, and can say why this protects
+  the network.
+
+<details><summary>✔ Answer</summary>
+
+After the dead time CORE2 (`10.10.5.2`) disappears from CORE1's neighbour list: the keys don't
+match, so the Hellos are rejected. The same thing happens to an attacker's laptop that tries to
+inject fake routes without the key (req. 22.18). With the right key back, the neighbour returns
+to FULL.
+</details>
+
+### Exercise C — Read the routing table ⭐
+- 🎯 **Task:** on DIST1, find the route to the server VLAN and explain every part of the line.
+- 👣 **Steps:** on DIST1 run `show ip route 10.10.1.0`, then `show ip route ospf`.
+- ✅ **Done when:** you can explain `O`, `[110/2]`, `via 10.10.4.2`, and why there are two `via`
+  lines.
+
+<details><summary>✔ Answer</summary>
+
+`O` = learned by OSPF inside the same area (area 0 — DIST1 is in area 0 on its uplinks).
+`110` = OSPF's administrative distance (how much the router trusts OSPF), `2` = the cost (sum of
+link costs). `via 10.10.4.2` = the next hop (CORE1). Two `via` lines = two equal-cost paths
+(CORE1 and CORE2) — the traffic is shared between them.
 </details>
 
 ---
@@ -724,6 +964,14 @@ keeps working. (Had CORE1 only rebooted, `preempt` would give VLAN 100 back to i
 
 You did this step on the Intel example. Now do it again in **your** project, with the values
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+- [ ] Open `my-project/step07.pkt` → **Save As** `my-project/step08.pkt`
+- [ ] Write your own link + loopback table first (like 1.10) from your area-0 block
+- [ ] Two cores with power, server switch, Syslog + AAA servers, cabled
+- [ ] Cores: hardening, routing, routed links with MD5, server VLAN gateway, OSPF area 0, SSH
+- [ ] Distribution: uplinks, OSPF areas 0 + your building area, summary
+- [ ] Servers + AAA server filled in; AAA + Syslog on every switch
+- [ ] Mission 10 and Mission 15 checks pass
 
 | In the example | In your project — take it from |
 |---|---|
@@ -919,11 +1167,13 @@ the AAA server, and a log message arriving at the Syslog server.
 
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** 3-tier model and routed links → static vs dynamic routing → OSPF in
-  simple words (neighbours, map, shortest path) → build and cable → configure CORE1/CORE2.
-- **Lesson 2 (90 min):** areas & ABRs (country/city comparison) → summarization → DIST uplinks +
-  OSPF → checks 5.1–5.3 → passive interfaces in Simulation mode.
-- **Lesson 3 (90 min):** Syslog and AAA (one guard for all doors) → server setup → AAA block on
-  all 7 devices → tests 5.4 → challenge.
+  simple words (neighbours, map, shortest path) → Missions 1–7 (build, cable, CORE1, CORE2).
+  End of lesson: the two cores are FULL neighbours.
+- **Lesson 2 (90 min):** areas & ABRs (country/city comparison) → summarization → Missions 8–10
+  → passive interfaces in Simulation mode.
+- **Lesson 3 (90 min):** Syslog and AAA (one guard for all doors) → Missions 11–15 → exercises.
+- **Use the 🔍 checks.** Each core and distribution mission ends with a neighbour check; a
+  student who reaches Mission 10 with no FULL neighbours has skipped them.
 - **Common student questions**
   - *"Why do PCs not run OSPF?"* — Only routers need the map. PCs just use their gateway.
   - *"What is `O IA`?"* — A route learned from another area. `O` alone = same area.

@@ -11,7 +11,7 @@ before assuming you made a mistake.
 | **3650 switch has no power / all ports down** | Physical tab → drag the **AC-POWER-SUPPLY** module into the empty slot. Every 3650 needs this. |
 | Router has too few ports | 2911 has Gi0/0-0/2. Power off → add an HWIC/EHWIC module → power on. |
 | Laptop can't do WiFi | Physical tab → power off → remove the Ethernet module → drag **WPC300N** in → power on. |
-| Which cable? | Use the **lightning bolt (Automatic)** cable while learning, then check with `show cdp neighbors` that the ports match the cabling table. DSL modem ↔ cloud uses the **phone** cable. |
+| Which cable? | **Never** use the Automatic (lightning bolt) cable — it picks the ports itself. Straight-Through between different device types, Cross-Over between same types ([basic-moves.md](basic-moves.md) M5). Check with `show cdp neighbors` that the ports match the cabling table (M6). DSL modem ↔ cloud uses the **phone** cable. |
 
 ## Commands
 

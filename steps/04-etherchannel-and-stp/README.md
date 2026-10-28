@@ -5,6 +5,20 @@
 > ✅ **Before you start:** every box in the checkpoint of step 03 is ticked, and you did its
 > 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
 
+## 🗺 Your missions in this step
+- [ ] **Mission 1** — Open step 03 and save as step 04 (2 min)
+- [ ] **Mission 2** — Two new cables between DIST1 and DIST2 (5 min)
+- [ ] **Mission 3** — DIST1: Rapid STP + boss of its VLANs (5 min)
+- [ ] **Mission 4** — DIST1: the EtherChannel + Root Guard (10 min)
+- [ ] **Mission 5** — DIST2: the same, mirrored (15 min)
+- [ ] **Mission 6** — ACC1 and ACC2: Rapid STP, PortFast, BPDU Guard (10 min)
+- [ ] **Mission 7** — Check the EtherChannel and the bosses (10 min)
+- [ ] **Mission 8** — Break test 1: pull an uplink (10 min)
+- [ ] **Mission 9** — Break test 2: pull an EtherChannel cable (5 min)
+- [ ] **Mission 10** — Break test 3: plug in a rogue switch (10 min)
+- [ ] **Exercise** — the hidden priority
+- [ ] **🛠 Your own project**
+
 ## What you will have at the end
 - DIST1 and DIST2 joined by **two cables bundled into one logical link** (an
   **EtherChannel** called `Port-channel1`).
@@ -101,37 +115,48 @@ better boss appears through *this* port, block the port". Protects the root elec
 
 ---
 
-## Part 2 — Prepare
+## Mission 1 — Open step 03 and save as step 04 (how? → M1)
 **File → Open** → `my-work/step03.pkt` → **File → Save As** → `my-work/step04.pkt`.
+
+✅ The title bar shows `step04.pkt`.
 
 ---
 
-## Part 3 — Build (click by click)
-Two new cables, both **Copper Cross-Over** (switch ↔ switch):
+## Mission 2 — Two new cables between DIST1 and DIST2
+Both **Copper Cross-Over** (switch ↔ switch) (how? → M5):
 
-| Click first | Port | Click second | Port |
-|---|---|---|---|
-| SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/23** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/23** |
-| SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/24** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/24** |
+| # | Click first | Port | Click second | Port |
+|---|---|---|---|---|
+| 1 | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/23** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/23** |
+| 2 | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/24** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/24** |
 
+✅ Two dashed lines between DIST1 and DIST2, labelled `Gi1/0/23` and `Gi1/0/24` at both ends.
 Don't worry if they stay orange — we configure them now.
 
 ---
 
-## Part 4 — Configure (type every line)
+## Mission 3 — DIST1: Rapid STP + boss of its VLANs
+👉 **Where:** **SWL3-HFA-A-DIST1** → CLI → **Enter** → banner → `Password:` `Intel#Con` →
+`enable` → `Intel#En4ble`. Prompt: `SWL3-HFA-A-DIST1#` (how? → M9).
 
-### 4.1 SWL3-HFA-A-DIST1
-Log in (console `Intel#Con`, enable `Intel#En4ble`):
+⌨️ Type:
 ```
-enable
 configure terminal
-
-! ---------- Spanning Tree: rapid mode + choose the boss ----------
 spanning-tree mode rapid-pvst
 spanning-tree vlan 10,30,99,110 root primary
 spanning-tree vlan 20,120 root secondary
+```
+✅ No error messages; prompt still `SWL3-HFA-A-DIST1(config)#`.
+🔍 **Check now:** `do show spanning-tree vlan 10` → near the top: `This bridge is the root`.
 
-! ---------- EtherChannel members: identical trunk settings + bundle 1 ----------
+---
+
+## Mission 4 — DIST1: the EtherChannel + Root Guard
+👉 **Where:** still DIST1, prompt `(config)#`.
+
+### 4a — The two member cables: identical trunk settings + bundle 1
+⌨️ Type:
+```
 interface range gi1/0/23 - 24
  description Po1 member to SWL3-HFA-A-DIST2
  switchport mode trunk
@@ -141,8 +166,12 @@ interface range gi1/0/23 - 24
  channel-group 1 mode active
  no shutdown
  exit
+```
+✅ After `channel-group 1 mode active` you see `Creating a port-channel interface Port-channel 1`.
 
-! ---------- the logical link that the bundle creates ----------
+### 4b — The logical link that the bundle creates
+⌨️ Type:
+```
 interface port-channel 1
  description EtherChannel to SWL3-HFA-A-DIST2
  switchport mode trunk
@@ -150,25 +179,37 @@ interface port-channel 1
  switchport trunk allowed vlan 10,20,30,99,110,120,998
  switchport nonegotiate
  exit
+```
 
-! ---------- Root Guard on the ports facing the access switches ----------
+### 4c — Root Guard on the ports facing the access switches
+⌨️ Type:
+```
 interface range gi1/0/1 - 2
  spanning-tree guard root
  end
 copy running-config startup-config
 ```
-After `channel-group 1 mode active` you see `Creating a port-channel interface Port-channel 1` — good.
+✅ `[OK]`. The bundle is not up yet — DIST2 is still missing its half (Mission 5).
 
-### 4.2 SWL3-HFA-A-DIST2
-Same structure, but DIST2 is boss of VLAN 20 and 120:
+---
+
+## Mission 5 — DIST2: the same, mirrored
+👉 **Where:** **SWL3-HFA-A-DIST2** → CLI → log in → `SWL3-HFA-A-DIST2#`.
+
+DIST2 is boss of VLAN 20 and 120, deputy for the others — the opposite of DIST1.
+
+### 5a — STP
+⌨️ Type:
 ```
-enable
 configure terminal
-
 spanning-tree mode rapid-pvst
 spanning-tree vlan 20,120 root primary
 spanning-tree vlan 10,30,99,110 root secondary
+```
 
+### 5b — EtherChannel and Root Guard
+⌨️ Type:
+```
 interface range gi1/0/23 - 24
  description Po1 member to SWL3-HFA-A-DIST1
  switchport mode trunk
@@ -192,10 +233,22 @@ interface range gi1/0/1 - 2
  end
 copy running-config startup-config
 ```
+Press **Fast Forward Time** 2–3 times (M18).
 
-### 4.3 SW-HFA-A-ACC1
+✅ You see messages like `%LINK-5-CHANGED: Interface Port-channel1, changed state to up`, and the
+two DIST1–DIST2 cables turn green.
+🔍 **Check now:** `show etherchannel summary` → a line `1  Po1(SU)  LACP  Gig1/0/23(P) Gig1/0/24(P)`.
+❌ `Po1(SD)` → see "If something doesn't work" (first row).
+
+---
+
+## Mission 6 — ACC1 and ACC2: Rapid STP, PortFast, BPDU Guard
+
+### 6a — SW-HFA-A-ACC1
+👉 **Where:** ACC1 → CLI → log in → `SW-HFA-A-ACC1#`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 spanning-tree mode rapid-pvst
 
@@ -206,12 +259,14 @@ interface range fa0/1 - 22
  end
 copy running-config startup-config
 ```
-PT prints a long `%Warning: portfast should only be enabled on ports connected to a single
+✅ PT prints a long `%Warning: portfast should only be enabled on ports connected to a single
 host...` — that's a reminder, not an error. It's correct here.
 
-### 4.4 SW-HFA-A-ACC2
+### 6b — SW-HFA-A-ACC2
+👉 **Where:** ACC2 → CLI → log in → `SW-HFA-A-ACC2#`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 spanning-tree mode rapid-pvst
 
@@ -224,7 +279,7 @@ copy running-config startup-config
 ```
 Press **Fast Forward Time** a few times.
 
-### 4.5 What the new commands mean
+### What the new commands mean
 | Command | In simple English |
 |---|---|
 | `spanning-tree mode rapid-pvst` | "Use the fast, one-tree-per-VLAN version of STP" |
@@ -238,13 +293,12 @@ Press **Fast Forward Time** a few times.
 
 ---
 
-## Part 5 — Check your work
+## Mission 7 — Check the EtherChannel and the bosses
 
-### 5.1 The EtherChannel
-On **DIST1**:
-```
-show etherchannel summary
-```
+### 7a — The EtherChannel
+👉 On **DIST1** (`#` prompt): `show etherchannel summary`
+
+✅ You should see:
 ```
 Flags:  D - down        P - bundled in port-channel
         S - Layer2      U - in use
@@ -253,21 +307,26 @@ Group  Port-channel  Protocol    Ports
 ------+-------------+-----------+--------------------------------
 1      Po1(SU)           LACP   Gig1/0/23(P) Gig1/0/24(P)
 ```
-✅ `Po1(SU)` = Layer-2, **in use**. Both ports `(P)` = bundled.
-If you see `(SD)` or `(I)`/`(s)` next to the ports, see the troubleshooting table.
+`Po1(SU)` = Layer-2, **in use**. Both ports `(P)` = bundled.
+❌ `(SD)` or `(I)`/`(s)` next to the ports → see the troubleshooting table.
 
-### 5.2 Who is the boss?
-On **DIST1**: `show spanning-tree vlan 10`
+### 7b — Who is the boss?
+👉 On **DIST1**: `show spanning-tree vlan 10`
+
+✅ You should see:
 ```
 VLAN0010
   Spanning tree enabled protocol rstp
   Root ID    Priority    24586
              Address     000A.F3C4.1101
-             This bridge is the root            <- ✅ DIST1 is boss of VLAN 10
+             This bridge is the root            <- DIST1 is boss of VLAN 10
 ```
-On **DIST2**: `show spanning-tree vlan 20` → `This bridge is the root` ✅
+👉 On **DIST2**: `show spanning-tree vlan 20` → ✅ `This bridge is the root`.
 
-On **ACC1**: `show spanning-tree vlan 10`
+### 7c — The view from an access switch
+👉 On **ACC1**: `show spanning-tree vlan 10`
+
+✅ You should see (your cost numbers may differ):
 ```
 Interface        Role Sts Cost      Prio.Nbr Type
 ---------------- ---- --- --------- -------- -----------
@@ -275,30 +334,50 @@ Gi0/1            Root FWD 4         128.25   P2p        <- road to the boss (DIS
 Gi0/2            Altn BLK 4         128.26   P2p        <- backup road, blocked
 Fa0/1            Desg FWD 19        128.1    P2p Edge   <- "Edge" = PortFast
 ```
-Now `show spanning-tree vlan 20` on ACC1 → this time **Gi0/2** (toward DIST2) is the Root port.
-That's the load sharing: VLAN 10 goes up via DIST1, VLAN 20 via DIST2.
+👉 Now `show spanning-tree vlan 20` on ACC1.
+✅ This time **Gi0/2** (toward DIST2) is the Root port. That's the load sharing: VLAN 10 goes up
+via DIST1, VLAN 20 via DIST2.
 
-`show spanning-tree summary` → `Switch is in rapid-pvst mode` ✅
+👉 `show spanning-tree summary` → ✅ `Switch is in rapid-pvst mode`.
 
-### 5.3 Break things on purpose (the best way to learn)
-**Test 1 — redundancy**
-1. PC-HFA-ENG-01 → Command Prompt → `ping -t 10.10.16.103` (continuous ping).
-2. Click the **Delete** tool (X) → click the cable **ACC1 Gi0/1 ↔ DIST1**.
-3. Watch the ping: 1–2 timeouts, then replies again — traffic moved to the Gi0/2 road.
-4. Press **Ctrl+C** in the Command Prompt to stop. Put the cable back (Cross-Over,
-   ACC1 Gi0/1 → DIST1 Gi1/0/1).
+---
 
-**Test 2 — the EtherChannel survives a broken cable**
-1. Delete one of the two DIST1 ↔ DIST2 cables.
-2. `show etherchannel summary` → Po1 still `(SU)` with one member.
-3. Put the cable back (same ports) → after a moment both members are `(P)` again.
+## Mission 8 — Break test 1: pull an uplink
+🧠 **Why:** prove the redundancy really works. The best way to learn is to break things on purpose.
 
-**Test 3 — BPDU Guard catches a rogue switch**
-1. Drag a new **2960** next to ACC1 (leave it named `Switch…`).
+1. Click **PC-HFA-ENG-01** → Command Prompt → `ping -t 10.10.16.103` (a ping that never stops).
+   Leave the window open.
+2. Toolbar: click the **Delete** tool (X) → click the cable **ACC1 Gi0/1 ↔ DIST1** (M7).
+3. Watch the ping window.
+
+✅ 1–2 `Request timed out`, then `Reply from` again — traffic moved to the Gi0/2 road.
+
+4. Click in the Command Prompt and press **Ctrl+C** to stop the ping.
+5. Put the cable back: **Copper Cross-Over**, ACC1 **Gi0/1** → DIST1 **Gi1/0/1**.
+
+---
+
+## Mission 9 — Break test 2: pull an EtherChannel cable
+1. Delete one of the two DIST1 ↔ DIST2 cables (M7).
+2. On DIST1: `show etherchannel summary`.
+   ✅ Po1 is still `(SU)`, now with one member.
+3. Put the cable back (Cross-Over, same ports as Mission 2) → Fast Forward Time.
+4. `show etherchannel summary` again.
+   ✅ Both members are `(P)` again.
+
+---
+
+## Mission 10 — Break test 3: plug in a rogue switch
+1. Drag a new **2960** next to ACC1 (leave its name `Switch…`).
 2. Connect it with **Copper Cross-Over**: new switch **Fa0/1** → ACC1 **Fa0/9**.
-3. Watch ACC1's CLI: `%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Fa0/9 with BPDU Guard enabled. Disabling port.`
-4. `show interfaces status` → Fa0/9 shows `err-disabled`. The link light is red.
-5. Delete the rogue switch. Recover the port:
+3. Watch ACC1's CLI.
+
+✅ `%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Fa0/9 with BPDU Guard enabled. Disabling port.`
+
+4. On ACC1: `show interfaces status`.
+   ✅ Fa0/9 shows `err-disabled`. The dot on that cable is red.
+5. Delete the rogue switch (M7).
+6. Recover the port on ACC1:
 ```
 configure terminal
 interface fa0/9
@@ -306,11 +385,9 @@ interface fa0/9
  no shutdown
  end
 ```
+7. Save all 4 switches (`copy running-config startup-config`) → **File → Save**.
 
 ---
-
-## Part 6 — Save
-`copy running-config startup-config` on all 4 switches → **File → Save**.
 
 ## Checkpoint
 - [ ] `show etherchannel summary` → `Po1(SU)`, both ports `(P)` — on DIST1 and DIST2
@@ -321,17 +398,35 @@ interface fa0/9
 ## If something doesn't work
 | Problem | Fix |
 |---|---|
-| `Po1(SD)` or ports `(s)` / `(I)` | The two cables are configured differently, or the other switch isn't configured yet. On **both** switches: `interface range gi1/0/23 - 24` → `no channel-group 1` → `exit` → `no interface port-channel 1`, then retype the EtherChannel part of 4.1/4.2 |
+| `Po1(SD)` or ports `(s)` / `(I)` | The two cables are configured differently, or the other switch isn't configured yet. On **both** switches: `interface range gi1/0/23 - 24` → `no channel-group 1` → `exit` → `no interface port-channel 1`, then retype Mission 4 / 5b |
 | One switch uses `active`, other `desirable` | Mixed LACP/PAgP — use `active` on both |
 | Wrong switch is root | Check `show run \| include spanning-tree vlan` — maybe you typed `primary` on both for the same VLAN |
 | PCs on ACC1 lose connectivity after Root Guard | `show spanning-tree vlan 10` on DIST1 — the port to the access switch is blocked by Root Guard because an access switch has a lower priority than DIST1/2. Remove any `spanning-tree vlan ... priority` from the access switches |
 | Fa0/9 stays red after removing the rogue switch | You need `shutdown` + `no shutdown` on it |
 
-## Challenge
-`spanning-tree vlan 10 root primary` is a shortcut. Run `show run | include priority` on
-DIST1: what priority did it actually set? Why is that number a multiple of 4096?
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercise — The hidden priority ⭐⭐
+- 🎯 **Task:** `spanning-tree vlan 10 root primary` is a shortcut. Find out which **number** it
+  actually set, and explain why that number is a multiple of 4096.
+- 📁 **Start from:** your `step04.pkt`.
+- 👣 **Steps:**
+  1. On DIST1 run `show run | include priority`.
+  2. Write down the priority for VLAN 10 and for VLAN 20.
+  3. Run `show spanning-tree vlan 10` and look at **Bridge ID → Priority**. Why is it not exactly
+     the number from step 2?
+- ✅ **Done when:** you have both numbers and a one-sentence explanation of the difference.
+
+<details><summary>💡 Hint 1</summary>
+
+Subtract the number in step 2 from the number in step 3. What do you get? Does it remind you
+of something?
+</details>
+<details><summary>💡 Hint 2</summary>
+
+The priority field is 16 bits; 12 of them carry something else. 2^12 = ?
+</details>
+<details><summary>✔ Answer</summary>
 
 `spanning-tree vlan 10 priority 24576` (secondary = 28672). The priority field has 16 bits,
 but the last 12 bits are used to carry the VLAN number ("extended system ID"), so the
@@ -345,6 +440,13 @@ displays 24586 for VLAN 10: 24576 + 10.
 
 You did this step on the Intel example. Now do it again in **your** project, with the values
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+- [ ] Open `my-project/step03.pkt` → **Save As** `my-project/step04.pkt`
+- [ ] Two Cross-Over cables between your distribution switches
+- [ ] Rapid-PVST on every switch; root primary/secondary per **your** VLAN table
+- [ ] EtherChannel (the protocol your plan part E gives this site) on both distribution switches
+- [ ] Root Guard on the distribution downlinks; PortFast + BPDU Guard on every end-device port
+- [ ] Mission 7 checks and the 3 break tests pass in your project
 
 | In the example | In your project — take it from |
 |---|---|
@@ -503,9 +605,10 @@ downlinks. Target: **15 minutes**. Then show `show etherchannel summary` and
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** draw a loop on the board and "pass a broadcast" around it until the
   class sees the storm; STP election as choosing a team captain; root/designated/blocked
-  ports; PVST load sharing → students configure STP on all 4 switches → check 5.2.
-- **Lesson 2 (90 min):** EtherChannel (two lanes = one road), LACP vs PAgP → cables + config →
-  PortFast/BPDU Guard/Root Guard → the 3 break tests (students love test 3).
+  ports; PVST load sharing → Missions 1–3 and 5a (STP on the distribution switches), Mission 6
+  → Mission 7b–c checks.
+- **Lesson 2 (90 min):** EtherChannel (two lanes = one road), LACP vs PAgP → Missions 4, 5b,
+  7a → Missions 8–10, the 3 break tests (students love test 3).
 - **Common student questions**
   - *"Why not just use one cable and no STP?"* — One cable = one point of failure. Companies
     pay for redundancy; STP makes it safe.

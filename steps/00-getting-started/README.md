@@ -2,6 +2,22 @@
 
 > ⏱ about 2 lessons (2 × 90 min) · 📁 start from: nothing · 💾 save as: `my-work/step00.pkt`
 
+## 🗺 Your missions in this step
+Tick each box when you finish it. Do them **in order**.
+
+- [ ] **Mission 1** — Download the course files (10 min)
+- [ ] **Mission 2** — Install Packet Tracer and log in (15 min)
+- [ ] **Mission 3** — Tour the window and turn on two settings (15 min)
+- [ ] **Mission 4** — Build your first network: 2 PCs + 1 switch (15 min)
+- [ ] **Mission 5** — Give the PCs addresses and ping (10 min)
+- [ ] **Mission 6** — Your first CLI: look inside the switch (10 min)
+- [ ] **Mission 7** — Watch it in slow motion (Simulation mode) (15 min)
+- [ ] **Mission 8** — Prove that a router is needed (5 min)
+- [ ] **Mission 9** — Practise the CLI modes (15 min)
+- [ ] **Mission 10** — Save your work (5 min)
+- [ ] **Exercises** A and B
+- [ ] **🛠 Your own project** — check your proposal, create your progress table
+
 ## What you will have at the end
 - Packet Tracer installed and you know **every button** you will use in this project.
 - You understand the basic words: switch, router, IP, MAC, mask, gateway, ping.
@@ -14,57 +30,33 @@
 
 ## What you hand in at the end of this step
 1. The file `my-work/step00.pkt`.
-2. A screenshot of a successful ping (4.4) and a screenshot of the MAC table (4.5).
+2. A screenshot of a successful ping (Mission 5) and a screenshot of the MAC table (Mission 6).
 3. A one-sentence answer to each: what is the difference between `Switch>` and `Switch#`?
    What is the difference between a MAC address and an IP address?
 4. Your progress table `my-project/progress.md`, with step 00 ticked (see 🛠 Your own project).
 
 ---
 
-## Part 0 — How this course works, and getting the course files
+## How to read every step of this course
 
-**Why?** Before you start, you need to know where the explanations are, where to save your
-work, and how this course leads to your final project.
+Every step looks the same. Learn these signs once:
 
-### 0.1 How this course works
-The course teaches every topic on **one worked example** — the network of Intel Israel. Your
-final project is **your own** company (the one in the project proposal you submitted). In every
-step you do two things:
-
-| | What you do | Where you save |
-|---|---|---|
-| **1. Learn** | Follow the step exactly, with the Intel values. Type every command, check it works, solve the challenge | `my-work/` |
-| **2. Build your own** | Do the same step in your project, with your values. The **🛠 Your own project** section at the end of every step says exactly what to change | `my-project/` |
-
-Why this way? You first see the topic working on an example that has already been checked.
-Then, when something doesn't work in your project, you know the problem is in your values,
-not in the commands.
-
-### 0.2 Download the course files
-1. Open the course link your teacher gave you.
-2. Click the green **Code** button → **Download ZIP**.
-3. Open the downloaded ZIP (right-click → **Extract All**) into your **Documents** folder.
-4. You now have a folder whose name starts with `intel-israel-network-lab`. This is the
-   **course folder**. Inside it:
-
-| Folder | What is in it |
+| Sign | Means |
 |---|---|
-| `steps/` | The steps (lessons). One per topic, in order |
-| `docs/` | Reference: the example's plan, the password table, the plan template for your project |
-| `my-work/` | Save your practice files on the example here (`step00.pkt`, `step01.pkt`…) |
-| `my-project/` | Save your own project here |
+| 🗺 **Your missions** | The to-do list of the step. Tick each box when the mission is finished |
+| **Mission N** | One small job (5–20 min). Finish it and check it **before** you start the next one |
+| 🧠 **Why** | One line: why we do this mission |
+| 👉 **Where** | Which device to click, and which prompt you must see before you type |
+| ⌨️ **Type** | The commands. Type them one line at a time |
+| ✅ **You should see** | What the screen shows when the mission worked. **Compare carefully** |
+| ❌ **If not** | The usual reasons it didn't work, and the fix |
+| **(how? → M5)** | A Packet Tracer action explained click by click in [docs/basic-moves.md](../../docs/basic-moves.md). Open it in a second tab |
+| 🏋 **Exercise** | A task you do alone. Try first, then open **Hint 1**, then **Hint 2**, and only then the **Answer** |
+| 🛠 **Your own project** | The same step again, in your own company's project |
+| 🎓 / 🔁 | Exam preparation: explain it, then do it again without the guide |
 
-> **Tip:** read the steps on the website (in the browser) — tables and pictures display
-> properly there. Save your `.pkt` files in the course folder on your computer.
-
-### 0.3 How every step is organised
-Every step follows the same order: **What you will have at the end** → **Understand it first**
-(the theory) → **Build** → **Configure** → **Check your work** → **Save** → **If something
-doesn't work** → **Challenge** → **🛠 Your own project** → **🎓 Explain it to the examiner** →
-**🔁 Do it again — without the guide**. The last two prepare you for the exam: you will have to
-explain everything you built and configure it again in front of the examiner
-([docs/exam-guide.md](../../docs/exam-guide.md)).
-Don't skip "Understand it first" — without it, the commands are just text you copy.
+> **The golden rule:** never start mission N+1 while mission N shows ❌. Fix it first — a
+> mistake you carry forward becomes ten mistakes later.
 
 ---
 
@@ -124,32 +116,73 @@ works **in both directions**. It is the test you will use most in this project.
 - **CLI** (command-line interface) — you configure IOS by **typing commands**. Real network
   engineers work this way, the exams test it, and the project is graded on it.
 
+### 1.7 How this course works
+The course teaches every topic on **one worked example** — the network of Intel Israel. Your
+final project is **your own** company (the one in the project proposal you submitted). In every
+step you do two things:
+
+| | What you do | Where you save |
+|---|---|---|
+| **1. Learn** | Follow the step exactly, with the Intel values. Type every command, check it works, do the exercises | `my-work/` |
+| **2. Build your own** | Do the same step in your project, with your values. The **🛠 Your own project** section at the end of every step says exactly what to change | `my-project/` |
+
+Why this way? You first see the topic working on an example that has already been checked.
+Then, when something doesn't work in your project, you know the problem is in your values,
+not in the commands.
+
 ---
 
-## Part 2 — Install Packet Tracer
+## Mission 1 — Download the course files
+🧠 **Why:** you need the steps, the reference docs, and a place to save your work.
 
-**Why?** You build the whole project in Packet Tracer — a simulator in which Cisco routers and
-switches behave like real equipment.
+1. Open the course link your teacher gave you (the GitHub page of this course).
+2. Click the green **Code** button (top right of the file list) → **Download ZIP**.
+3. Open your **Downloads** folder. Right-click the ZIP → **Extract All…** → choose your
+   **Documents** folder → **Extract**.
+4. Open the new folder. Its name starts with `intel-israel-network-lab`. This is your
+   **course folder**. Inside it you see:
+
+| Folder | What is in it |
+|---|---|
+| `steps/` | The steps (lessons). One per topic, in order |
+| `docs/` | Reference: the example's plan, passwords, **basic moves**, the plan template for your project |
+| `my-work/` | Save your practice files on the example here (`step00.pkt`, `step01.pkt`…) |
+| `my-project/` | Save your own project here |
+
+✅ You can see the four folders `steps`, `docs`, `my-work`, `my-project`.
+
+> **Tip:** read the steps on the website (in the browser) — tables and pictures display
+> properly there. Save your `.pkt` files in the course folder on your computer.
+
+---
+
+## Mission 2 — Install Packet Tracer and log in
+🧠 **Why:** you build the whole project in Packet Tracer.
 
 1. Go to **netacad.com** and create a free account (or log in).
 2. After logging in, look in the top menu for **Resources → Download Packet Tracer**.
    If you can't find it, go straight to `https://www.netacad.com/resources/lab-downloads`.
-   Choose the version for your computer (8.2 or newer).
-3. Install it:
-   - **Windows:** double-click the `.exe`, click *Next* until it finishes.
+3. Choose the version for your computer (8.2 or newer) and download it.
+4. Install it:
+   - **Windows:** double-click the downloaded `.exe` → click **Next** on every screen →
+     **Finish**.
    - **Linux (Ubuntu):** open a terminal in the download folder and type
      `sudo apt install ./CiscoPacketTracer*.deb`
-4. Start Packet Tracer. The first time, it asks you to **log in** with your netacad account.
-   Tick "Keep me logged in".
+5. Start Packet Tracer. The first time, it asks you to **log in** with your netacad account.
+   Tick **Keep me logged in**.
+
+✅ Packet Tracer is open and shows an empty white area.
+❌ It asks for a login every time → you didn't tick "Keep me logged in". It's not a problem —
+just log in.
 
 ---
 
-## Part 3 — A tour of the Packet Tracer window
+## Mission 3 — Tour the window and turn on two settings
+🧠 **Why:** every later step says "click …" with the name of a button. Know them now, and you
+won't get stuck hunting for buttons when you need to concentrate on the network.
 
-**Why?** Every later step says "click …" with the name of a button. If you know the window now,
-you won't get stuck hunting for buttons when you need to concentrate on the network.
-
-Open Packet Tracer. You see an empty white area. Here is every part you will use.
+### 3a — Find every part of the window
+Look at your screen and find each part below. Point at it with the mouse.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -172,103 +205,93 @@ Open Packet Tracer. You see an empty white area. Here is every part you will use
 |---|---|---|
 | ① | **Menu bar** | *File → Save As* (save your work), *Options → Preferences* (settings) |
 | ② | **Main toolbar** | Shortcuts: New, Open, Save, Zoom in/out |
-| ③ | **Common tools** | **Select** (arrow — the normal mouse), **Inspect** (magnifying glass — look at tables inside a device), **Delete** (X — delete a device or cable), **Place Note** (write a text label on the workspace), **Drawing Palette** (rectangles/ellipses to mark buildings), **Add Simple PDU** (closed envelope — a quick ping between two devices) |
+| ③ | **Common tools** | **Select** (arrow — the normal mouse), **Inspect** (magnifying glass), **Delete** (X), **Place Note** (write a label), **Drawing Palette** (rectangles to mark buildings), **Add Simple PDU** (closed envelope — a quick ping) |
 | ④ | **Logical / Physical** | *Logical* = the network diagram (you work here 99% of the time). *Physical* = cities, buildings, racks |
 | ⑤ | **Workspace** | Drag devices here and connect them |
-| ⑥ | **Time bar** | **Fast Forward Time** — makes simulated time pass quickly (links come up, protocols finish). Press it whenever you are waiting for something to turn green. **Power Cycle Devices** — reboots *all* devices (careful: unsaved configs are lost) |
-| ⑦ | **Device-type box** (bottom left) | Categories: *Network Devices* (routers, switches, wireless…), *End Devices* (PCs, servers, printers…), *Connections* (cables), *Components*, *Miscellaneous*… |
-| ⑧ | **Device-model box** | The models inside the chosen category (e.g. 2960, 3650-24PS) — **drag** from here into the workspace |
-| ⑨ | **Realtime / Simulation** | *Realtime* = normal mode. *Simulation* = slow motion: you see every packet as an envelope and can open it |
+| ⑥ | **Time bar** | **Fast Forward Time** — makes simulated time pass quickly. **Power Cycle Devices** — reboots *all* devices (careful: unsaved configs are lost) |
+| ⑦ | **Device-type box** (bottom left) | Categories: *Network Devices*, *End Devices*, *Connections* (cables)… |
+| ⑧ | **Device-model box** | The models inside the chosen category — **drag** from here into the workspace |
+| ⑨ | **Realtime / Simulation** | *Realtime* = normal. *Simulation* = slow motion |
 
-### 3.1 Two settings to turn on once (they make life much easier)
-1. **Options → Preferences** → **Interface** tab.
-2. Tick **"Always Show Port Labels in Logical Workspace"** — every cable now shows the port
-   names at both ends (e.g. `Fa0/1`, `Gi0/1`). Essential for checking your cabling.
-3. Make sure **"Show Device Name Labels"** is ticked.
-4. Close the window.
+✅ You can point at: the **Connections** lightning bolt, the **Fast Forward Time** button, and
+the **Simulation** button.
 
-### 3.2 The device window — what opens when you click a device
-Click any device once (with the **Select** arrow) → a window opens with tabs:
+### 3b — Turn on two settings (once, forever)
+1. Top menu: **Options** → **Preferences**.
+2. Click the **Interface** tab.
+3. Tick **Always Show Port Labels in Logical Workspace**.
+4. Make sure **Show Device Name Labels** is ticked.
+5. Close the window with the **X**.
+
+✅ Nothing visible changes yet — you will see the port labels in Mission 4.
+
+### 3c — The device window
+Every device opens a window when you click it. The tabs:
 
 | Tab | On which devices | What you do there |
 |---|---|---|
-| **Physical** | all | See the real device, its power switch, add modules (cards, power supplies) |
-| **Config** | all | Change the **Display Name** (the label on the workspace); simple settings with buttons |
-| **CLI** | routers, switches | The **command line** — where you type IOS commands. This is where you'll spend most of the time |
-| **Desktop** | PCs, laptops | Small apps: **IP Configuration**, **Command Prompt**, **Web Browser**, **Email**, **PC Wireless**, **VPN** |
+| **Physical** | all | See the real device, its power switch, add modules |
+| **Config** | all | Change the **Display Name**; simple settings with buttons |
+| **CLI** | routers, switches | The **command line** — where you type IOS commands |
+| **Desktop** | PCs, laptops, servers | Small apps: **IP Configuration**, **Command Prompt**, **Web Browser**, **Email**… |
 | **Services** | servers | Turn services on/off: HTTP, DHCP, DNS, EMAIL, FTP, NTP, SYSLOG, AAA |
-| **Attributes** | all | Info only — you can ignore it |
+| **Attributes** | all | Info only — ignore it |
 
-### 3.3 Cables — which one to choose
-Click **Connections** (the lightning bolt ⚡ in the device-type box). The cable types:
-
-| Icon / name | Use it for |
-|---|---|
-| ⚡ **Automatic** | PT chooses the cable. Fast, but it chooses the **port** itself too — so for this project **don't** use it; we must use exact ports |
-| **Copper Straight-Through** (solid black line) | **Different** kinds of devices: PC ↔ switch, switch ↔ router, server ↔ switch, printer ↔ switch |
-| **Copper Cross-Over** (dashed black line) | **Same** kind of devices: switch ↔ switch, router ↔ router, PC ↔ PC |
-| **Fiber** (orange) | Fiber ports (we use it only if PT says a port is fiber) |
-| **Console** (light blue) | PC RS-232 ↔ device console port (not needed — we use the CLI tab) |
-| **Phone** | DSL modem ↔ cloud (step 12) |
-
-How to connect a cable, every time:
-1. Click the cable type (e.g. **Copper Straight-Through**).
-2. Click the **first device** → a small list of its ports appears → click the **port** you need.
-3. Click the **second device** → choose its port.
-4. Done. The dots at each end show the link state:
-
-| Link light | Meaning |
-|---|---|
-| 🟢 green | Link up and forwarding |
-| 🟠 orange | Link up but not forwarding yet (switch is still checking for loops — wait ~30 s or press **Fast Forward Time**). If it stays orange forever, Spanning Tree is blocking it (normal for backup links) |
-| 🔴 red | Link down — wrong cable type, port shut down, or device off |
-
-To delete a cable: choose the **Delete** tool (X) and click the cable, or select it and press **Delete** on the keyboard.
-
-### 3.4 Useful mouse & keyboard tricks
-| Trick | How |
-|---|---|
-| Place many devices of the same type | Hold **Ctrl** while clicking the model, then click in the workspace several times. Press **Esc** to stop |
-| Copy devices (with their settings) | Select them with a box (drag a rectangle with the mouse), **Ctrl+C**, **Ctrl+V** |
-| Move the workspace | Use the scroll bars or the mouse wheel (dragging on an empty area draws a selection box instead) |
-| Zoom | Ctrl + mouse wheel, or the zoom buttons in the toolbar |
-| Rename a device | Click it → **Config** tab → **Display Name** |
+Now open [docs/basic-moves.md](../../docs/basic-moves.md) in a **second browser tab** and read
+the list of moves M1–M23. You don't need to remember them — just know they are there.
 
 ---
 
-## Part 4 — Your first network (click by click)
+## Mission 4 — Build your first network: 2 PCs + 1 switch
+🧠 **Why:** the smallest possible network shows the ideas the whole project is built on.
 
-**Why?** The smallest possible network — two PCs and a switch — shows the ideas the whole
-project is built on: addresses, the mask, how a switch learns where each PC is, and why a
-router is needed.
+### 4a — Place the switch (how? → M2)
+1. Bottom left, top row: click **Network Devices**. Bottom row: click **Switches**.
+2. In the model box, hover until you find **2960** (`2960-24TT`).
+3. **Drag** it into the middle of the workspace.
 
-### 4.1 Place the devices
-1. In the device-type box (bottom left), click **Network Devices** → **Switches**.
-2. In the model box, find **2960** (its label says `2960-24TT`). **Drag** it into the middle of
-   the workspace. It's called `Switch0`.
-3. Click **End Devices** → **End Devices** (the first icon). Drag a **PC** to the left of the
-   switch, then another **PC** to the right. They are called `PC0` and `PC1`.
+✅ A switch named `Switch0` is on the workspace.
 
-### 4.2 Connect the cables
-1. Click **Connections** (⚡) → choose **Copper Straight-Through** (PC ↔ switch = different devices).
-2. Click **PC0** → choose **FastEthernet0**.
-3. Click **Switch0** → choose **FastEthernet0/1**.
-4. Again: **Copper Straight-Through** → **PC1** → **FastEthernet0** → **Switch0** → **FastEthernet0/2**.
-5. The lights are orange at first. Press **Fast Forward Time** two or three times → green.
+### 4b — Place two PCs (how? → M2)
+1. Bottom left: **End Devices** → **End Devices**.
+2. Drag a **PC** to the **left** of the switch. Then drag another **PC** to the **right**.
 
-### 4.3 Give the PCs IP addresses
+✅ You see `PC0` on the left and `PC1` on the right.
+
+### 4c — Connect the cables (how? → M5)
+PC ↔ switch = **different** device types → **Copper Straight-Through**.
+1. Bottom left: click **Connections** (⚡) → click **Copper Straight-Through** (solid black line).
+2. Click **PC0** → in the list click **FastEthernet0**.
+3. Click **Switch0** → in the list click **FastEthernet0/1**.
+4. Again: **Copper Straight-Through** → click **PC1** → **FastEthernet0** → click **Switch0** →
+   **FastEthernet0/2**.
+5. The dots are orange at first. Click **Fast Forward Time** 2–3 times (how? → M18).
+
+✅ Both cables have **green** dots at both ends, and the labels show `Fa0/1` and `Fa0/2` next
+to the switch.
+❌ A dot is red → you used the wrong cable type. Delete it (M7) and use Straight-Through.
+❌ No port labels → do Mission 3b again.
+
+---
+
+## Mission 5 — Give the PCs addresses and ping
+
+### 5a — Addresses (how? → M14)
 1. Click **PC0** → **Desktop** tab → **IP Configuration**.
-2. Make sure **Static** is selected.
-3. **IPv4 Address:** `192.168.1.1`
-4. Click in **Subnet Mask** → PT fills in `255.255.255.0` automatically. Keep it.
+2. Select **Static** at the top.
+3. **IPv4 Address:** type `192.168.1.1`
+4. Click in **Subnet Mask** → PT fills in `255.255.255.0` by itself. Keep it.
 5. Leave **Default Gateway** empty (there is no router).
-6. Close the window (X at the top right). PT saves the settings immediately.
+6. Close the window (X at the top right). PT keeps the settings immediately.
 7. Do the same on **PC1** with `192.168.1.2`.
 
-### 4.4 Test with ping
+✅ Hover the mouse over PC1 — the box shows `192.168.1.2`.
+
+### 5b — Ping (how? → M17)
 1. Click **PC0** → **Desktop** → **Command Prompt**.
-2. Type: `ping 192.168.1.2` and press Enter.
-3. You should see:
+2. Type `ping 192.168.1.2` and press **Enter**.
+
+✅ You should see:
 ```
 Pinging 192.168.1.2 with 32 bytes of data:
 
@@ -277,15 +300,29 @@ Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 Reply from 192.168.1.2: bytes=32 time<1ms TTL=128
 ```
-(The first line may or may not be `Request timed out` — both are fine. Section 4.6 explains why.)
+(The first line may or may not be `Request timed out` — both are fine.)
+
+❌ `Request timed out` four times → check both addresses (5a) and that both cables are green.
+
+📸 Take a screenshot of the replies for your hand-in (how? → M22).
 
 🎉 Your first working network!
 
-### 4.5 Look inside the switch — your first CLI
-1. Click **Switch0** → **CLI** tab.
-2. Click in the black area and press **Enter**. You see `Switch>`.
-3. Type `enable` and press Enter → the prompt becomes `Switch#`.
-4. Type `show mac address-table` and press Enter:
+---
+
+## Mission 6 — Your first CLI: look inside the switch
+1. Click **Switch0** → **CLI** tab (how? → M9).
+2. Click inside the black area and press **Enter**.
+
+✅ You see `Switch>`.
+
+3. Type `enable` and press **Enter**.
+
+✅ The prompt is now `Switch#`.
+
+4. Type `show mac address-table` and press **Enter**.
+
+✅ You should see:
 ```
           Mac Address Table
 -------------------------------------------
@@ -296,12 +333,15 @@ Vlan    Mac Address       Type        Ports
    1    0001.4211.aa01    DYNAMIC     Fa0/1
    1    0060.2f3b.cc02    DYNAMIC     Fa0/2
 ```
-(Your MAC addresses will be different — that's normal. What matters: two lines, one with
-`Fa0/1` and one with `Fa0/2`.)
+Your MAC addresses will be different — that's normal. What matters: two lines, one with
+`Fa0/1` and one with `Fa0/2`.
 
-The switch **learned** which PC sits on which port.
+❌ The table is empty → the switch forgot (entries expire after 5 minutes). Ping again from PC0,
+then run the command again.
 
-### 4.6 What just happened? Why did it work?
+📸 Screenshot this table for your hand-in.
+
+### What just happened? Why did it work?
 1. PC0 knew PC1's **IP** (you typed it) but not its **MAC**. The switch delivers by MAC, so
    PC0 first shouted to everyone: *"Who has 192.168.1.2? Tell me your MAC."*
    This shout is called an **ARP broadcast**.
@@ -312,31 +352,49 @@ The switch **learned** which PC sits on which port.
 
 That's why the **first** ping sometimes times out — PC0 was still waiting for the ARP answer.
 
-### 4.7 Watch it in slow motion (Simulation mode)
-1. PC0 → Command Prompt → type `arp -d` (clears PC0's memory of MACs). Close the window.
-2. Bottom right: click **Simulation**. A *Simulation Panel* opens.
-3. In the panel, click **Show All/None** to clear all filters, then **Edit Filters** → on the
-   **IPv4** tab tick only **ARP** and **ICMP**. Close the filter window.
-4. Click the closed **envelope** tool (*Add Simple PDU*) in the toolbar → click **PC0** → click **PC1**.
-5. Press **Capture / Forward** (▶|) step by step. Watch:
-   - the ARP envelope goes from PC0 to the switch, then to **all** other ports (broadcast);
-   - PC1 answers;
-   - then the ICMP (ping) envelope goes only to PC1.
-6. Click an envelope on the workspace → you see its layers (OSI model). Look at the MAC and
-   IP addresses inside.
-7. Click **Realtime** to go back to normal.
+---
 
-### 4.8 See that a router is needed
-1. PC1 → Desktop → IP Configuration → change the address to `192.168.2.2`. Close.
-2. PC0 → Command Prompt → `ping 192.168.2.2` → **fails**.
-3. Same switch, same cable — but now they are on **different streets** (networks).
-   Without a router, they can't talk. We'll solve this properly in step 05.
+## Mission 7 — Watch it in slow motion (Simulation mode)
+🧠 **Why:** see with your own eyes the ARP shout and the ping you just read about.
+(how? → M21)
+
+1. Click **PC0** → **Desktop** → **Command Prompt** → type `arp -d` → **Enter**.
+   (This makes PC0 forget PC1's MAC, so it has to ask again.) Close the window.
+2. Bottom right: click **Simulation**. The *Simulation Panel* opens.
+3. In the panel: click **Show All/None** (all protocols disappear from the list).
+4. Click **Edit Filters** → tick **ICMP** and **ARP** (they may be on different tabs of the
+   filter window, depending on the version) → close the filter window.
+5. In the toolbar, click the **closed envelope** (*Add Simple PDU*) → click **PC0** → click **PC1**.
+6. In the Simulation Panel press **Capture / Forward** (▶|) once. Look at the drawing.
+7. Keep pressing ▶| one at a time and watch:
+   - the **ARP** envelope goes from PC0 to the switch, then to **all** other ports (broadcast);
+   - PC1 answers;
+   - then the **ICMP** (ping) envelope goes only to PC1, and back.
+8. Click one envelope on the drawing → a window shows its layers. Look for the MAC and IP
+   addresses inside. Close it.
+9. Click **Realtime** to go back to normal.
+
+✅ You saw an ARP envelope go out to **every** port, and the ICMP envelope go **only** to PC1.
+❌ No envelopes move → you didn't press ▶|, or the filters hide them (repeat 3–4).
 
 ---
 
-## Part 5 — The CLI: modes and the basic keys
+## Mission 8 — Prove that a router is needed
+1. Click **PC1** → **Desktop** → **IP Configuration** → change the IPv4 address to
+   `192.168.2.2`. Close.
+2. Click **PC0** → **Desktop** → **Command Prompt** → `ping 192.168.2.2`.
 
-**Why?** From now on, every router and switch is configured by typing commands. If you don't
+✅ The ping **fails** (`Request timed out` ×4). That is the expected result!
+
+Same switch, same cable — but now they are on **different streets** (networks). Without a
+router, they can't talk. We'll solve this properly in step 05.
+
+3. Put PC1 back to `192.168.1.2` (so your saved file works).
+
+---
+
+## Mission 9 — Practise the CLI modes
+🧠 **Why:** from now on, every router and switch is configured by typing commands. If you don't
 know which "mode" you are in, correct commands will fail.
 
 Think of a building with doors you open one after another:
@@ -346,30 +404,33 @@ Think of a building with doors you open one after another:
 | `Switch>` | **User EXEC** | The lobby | Look a little (ping, a few `show` commands). Can't change anything |
 | `Switch#` | **Privileged EXEC** | The manager's office (needs a key = `enable`) | See **everything**, save, reboot |
 | `Switch(config)#` | **Global configuration** | The control room | Change settings for the **whole device** |
-| `Switch(config-if)#` | **Sub-mode** (interface, line, VLAN, router…) | One machine inside the control room | Change settings for **one part** (one port, one line…) |
+| `Switch(config-if)#` | **Sub-mode** (interface, line, VLAN, router…) | One machine inside the control room | Change settings for **one part** |
 
-```
-Switch>                      user EXEC
-Switch> enable               -> go up
-Switch#                      privileged EXEC
-Switch# configure terminal   -> go up (short: conf t)
-Switch(config)#              global config
-Switch(config)# interface fa0/1
-Switch(config-if)#           sub-mode for port Fa0/1
-Switch(config-if)# exit      -> one level down
-Switch(config-if)# end       -> straight back to Switch#
-```
+👉 **Where:** Switch0 → CLI. Type each line and **watch the prompt** after every Enter:
 
-### Keys that save you time
-| Key / command | What it does |
+| Type | The prompt becomes |
 |---|---|
-| **?** | Shows what you can type here. `show ?` lists all show commands. |
-| **Tab** | Completes the word: `conf` + Tab → `configure` |
-| Short forms | IOS accepts any unique start: `conf t` = `configure terminal`, `int fa0/1` = `interface FastEthernet0/1`, `sh run` = `show running-config` |
-| **↑ / ↓** | Previous / next command you typed |
-| **Ctrl+Shift+6** | Stops a long ping or a stuck lookup |
-| `do show ...` | Run a `show` command while you are in config mode |
-| `no <command>` | Removes a setting (e.g. `no shutdown`) |
+| (press Enter) | `Switch>` |
+| `enable` | `Switch#` |
+| `configure terminal` | `Switch(config)#` |
+| `interface fa0/1` | `Switch(config-if)#` |
+| `exit` | `Switch(config)#` (one level back) |
+| `interface fa0/2` | `Switch(config-if)#` |
+| `end` | `Switch#` (straight back) |
+| `disable` | `Switch>` |
+
+✅ Every prompt matched the table.
+
+### Keys that save you time — try each one now
+| Key / command | What it does | Try it |
+|---|---|---|
+| **?** | Shows what you can type here | In `Switch#` type `show ?` |
+| **Tab** | Completes the word | Type `conf` then press **Tab** → `configure` |
+| Short forms | IOS accepts any unique start | `conf t` = `configure terminal`, `sh run` = `show running-config` |
+| **↑ / ↓** | Previous / next command | Press ↑ a few times |
+| **Ctrl+Shift+6** | Stops a long ping or a stuck lookup | — |
+| `do show ...` | Run a `show` command while in config mode | In `(config)#` type `do show vlan brief` |
+| `no <command>` | Removes a setting | `no shutdown` |
 
 ### Running vs startup config
 | | Running-config | Startup-config |
@@ -379,21 +440,22 @@ Switch(config-if)# end       -> straight back to Switch#
 | Comparison | A whiteboard | A notebook |
 
 Every command changes the **running-config** immediately. If the device restarts, the
-whiteboard is wiped — unless you copied it into the notebook:
+whiteboard is wiped — unless you copied it into the notebook (how? → M13):
 `copy running-config startup-config` (short: `copy run start` or `wr`).
 **Save every device at the end of every step.**
 
 ---
 
-## Part 6 — Save your work
-
-**Why?** Every step continues from the file of the step before. A file you didn't save = building
-everything again.
+## Mission 10 — Save your work (how? → M1)
+🧠 **Why:** every step continues from the file of the step before. A file you didn't save =
+building everything again.
 
 1. **File → Save As**.
-2. Go to the course folder (section 0.2) → `my-work` → name it `step00.pkt` → **Save**.
+2. Go to the course folder (Mission 1) → open **my-work** → name it `step00.pkt` → **Save**.
 3. (Optional, if you use git) in a terminal in the course folder:
    `git add my-work/step00.pkt` → `git commit -m "Step 00 done"` → `git push`.
+
+✅ The window title shows `step00.pkt`.
 
 > Saving the `.pkt` file saves the whole drawing. Saving inside each device (`wr`) makes the
 > device keep its config after a reboot. **Do both.**
@@ -411,19 +473,41 @@ everything again.
 ## If something doesn't work
 | Problem | Fix |
 |---|---|
-| Cable lights red | Wrong cable type (switch ↔ switch needs **Cross-Over**), or the device is off (Physical tab → power button) |
-| Lights stay orange | Press **Fast Forward Time** a few times |
+| Cable dots red | Wrong cable type (switch ↔ switch needs **Cross-Over**), or the device is off (Physical tab → power button) |
+| Dots stay orange | Press **Fast Forward Time** a few times |
 | Ping says `Request timed out` every time | Check both IPs and masks; check the cable goes to the right PC |
 | CLI shows nothing | Click inside the black area and press **Enter** |
-| Typed a wrong command → `% Invalid input detected at '^' marker` | The `^` points to the mistake. Use **↑** to get the line back and fix it |
-| Typed a typo in `Switch#` and it waits for 30 s ("Translating…") | It thinks the typo is a hostname. Press **Ctrl+Shift+6**. (We switch this off in step 02) |
+| `% Invalid input detected at '^' marker` | The `^` points to the mistake. Press **↑** to get the line back and fix it (M12) |
+| A typo in `Switch#` waits 30 s ("Translating…") | It thinks the typo is a hostname. Press **Ctrl+Shift+6**. (We switch this off in step 02) |
 | No command works and the letters look strange | The keyboard is set to Hebrew/Arabic. Switch to English (Alt+Shift) |
 
-## Challenge
-On the switch, run `show running-config`. Find the line `hostname Switch`. Change the
-hostname to `MY-FIRST-SWITCH` and save it.
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercises
+
+### Exercise A — Give the switch a name ⭐
+- 🎯 **Task:** change the switch's name from `Switch` to `MY-FIRST-SWITCH`, and save it so it
+  survives a restart.
+- 📁 **Start from:** your `step00.pkt`.
+- 👣 **Steps:**
+  1. Open the CLI of Switch0 and reach the `Switch#` prompt.
+  2. Run `show running-config` and find the line that starts with `hostname`.
+  3. Go into configuration mode and change the hostname.
+  4. Save the configuration.
+- ✅ **Done when:** the prompt shows `MY-FIRST-SWITCH#`, and `show startup-config` also contains
+  `hostname MY-FIRST-SWITCH`.
+
+<details><summary>💡 Hint 1</summary>
+
+The command that sets the name is called `hostname`. It is typed in `(config)#` mode.
+</details>
+
+<details><summary>💡 Hint 2</summary>
+
+`configure terminal` → `hostname ...` → `end` → save with M13.
+</details>
+
+<details><summary>✔ Answer</summary>
 
 ```
 enable
@@ -437,28 +521,54 @@ changed the moment you pressed Enter. When `copy` asks `Destination filename [st
 just press **Enter**.
 </details>
 
+### Exercise B — A third PC ⭐
+- 🎯 **Task:** add `PC2` with address `192.168.1.3` on port **Fa0/3**, and prove it can reach PC0.
+- 📁 **Start from:** your `step00.pkt`.
+- 👣 **Steps:**
+  1. Place a PC (M2).
+  2. Connect it to Switch0 Fa0/3 with the right cable (M5).
+  3. Give it the address (M14).
+  4. Ping PC0 from PC2 (M17).
+  5. Show the MAC table on the switch.
+- ✅ **Done when:** the ping replies, and `show mac address-table` shows **three** lines
+  (Fa0/1, Fa0/2, Fa0/3).
+
+<details><summary>💡 Hint 1</summary>
+
+PC ↔ switch = Copper **Straight-Through**. The mask is the same as the other PCs.
+</details>
+
+<details><summary>✔ Answer</summary>
+
+Copper Straight-Through: PC2 FastEthernet0 → Switch0 FastEthernet0/3. IP `192.168.1.3`, mask
+`255.255.255.0`, no gateway. From PC2: `ping 192.168.1.1` → replies. On the switch: three MAC
+lines. (If you see only two, ping from PC1 too — a line appears only after the PC sent something.)
+</details>
+
 ---
 
 ## 🛠 Your own project
 
 In this step you don't build your project yet — you prepare its foundation.
 
-1. Open the **project proposal** you submitted. Your company, its 3 sites and its departments
-   are already written there.
-2. Check that the proposal follows the rules, and tick each one:
-   - [ ] 3 sites, one of them defined as the **main branch** (requirement 19)
-   - [ ] **6 different departments** in every site, with at least **8 PCs** in each
-     (requirement 20.2)
-   - [ ] No site is a copy of another — each site has its own design model and features (rule ג)
-   - [ ] One site is **collapsed core** (requirement 5) and one site is entirely **IPv6**
-     (requirement 7)
-3. If something is missing or unclear — write it down and ask your teacher next lesson.
-4. Open [docs/project-plan-template.md](../../docs/project-plan-template.md) and read it once.
-   In step 01 you will fill it in from your proposal.
-5. Copy [docs/progress-template.md](../../docs/progress-template.md) to `my-project/progress.md`.
-   Tick step 00 when you finish it, and show it to your teacher at the end of every step.
-6. Read [docs/exam-guide.md](../../docs/exam-guide.md) once, so you know from today what the
-   examiner will ask.
+- [ ] **1.** Open the **project proposal** you submitted. Your company, its 3 sites and its
+  departments are already written there.
+- [ ] **2.** Check that the proposal follows the rules, and tick each one:
+  - [ ] 3 sites, one of them defined as the **main branch** (requirement 19)
+  - [ ] **6 different departments** in every site, with at least **8 PCs** in each
+    (requirement 20.2)
+  - [ ] No site is a copy of another — each site has its own design model and features (rule ג)
+  - [ ] One site is **collapsed core** (requirement 5) and one site is entirely **IPv6**
+    (requirement 7)
+- [ ] **3.** If something is missing or unclear — write it down and ask your teacher next lesson.
+- [ ] **4.** Open [docs/project-plan-template.md](../../docs/project-plan-template.md) and read it
+  once. In step 01 you will fill it in from your proposal.
+- [ ] **5.** Copy [docs/progress-template.md](../../docs/progress-template.md) to
+  `my-project/progress.md`: open it, select all (**Ctrl+A**), copy (**Ctrl+C**), create a new
+  file `progress.md` in `my-project`, paste (**Ctrl+V**), save. Tick step 00 when you finish
+  it, and show it to your teacher at the end of every step.
+- [ ] **6.** Read [docs/exam-guide.md](../../docs/exam-guide.md) once, so you know from today
+  what the examiner will ask.
 
 > **Important:** don't save files containing an ID number (such as the proposal form) in the
 > course folder. This folder may be shared.
@@ -543,13 +653,16 @@ if you have done it **without the guide** before. Do this drill in your own proj
 ---
 
 ## 👩‍🏫 Teacher notes
-- **Lesson 1 (90 min):** Part 0 — download the course files, explain the learn / build-your-own
-  workflow (10 min) → device table, MAC vs IP (ID number vs home address), mask and
-  gateway on the board (30 min) → install + tour of the PT window, preferences (30 min) →
-  2-PC lab and MAC table (30 min).
-- **Lesson 2 (90 min):** Simulation mode ARP demo on the projector (20 min) → students repeat
-  it (20 min) → "different network" test and discussion (15 min) → CLI modes, keys, running vs
-  startup (25 min) → save the file (10 min).
+- **Lesson 1 (90 min):** Missions 1–3 — download the course files, explain the learn /
+  build-your-own workflow and the "how to read a step" table (15 min) → device table, MAC vs IP
+  (ID number vs home address), mask and gateway on the board (30 min) → install + tour of the PT
+  window, preferences (20 min) → Missions 4–6: 2-PC lab and MAC table (25 min).
+- **Lesson 2 (90 min):** Mission 7 Simulation mode ARP demo on the projector (20 min) → students
+  repeat it (20 min) → Mission 8 "different network" test and discussion (15 min) → Mission 9 CLI
+  modes, keys, running vs startup (25 min) → save the file (10 min).
+- **Teach the mission rhythm from day one:** do → compare with ✅ → only then continue. Walk
+  around and ask "show me your ✅" before students move on. Weak students skip the check, not the
+  commands.
 - **Common student questions**
   - *"Why do we need MAC **and** IP?"* — MAC delivers inside one network (one hop); IP gets
     you across many networks. A letter needs the city address to cross the country and the

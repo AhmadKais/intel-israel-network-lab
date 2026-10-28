@@ -5,6 +5,20 @@
 > ✅ **Before you start:** every box in the checkpoint of step 02 is ticked, and you did its
 > 🔁 drill in your own project. Don't skip steps — each step builds on the file of the one before.
 
+## 🗺 Your missions in this step
+- [ ] **Mission 1** — Open step 02 and save as step 03 (2 min)
+- [ ] **Mission 2** — Place the two 3650 switches **and give them power** (10 min)
+- [ ] **Mission 3** — Place ACC2 and two more PCs (5 min)
+- [ ] **Mission 4** — Cable the uplinks and the new PCs (10 min)
+- [ ] **Mission 5** — DIST1: hardening + VTP server + VLANs + trunks (20 min)
+- [ ] **Mission 6** — DIST2: hardening + VTP client + trunks (15 min)
+- [ ] **Mission 7** — ACC1: join VTP + trunk uplinks (10 min)
+- [ ] **Mission 8** — ACC2: everything (it's new) (20 min)
+- [ ] **Mission 9** — Check VTP, trunks and pings (15 min)
+- [ ] **Mission 10** — Watch VTP live and see the tag (15 min)
+- [ ] **Exercises** A and B
+- [ ] **🛠 Your own project**
+
 ## What you will have at the end
 Building A gets its two **distribution** switches and a second access switch. Every access
 switch has **two trunk uplinks** (one to each distribution switch). VLANs are created
@@ -106,50 +120,70 @@ power supply** — you must add one or it stays dead.
 
 ---
 
-## Part 2 — Prepare
-1. **File → Open** → `my-work/step02.pkt` → **File → Save As** → `my-work/step03.pkt`.
+## Mission 1 — Open step 02 and save as step 03 (how? → M1)
+**File → Open** → `my-work/step02.pkt` → **File → Save As** → `my-work/step03.pkt`.
+
+✅ The title bar shows `step03.pkt`.
 
 ---
 
-## Part 3 — Build (click by click)
+## Mission 2 — Place the two 3650 switches and give them power
 
-### 3.1 Add the two 3650 switches
-1. **Network Devices → Switches** → drag a **3650-24PS** into Building A, above ACC1.
+### 2a — Place and name them (how? → M2, M4)
+1. **Network Devices → Switches** → drag a **3650-24PS** into Building A, **above** ACC1.
 2. Drag a second **3650-24PS** next to it.
-3. Rename them (**Config → Display Name**): `SWL3-HFA-A-DIST1` and `SWL3-HFA-A-DIST2`.
+3. Rename them (**Config → Display Name**): left one `SWL3-HFA-A-DIST1`, right one
+   `SWL3-HFA-A-DIST2`.
 
-### 3.2 Give each 3650 a power supply (⚠️ don't skip)
-For **each** 3650:
+### 2b — Add the power supply (⚠️ don't skip — how? → M8)
+Do this for **each** 3650:
 1. Click the switch → **Physical** tab.
-2. Zoom in on the picture of the device (use the **Zoom In** button in that window).
-   Look at the back: there is an **empty power-supply slot**.
-3. In the **MODULES** list on the left, find **AC-POWER-SUPPLY**.
-4. **Drag** it onto the empty slot. The switch picture changes and its lights come on.
+2. Zoom in on the picture of the device (the **Zoom In** button in that window).
+   Look at the back: there is an **empty power-supply slot** on the right.
+3. In the **MODULES** list on the left, click **AC-POWER-SUPPLY**. Its picture appears at
+   the bottom.
+4. **Drag** that picture onto the empty slot. The switch picture changes and its lights come on.
 5. Close the window.
-(If the module doesn't drop in, make sure you dragged it exactly onto the empty slot.)
 
-### 3.3 Add the second access switch and 2 PCs
+✅ Both 3650s show green lights in the Physical tab.
+❌ The module doesn't drop in → drag it exactly onto the empty slot (zoom in more).
+
+---
+
+## Mission 3 — Place ACC2 and two more PCs
 1. Drag a **2960** next to ACC1 → rename `SW-HFA-A-ACC2`.
 2. Drag 2 PCs below it → rename `PC-HFA-ENG-03` and `PC-HFA-FIN-03`.
 
-### 3.4 Cable — uplinks (switch ↔ switch = **Copper Cross-Over**)
-| Click first | Port | Click second | Port |
-|---|---|---|---|
-| SW-HFA-A-ACC1 | **GigabitEthernet0/1** | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/1** |
-| SW-HFA-A-ACC1 | **GigabitEthernet0/2** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/1** |
-| SW-HFA-A-ACC2 | **GigabitEthernet0/1** | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/2** |
-| SW-HFA-A-ACC2 | **GigabitEthernet0/2** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/2** |
+✅ Building A now has 4 switches and 8 end devices.
 
-### 3.5 Cable — PCs (Copper **Straight-Through**)
-| Device | Port | Switch port |
-|---|---|---|
-| PC-HFA-ENG-03 | FastEthernet0 | SW-HFA-A-ACC2 **Fa0/1** |
-| PC-HFA-FIN-03 | FastEthernet0 | SW-HFA-A-ACC2 **Fa0/11** |
+---
 
-Press **Fast Forward Time** a few times. Most lights turn green; **one or more uplinks stay
-orange** — that's Spanning Tree blocking the loop (section 1.7). Correct!
+## Mission 4 — Cable the uplinks and the new PCs (how? → M5)
 
-### 3.6 PC addresses (Desktop → IP Configuration → Static)
+### 4a — Uplinks: switch ↔ switch = **Copper Cross-Over** (dashed line)
+| # | Click first | Port | Click second | Port |
+|---|---|---|---|---|
+| 1 | SW-HFA-A-ACC1 | **GigabitEthernet0/1** | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/1** |
+| 2 | SW-HFA-A-ACC1 | **GigabitEthernet0/2** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/1** |
+| 3 | SW-HFA-A-ACC2 | **GigabitEthernet0/1** | SWL3-HFA-A-DIST1 | **GigabitEthernet1/0/2** |
+| 4 | SW-HFA-A-ACC2 | **GigabitEthernet0/2** | SWL3-HFA-A-DIST2 | **GigabitEthernet1/0/2** |
+
+> On the 3650 the port list is long. `GigabitEthernet1/0/1` is near the top; don't pick
+> `GigabitEthernet1/1/1` (that's a different port, used in step 08).
+
+### 4b — PCs: Copper **Straight-Through**
+| # | Device | Port | Switch | Port |
+|---|---|---|---|---|
+| 5 | PC-HFA-ENG-03 | FastEthernet0 | SW-HFA-A-ACC2 | **Fa0/1** |
+| 6 | PC-HFA-FIN-03 | FastEthernet0 | SW-HFA-A-ACC2 | **Fa0/11** |
+
+Press **Fast Forward Time** a few times (M18).
+
+✅ Most dots turn green; **one or more uplinks stay orange** — that's Spanning Tree blocking the
+loop (section 1.7). Correct!
+❌ A dot on an uplink is red → you used Straight-Through. Delete it (M7), use Cross-Over.
+
+### 4c — Addresses of the new PCs (how? → M14)
 | PC | IP | Mask |
 |---|---|---|
 | PC-HFA-ENG-03 | 10.10.16.103 | 255.255.255.0 |
@@ -157,14 +191,15 @@ orange** — that's Spanning Tree blocking the loop (section 1.7). Correct!
 
 ---
 
-## Part 4 — Configure (type every line; `!` lines are comments)
+## Mission 5 — DIST1: hardening + VTP server + VLANs + trunks
+👉 **Where:** click **SWL3-HFA-A-DIST1** → **CLI** → press **Enter**. You see `Switch>`
+(if it asks about the initial configuration dialog, type `no`) (how? → M9).
 
-### 4.1 SWL3-HFA-A-DIST1 — basics + VTP **server** + trunks
-Click it → **CLI** → press Enter.
+### 5a — Hardening (the same block you typed in step 02)
+⌨️ Type:
 ```
 enable
 configure terminal
-! ---------- hardening (same as step 02) ----------
 hostname SWL3-HFA-A-DIST1
 no ip domain-lookup
 enable secret Intel#En4ble
@@ -178,14 +213,23 @@ line console 0
  logging synchronous
  exec-timeout 10 0
  exit
+```
+✅ The prompt is `SWL3-HFA-A-DIST1(config)#`.
 
-! ---------- VTP: this switch is the head office of building A ----------
+### 5b — VTP: this switch is the head office of building A
+⌨️ Type:
+```
 vtp domain HFA-A
 vtp version 2
 vtp password Intel#Vtp
 vtp mode server
+```
+✅ Each line answers with a message like `Changing VTP domain name from NULL to HFA-A` or
+`Setting device to VTP Server mode`. (Some versions say nothing — also fine.)
 
-! ---------- the VLAN list (created only here) ----------
+### 5c — The VLAN list (created only here)
+⌨️ Type:
+```
 vlan 10
  name ENGINEERING
 vlan 20
@@ -203,8 +247,12 @@ vlan 998
 vlan 999
  name PARKING
  exit
+```
+🔍 **Check now:** `do show vlan brief` → the 8 VLANs are listed with their names.
 
-! ---------- downlinks to ACC1 and ACC2 = trunks ----------
+### 5d — Downlinks to ACC1 and ACC2 = trunks
+⌨️ Type:
+```
 interface range gi1/0/1 - 2
  description TRUNK to access switch
  switchport mode trunk
@@ -212,8 +260,17 @@ interface range gi1/0/1 - 2
  switchport trunk allowed vlan 10,20,30,99,110,120,998
  switchport nonegotiate
  no shutdown
+```
+> **3650 note:** the 3650 only speaks 802.1Q, so it doesn't need (or accept) the command
+> `switchport trunk encapsulation dot1q`. If your PT asks for it, type it before
+> `switchport mode trunk`.
 
-! ---------- unused ports -> parking + off ----------
+> You may see `%CDP-4-NATIVE_VLAN_MISMATCH` messages now. That's normal: the access switches
+> still have native VLAN 1. It stops after Missions 7–8.
+
+### 5e — Unused ports → parking + off
+⌨️ Type:
+```
 interface range gi1/0/3 - 22
  description UNUSED
  switchport mode access
@@ -224,10 +281,16 @@ copy running-config startup-config
 ```
 (Ports Gi1/0/23-24 are left alone — they're used in step 04.)
 
-> **3650 note:** the 3650 only speaks 802.1Q, so it doesn't need (or accept) the command
-> `switchport trunk encapsulation dot1q`. If your PT asks for it, type it before `switchport mode trunk`.
+✅ `[OK]` after the copy (press **Enter** at `Destination filename`).
+🔍 **Check now:** `show vtp status` → `VTP Operating Mode : Server`, `VTP Domain Name : HFA-A`.
 
-### 4.2 SWL3-HFA-A-DIST2 — basics + VTP **client** + trunks
+---
+
+## Mission 6 — DIST2: hardening + VTP client + trunks
+👉 **Where:** **SWL3-HFA-A-DIST2** → CLI → **Enter** → `Switch>`.
+
+### 6a — Hardening
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -244,14 +307,22 @@ line console 0
  logging synchronous
  exec-timeout 10 0
  exit
+```
 
-! ---------- safe join: transparent first (revision -> 0), then client ----------
+### 6b — Safe join: transparent first (revision → 0), then client
+⌨️ Type:
+```
 vtp mode transparent
 vtp domain HFA-A
 vtp version 2
 vtp password Intel#Vtp
 vtp mode client
+```
+**No `vlan` commands here** — DIST2 receives the list from DIST1.
 
+### 6c — Trunks and unused ports
+⌨️ Type:
+```
 interface range gi1/0/1 - 2
  description TRUNK to access switch
  switchport mode trunk
@@ -267,16 +338,21 @@ interface range gi1/0/3 - 22
  end
 copy running-config startup-config
 ```
-No `vlan` commands here — DIST2 receives the list from DIST1.
-
 > You may see a warning like `% Access VLAN does not exist` on `switchport access vlan 999`.
 > That's normal: DIST2 hasn't received the VLAN list yet (it arrives once the access switches'
-> trunks are up, in 4.3–4.4). The setting is kept and starts working when VLAN 999 arrives.
+> trunks are up, in Missions 7–8). The setting is kept and starts working when VLAN 999 arrives.
 
-### 4.3 SW-HFA-A-ACC1 — join VTP + trunk uplinks
-ACC1 was configured in step 02. Log in (console password `Intel#Con`, enable `Intel#En4ble`):
+✅ `[OK]`. `show vtp status` → `VTP Operating Mode : Client`.
+
+---
+
+## Mission 7 — ACC1: join VTP + trunk uplinks
+👉 **Where:** **SW-HFA-A-ACC1** → CLI → **Enter**. ACC1 was secured in step 02, so you see the
+banner and `Password:` → type `Intel#Con` → then `enable` → `Intel#En4ble`.
+✅ Prompt: `SW-HFA-A-ACC1#`.
+
+⌨️ Type:
 ```
-enable
 configure terminal
 ! ACC1 has revision > 0 from step 02 -> safe join
 vtp mode transparent
@@ -295,8 +371,16 @@ interface range gi0/1 - 2
  end
 copy running-config startup-config
 ```
+🔍 **Check now:** `show interfaces trunk` → `Gig0/1` and `Gig0/2` are listed, status `trunking`,
+native `998`.
 
-### 4.4 SW-HFA-A-ACC2 — everything (it's new)
+---
+
+## Mission 8 — ACC2: everything (it's new)
+👉 **Where:** **SW-HFA-A-ACC2** → CLI → **Enter** → `Switch>`.
+
+### 8a — Hardening
+⌨️ Type:
 ```
 enable
 configure terminal
@@ -313,7 +397,11 @@ line console 0
  logging synchronous
  exec-timeout 10 0
  exit
+```
 
+### 8b — VTP and trunk uplinks
+⌨️ Type:
+```
 vtp mode transparent
 vtp domain HFA-A
 vtp version 2
@@ -327,7 +415,13 @@ interface range gi0/1 - 2
  switchport trunk allowed vlan 10,20,30,99,110,120,998
  switchport nonegotiate
  no shutdown
+```
 
+### 8c — Access ports
+ACC2's port plan: same as ACC1, except Fa0/22–23 are reserved for the two WiFi access points.
+
+⌨️ Type:
+```
 interface range fa0/1 - 10
  description ENGINEERING users
  switchport mode access
@@ -356,9 +450,12 @@ interface fa0/24
  end
 copy running-config startup-config
 ```
-ACC2's port plan: same as ACC1, except Fa0/22-23 are reserved for the two WiFi access points.
+> If `switchport access vlan …` says the VLAN doesn't exist yet — wait a few seconds (Fast
+> Forward Time) for VTP to deliver the list; the setting is kept anyway.
 
-### 4.5 What the new commands mean
+✅ `[OK]`.
+
+### What the new commands mean
 | Command | In simple English |
 |---|---|
 | `vtp domain HFA-A` | "I belong to the building-A VLAN club" |
@@ -372,14 +469,13 @@ ACC2's port plan: same as ACC1, except Fa0/22-23 are reserved for the two WiFi a
 
 ---
 
-## Part 5 — Check your work
+## Mission 9 — Check VTP, trunks and pings
+Press **Fast Forward Time** 2–3 times first.
 
-### 5.1 VTP
-On **SW-HFA-A-ACC2**:
-```
-show vtp status
-```
-Look for:
+### 9a — VTP
+👉 On **SW-HFA-A-ACC2** (`#` prompt) type `show vtp status`.
+
+✅ Look for:
 ```
 VTP Version capable             : 1 to 2
 VTP version running             : 2
@@ -387,18 +483,15 @@ VTP Domain Name                 : HFA-A
 VTP Operating Mode              : Client
 Configuration Revision          : 16         <- your number may differ - it must be the SAME as on DIST1
 ```
-Run `show vtp status` on DIST1 too: the **Configuration Revision** must be the same.
+👉 Run `show vtp status` on **DIST1** too: the **Configuration Revision** must be the same.
 
-```
-show vlan brief
-```
-on ACC2 → all 8 VLANs are there, although you never created them on ACC2. ✅ VTP works.
+👉 On ACC2 type `show vlan brief`.
+✅ All 8 VLANs are there, although you never created them on ACC2. VTP works.
 
-### 5.2 Trunks
-On **SWL3-HFA-A-DIST1**:
-```
-show interfaces trunk
-```
+### 9b — Trunks
+👉 On **SWL3-HFA-A-DIST1** type `show interfaces trunk`.
+
+✅ You should see:
 ```
 Port        Mode         Encapsulation  Status        Native vlan
 Gig1/0/1    on           802.1q         trunking      998
@@ -408,35 +501,45 @@ Port        Vlans allowed on trunk
 Gig1/0/1    10,20,30,99,110,120,998
 ...
 ```
-✅ Both ports `trunking`, native 998, our allowed list.
+Both ports `trunking`, native 998, our allowed list.
 
-### 5.3 Ping across the trunk
-| From | Type | Expected | Why |
-|---|---|---|---|
-| PC-HFA-ENG-01 (on ACC1) | `ping 10.10.16.103` (ENG-03 on ACC2) | ✅ | VLAN 10 crosses the trunks via a distribution switch |
-| PC-HFA-FIN-01 (ACC1) | `ping 10.10.17.103` (FIN-03 on ACC2) | ✅ | VLAN 20 too |
-| PC-HFA-ENG-01 | `ping 10.10.17.103` | ❌ | still no router |
+### 9c — Ping across the trunk (how? → M17)
+| # | From | Type | Expected | Why |
+|---|---|---|---|---|
+| 1 | PC-HFA-ENG-01 (on ACC1) | `ping 10.10.16.103` (ENG-03 on ACC2) | ✅ | VLAN 10 crosses the trunks via a distribution switch |
+| 2 | PC-HFA-FIN-01 (ACC1) | `ping 10.10.17.103` (FIN-03 on ACC2) | ✅ | VLAN 20 too |
+| 3 | PC-HFA-ENG-01 | `ping 10.10.17.103` | ❌ | still no router |
 
-### 5.4 Watch VTP live
-1. On **DIST1**: `configure terminal` → `vlan 50` → `name TEST` → `end`.
-2. On **ACC2**: `show vlan brief` → VLAN 50 TEST is there within seconds.
-3. On DIST1: `configure terminal` → `no vlan 50` → `end`. Check ACC2 again → gone.
-4. Try on ACC2: `configure terminal` → `vlan 60` → you get
-   `VTP VLAN configuration not allowed when device is in CLIENT mode.` ✅
-
-### 5.5 See the tag (Simulation mode)
-1. Click **Simulation** (bottom right). In the panel click **Show All/None** to clear all
-   filters, then **Edit Filters** → on the **IPv4** tab tick only **ICMP**. Close the filter window.
-2. **Add Simple PDU** (envelope) → click PC-HFA-ENG-01 → click PC-HFA-ENG-03.
-3. Press **Capture / Forward** until the envelope is on an uplink cable. Click the envelope.
-4. In **Outbound PDU Details** you see an **802.1Q** header with `VLAN: 10`. On the PC's own
-   cable there is no such header. That's the sticker!
-5. Back to **Realtime**.
+✅ 1 and 2 reply, 3 fails — all correct.
 
 ---
 
-## Part 6 — Save
-`copy running-config startup-config` on all 4 switches (done above), then **File → Save**.
+## Mission 10 — Watch VTP live and see the tag
+
+### 10a — VTP live
+1. On **DIST1**: `configure terminal` → `vlan 50` → `name TEST` → `end`.
+2. On **ACC2**: `show vlan brief`.
+   ✅ VLAN 50 TEST is there within seconds.
+3. On DIST1: `configure terminal` → `no vlan 50` → `end`. Check ACC2 again.
+   ✅ VLAN 50 is gone.
+4. Try on ACC2: `configure terminal` → `vlan 60`.
+   ✅ You get `VTP VLAN configuration not allowed when device is in CLIENT mode.` Type `end`.
+
+### 10b — See the tag (Simulation mode — how? → M21)
+1. Click **Simulation** (bottom right). In the panel click **Show All/None** to clear all
+   filters, then **Edit Filters** → on the **IPv4** tab tick only **ICMP**. Close the filter window.
+2. **Add Simple PDU** (closed envelope) → click PC-HFA-ENG-01 → click PC-HFA-ENG-03.
+3. Press **Capture / Forward** (▶|) until the envelope is on an **uplink** cable. Click the envelope.
+4. In **Outbound PDU Details** you see an **802.1Q** header with `VLAN: 10`.
+5. Now click an envelope that is on a **PC's** cable — there is no such header.
+6. Back to **Realtime**.
+
+✅ You found the 802.1Q tag on the uplink and no tag on the PC's cable. That's the sticker!
+
+### 10c — Save
+All 4 switches were saved with `copy running-config startup-config`. Now **File → Save**.
+
+---
 
 ## Checkpoint
 - [ ] DIST1 and DIST2 have power supplies and are on
@@ -447,19 +550,40 @@ Gig1/0/1    10,20,30,99,110,120,998
 ## If something doesn't work
 | Problem | Fix |
 |---|---|
-| 3650 is dark, no ports | Power supply missing (3.2) |
-| Uplink light red | Switch ↔ switch needs **Cross-Over**. Delete the cable and redo it |
+| 3650 is dark, no ports | Power supply missing (Mission 2b) |
+| Uplink dot red | Switch ↔ switch needs **Cross-Over**. Delete the cable and redo it |
 | ACC2 doesn't learn VLANs | `show vtp status` on both: domain, password (`show vtp password`), version must match **exactly** (case-sensitive) |
 | `%CDP-4-NATIVE_VLAN_MISMATCH` messages | One end of a trunk has native 998, the other doesn't. Fix the missing side |
 | `show interfaces trunk` shows nothing | The port isn't a trunk on one side, or it's shut down |
 | Ping ENG-01 → ENG-03 fails | Is VLAN 10 in the allowed list on **both** ends? Are the PCs in VLAN 10 (`show vlan brief`)? |
 
-## Challenge
-Run `show spanning-tree vlan 10` on ACC1. One of its two uplinks is **BLK** (blocking). Why
-does the switch block a perfectly good cable? Which switch is the **root bridge** right now,
-and why that one?
+---
 
-<details><summary>Answer</summary>
+## 🏋 Exercises
+
+### Exercise A — Why is one cable blocked? ⭐⭐
+- 🎯 **Task:** find which uplink of ACC1 is blocked, and explain why the switch blocks a
+  perfectly good cable. Which switch is the **root bridge** right now, and why that one?
+- 📁 **Start from:** your `step03.pkt`.
+- 👣 **Steps:**
+  1. On ACC1 run `show spanning-tree vlan 10`.
+  2. In the bottom table, find the port whose **Sts** column says `BLK`.
+  3. At the top, find the **Root ID** block: its **Address** is the MAC of the root switch.
+  4. On each switch run `show version` (or hover over it) to find whose MAC that is.
+- ✅ **Done when:** you can name the blocked port, name the root switch, and explain both in
+  two sentences.
+
+<details><summary>💡 Hint 1</summary>
+
+Draw the four switches and the four cables. Follow a path starting at ACC1 and see if you can
+come back to ACC1.
+</details>
+<details><summary>💡 Hint 2</summary>
+
+The root is the switch with the **lowest bridge ID** = priority, then MAC address. Are the
+priorities different?
+</details>
+<details><summary>✔ Answer</summary>
 
 ACC1 → DIST1 → ACC2 → DIST2 → ACC1 is a **loop**. Without Spanning Tree, a broadcast would
 circle forever (a "broadcast storm") and kill the network in seconds. STP blocks one port to
@@ -471,12 +595,45 @@ maybe an access switch, which is a bad root (traffic would take strange paths). 
 in step 04 by choosing the root ourselves.
 </details>
 
+### Exercise B — Break the native VLAN ⭐⭐
+- 🎯 **Task:** see what happens when the two ends of a trunk disagree on the native VLAN, then
+  fix it.
+- 📁 **Start from:** your `step03.pkt` (Save As `step03-exB.pkt` first).
+- 👣 **Steps:**
+  1. On ACC2: `configure terminal` → `interface gi0/1` → `switchport trunk native vlan 1` → `end`.
+  2. Press Fast Forward Time. Watch the CLI of ACC2 and DIST1 for a few seconds.
+  3. Read the message. Which two ports does it name?
+  4. Fix it so both ends match again.
+- ✅ **Done when:** you saw the error message, explained it in one sentence, and after the fix
+  `show interfaces trunk` on ACC2 shows native `998` on both uplinks.
+
+<details><summary>💡 Hint</summary>
+
+The message starts with `%CDP-4-NATIVE_VLAN_MISMATCH`. CDP is the protocol that tells each
+switch about its neighbour — it noticed the difference.
+</details>
+<details><summary>✔ Answer</summary>
+
+`%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on GigabitEthernet0/1 (1), with
+SWL3-HFA-A-DIST1 GigabitEthernet1/0/2 (998).` — one end sends untagged frames as VLAN 1, the
+other reads them as VLAN 998: traffic would leak between VLANs. Fix on ACC2:
+`interface gi0/1` → `switchport trunk native vlan 998`.
+</details>
+
 ---
 
 ## 🛠 Your own project
 
 You did this step on the Intel example. Now do it again in **your** project, with the values
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
+
+- [ ] Open `my-project/step02.pkt` → **Save As** `my-project/step03.pkt`
+- [ ] Place your two distribution 3650s **with power supplies**, your second access switch, its PCs
+- [ ] Cable the uplinks with **Cross-Over**, following your plan
+- [ ] DIST1: hardening, VTP **server**, your VLANs, trunks, parking
+- [ ] DIST2: hardening, VTP **client** (transparent first), trunks, parking
+- [ ] Both access switches: VTP client (transparent first), trunk uplinks
+- [ ] Mission 9 checks pass in your project
 
 | In the example | In your project — take it from |
 |---|---|
@@ -563,11 +720,11 @@ switch, and explain the native VLAN and allowed list you chose.
 
 ## 👩‍🏫 Teacher notes
 - **Lesson 1 (90 min):** trunks (draw the highway with coloured stickers), native VLAN,
-  allowed list, DTP → build: 3650s + power supplies, cabling with the right cable types →
-  configure DIST1.
+  allowed list, DTP → Missions 1–4: 3650s + power supplies, cabling with the right cable
+  types → Mission 5: configure DIST1.
 - **Lesson 2 (90 min):** VTP with the head-office comparison + the revision-number story →
-  configure DIST2, ACC1, ACC2 → checks 5.1–5.3 → live VTP demo (5.4) → tagging in Simulation
-  mode (5.5) on the projector.
+  Missions 6–8: DIST2, ACC1, ACC2 → Mission 9 checks → Mission 10: live VTP demo and tagging in
+  Simulation mode on the projector.
 - **Common student questions**
   - *"Why don't PCs need to understand tags?"* — The access port adds/removes the tag; the PC
     only ever sees normal frames.
@@ -576,5 +733,5 @@ switch, and explain the native VLAN and allowed list you chose.
     transparent mode — a design choice to discuss in the project book.
   - *"Why is one light orange?"* — Spanning Tree blocks the loop. It's protection, not a fault.
 - **Typical errors:** forgetting the 3650 power supply; straight-through instead of
-  cross-over between switches; VTP domain typo (`HFA-A` ≠ `hfa-a`); native VLAN set on only
-  one side.
+  cross-over between switches; picking Gi1/1/1 instead of Gi1/0/1 in the port list; VTP domain
+  typo (`HFA-A` ≠ `hfa-a`); native VLAN set on only one side.
