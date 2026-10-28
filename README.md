@@ -5,7 +5,7 @@ project (**שאלון 735918 — פרויקט גמר הנדסאים, רשתות 
 
 The course teaches every topic of the final project on **one worked example**: a 3-branch
 network for **Intel Israel**. Every step explains the *why*, gives you the exact devices,
-cables and commands, tells you how to **verify** it works, and ends with a **challenge** you
+cables and commands, tells you how to **verify** it works, and ends with **exercises** you
 solve on your own.
 
 **Intel Israel is only the example.** Your final project is **your own company**, with your
@@ -18,7 +18,7 @@ Every step has two parts:
 
 | | Where | What you do |
 |---|---|---|
-| **1. Learn** | `my-work/stepNN.pkt` | Follow the step exactly, with the Intel values. Type every command as shown, verify, solve the challenge. This is practice — nobody grades it. |
+| **1. Learn** | `my-work/stepNN.pkt` | Follow the step exactly, with the Intel values. Type every command as shown, verify, solve the exercises. This is practice — nobody grades it. |
 | **2. Build your own** | `my-project/` | Do the same step again in **your** project, with the values from **your** plan. The section **🛠 Your own project** at the end of every step lists exactly what to take from your plan. |
 
 Before you start:
