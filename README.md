@@ -91,11 +91,11 @@ and then the same step in your own project.
 | 02 | [First switch & VLANs](steps/02-first-switch-vlans) | Basic hardening, VLANs, access ports | 1 h |
 | 03 | [Trunks & VTP](steps/03-trunks-and-vtp) | 802.1Q trunks, native VLAN, VTP | 1 h |
 | 04 | [EtherChannel & STP](steps/04-etherchannel-and-stp) | LACP, Rapid-PVST+, root bridge, PortFast, BPDU/Root guard | 1.5 h |
-| 05 | [Inter-VLAN, HSRP, DHCP](steps/05-intervlan-hsrp-dhcp) | SVIs, first-hop redundancy, DHCP on a router | 1.5 h |
+| 05 | [Inter-VLAN, HSRP, DHCP](steps/05-intervlan-hsrp-dhcp) | SVIs, first-hop redundancy, DHCP on the Layer-3 switches | 1.5 h |
 | 06 | [Layer-2 security](steps/06-layer2-security) | Port-security, DHCP snooping, hardening | 1 h |
 | 07 | [SSH management](steps/07-ssh-management) | Management VLAN, SSH, VTY ACL | 1 h |
 | 08 | [Core, OSPF, servers](steps/08-core-ospf-servers) | Routed links, OSPF areas, MD5, AAA/TACACS+, Syslog | 2 h |
-| 09 | [Buildings B & C + virtual link](steps/09-buildings-b-c-virtual-link) | **You** build 2 buildings alone; OSPF virtual link, summarization | 3 h |
+| 09 | [Buildings B & C + virtual link](steps/09-buildings-b-c-virtual-link) | **You** build 2 buildings alone; OSPF virtual link, summarization; Physical view (city + buildings) | 3 h |
 | 10 | [Wireless](steps/10-wireless) | Employee + guest WiFi, guest isolation ACL | 1 h |
 | 11 | [ASA firewall & DMZ](steps/11-asa-firewall-dmz) | inside/outside/DMZ, security levels, ACLs, 6 DMZ servers, NTP | 2 h |
 | 12 | [WAN: ISPs, BGP, NAT](steps/12-wan-isp-bgp-nat) | eBGP, OSPF inside an AS, static NAT + PAT, DSL backup | 2.5 h |
