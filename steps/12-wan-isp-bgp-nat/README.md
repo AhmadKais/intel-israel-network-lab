@@ -508,14 +508,16 @@ Tick each router when both of its lines end with a number:
 ```
    Network          Next Hop            Metric LocPrf Weight Path
 *> 200.1.0.0/16     0.0.0.0                  0         32768 i
-*> 200.2.0.0/16     200.0.12.2               0             0 200 i
+*  200.2.0.0/16     200.0.13.2                             0 300 200 i
+*>                  200.0.12.2               0             0 200 i
 *  200.3.0.0/16     200.0.12.2                             0 200 300 i
 *>                  200.0.13.2               0             0 300 i
 ```
 How to read it:
 - `*>` = the **best** path (the one used).
 - `Path` = the list of ASes on the way. `i` at the end = "came from inside that AS".
-- `200.3.0.0` has **two** paths: direct (`300`) and through ISP-B (`200 300`). The shorter one wins;
+- `200.3.0.0` has **two** paths: direct (`300`) and through ISP-B (`200 300`). (`200.2.0.0` too:
+  direct `200` and through ISP-C `300 200`.) The shorter one wins;
   the longer one is the backup.
 
 📝 In your notebook: "To reach ISP-C, ISP-A goes ______; if that link breaks it goes ______."
@@ -696,7 +698,8 @@ copy running-config startup-config
 
 🔍 **Check now:**
 1. `ping 200.2.9.1` → `!!!!!` (the DSL line works).
-2. `show ip route static` → **only** `S* 0.0.0.0/0 [1/0] via 200.1.1.1` — the backup is hidden.
+2. `show ip route static` → `S* 0.0.0.0/0 [1/0] via 200.1.1.1` (and `S 10.10.0.0/16` to the ASA from step 11) — **no**
+   route via `200.2.9.1`: the backup is hidden.
    That's correct: it waits.
 
 ❌ **If the DSL link is red:** the cloud mapping (12b) is missing, or the phone cable is on the

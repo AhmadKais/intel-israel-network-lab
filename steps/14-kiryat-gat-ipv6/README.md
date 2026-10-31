@@ -358,8 +358,8 @@ interface gi1/1/1
 > The uplink also has an IPv4 address (10.30.4.2) — only for the legacy VLAN 199.
 
 ### 6b — The six user VLAN gateways
-Every block is the same 9 lines; only the **VLAN number** changes (in 4 places: `vlan 31`,
-`:31::2`, `standby 31` ×3).
+Every block has the same 11 lines; only the **VLAN number** changes (in 5 places: `vlan 31`,
+`:31::2`, `standby 31` ×3) — and the description.
 
 ⌨️ Type:
 ```

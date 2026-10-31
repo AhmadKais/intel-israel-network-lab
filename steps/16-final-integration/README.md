@@ -234,6 +234,14 @@ show running-config | include hostname|banner|enable secret|service password|ip 
 ✅ **Each must show:** a logical hostname, a banner, `enable secret`, `service password-encryption`,
 `ip ssh version 2`, a `logging host`, an `ntp server`.
 
+> **Expected exceptions (by design — don't "fix" them):**
+> - **SW-HFA-DMZ** is managed from the console only (step 11): no `ip ssh`, `logging host`,
+>   `ntp server` or VTY lines.
+> - **Kiryat Gat:** only DIST1 has an `ntp server` line (step 14); logging shows as `logging host ipv6 ...`.
+> - **ASA** has its own commands (`enable password`, `ssh ...`, `write memory`). It has no banner
+>   yet — add one: `configure terminal` → `banner motd Intel Israel - AUTHORIZED ACCESS ONLY` →
+>   `end` → `write memory`.
+
 ⌨️ Then:
 ```
 show running-config | section vty
