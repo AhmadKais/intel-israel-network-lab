@@ -418,9 +418,9 @@ Packet Tracer shows the **same network** in two ways:
    tabs: **Logical** and **Physical**.
 2. Click **Physical**. You see the **Intercity** map with one city: **Home City**.
 3. Click **Home City** → you see a building: **Corporate Office**.
-4. Click **Corporate Office** → you see the end devices (PCs, printers…) and a closet:
-   **Main Wiring Closet**.
-5. Click **Main Wiring Closet** → you see the switches and routers in racks.
+4. Click **Corporate Office** → you see a closet: **Main Wiring Closet**.
+5. Click **Main Wiring Closet** → you see the switches and routers in racks, and the PCs,
+   servers and printers on a table. (Every new device starts here — see M26.)
 6. To go **up** one level: on the bar at the top of the workspace click the name of the level
    you want (e.g. **Intercity**), or click **Back**.
 7. Click the **Logical** tab to go back to the normal map.
@@ -469,14 +469,18 @@ default name is which site (e.g. "City 1 = Jerusalem").
 ## M26 — Move a device to another city, building or closet
 👉 Physical view (M24).
 
+**Where does a new device start?** Every device you add in the **Logical** view starts in the
+**working closet** — in this project **Haifa → HFA Data Center → Main Wiring Closet**. Switches
+and routers sit in its racks, PCs, servers and printers on a table. In the **Navigation** tree
+they are listed under that closet. Not there? Look directly under **HFA Data Center**.
+
 **One device:**
 1. Go to the place where the device is **now** (e.g. Home City → Corporate Office → Main Wiring
    Closet).
 2. On the bar, click **Move Object**.
 3. Click the device. A small menu opens with the tree of all places (Intercity → cities →
    buildings → closets).
-4. Open the tree and click the destination (e.g. **Haifa → HFA Building B → Main Wiring
-   Closet**).
+4. Open the tree and click the destination (e.g. **Haifa → HFA Building B → Closet B**).
 5. Go to the destination and check: the device is there (in the top-left corner, or in a rack
    in a closet).
 

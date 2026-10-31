@@ -134,8 +134,9 @@ Intercity (the country map)
            └── Wiring closet   e.g. Main Wiring Closet   (switches and routers in racks)
 ```
 
-At the start, everything is in **Home City → Corporate Office**: switches and routers in its
-**Main Wiring Closet**, PCs and printers in the building itself.
+At the start, everything is in **Home City → Corporate Office → Main Wiring Closet**: switches
+and routers in its racks, PCs, servers and printers on a table. (Can't find an end device there?
+Look directly under **Corporate Office**.)
 
 ---
 
@@ -148,13 +149,13 @@ Do it once the site is built and working (the steps tell you when: steps 09, 12,
 
    | City | Building | Closet | Devices |
    |---|---|---|---|
-   | Haifa | HFA Data Center (renamed *Corporate Office*) | Main Wiring Closet | CORE1/2, SW-HFA-SRV, servers, ASA, R-HFA-EDGE, SW-HFA-DMZ, DMZ servers |
+   | Haifa | HFA Data Center (renamed *Corporate Office*) | Main Wiring Closet | CORE1/2, SW-HFA-SRV, servers, ASA, R-HFA-EDGE, SW-HFA-DMZ, DMZ servers, DSL-HFA |
    | Haifa | HFA Building A | Closet A | A-DIST1/2, A-ACC1/2 (+ PCs, printer, APs, laptops in the building) |
    | Haifa | HFA Building B | Closet B | B-DIST1/2, B-ACC1/2 (+ PCs, printer) |
    | Haifa | HFA Building C | Closet C | C-DIST1/2, C-ACC1/2 (+ PCs, printer) |
-   | Internet | ISP-A / ISP-B / ISP-C / Home | one closet each | the provider routers, internet servers, DSL modem, cloud, PC-HOME-01 |
-   | Jerusalem | JLM Office | Main closet | CC1, CC2, R-JLM-EDGE, SW-JLM-SRV, servers, the 3 floor switches (+ PCs, printers) |
-   | Kiryat Gat | KG Fab | Main closet | DIST1/2, ACC1/2/3, R-KG-EDGE, SW-KG-SRV, servers (+ PCs, printers) |
+   | Internet | ISP-A / ISP-B / ISP-C / Home | — (no closets) | the provider routers, internet servers, cloud, PC-HOME-01 |
+   | Jerusalem | JLM Office | JLM Main Closet + one closet per floor | CC1, CC2, R-JLM-EDGE, SW-JLM-SRV in the main closet; each floor switch in its floor closet (+ servers, PCs, printers) |
+   | Kiryat Gat | KG Fab | KG Main Closet | DIST1/2, ACC1/2/3, R-KG-EDGE, SW-KG-SRV (+ servers, PCs, printers) |
 
 2. **Make the places** (M25): rename *Home City* → `Haifa`, make the new cities, buildings and
    closets.
@@ -193,22 +194,25 @@ There are **two different kinds of "move"** — know which one you need:
 | **Move to another network** (logical) | the switch it's plugged into, its VLAN, its IP address | the device itself | the 8 steps in 4.2 |
 
 ### 4.1 Opening a new city and moving its devices there (physical)
-Example: you just built Jerusalem (step 13). All its devices are still in Home City / Haifa.
+Example: you just built Jerusalem (step 13). All its devices are still in **Haifa → HFA Data
+Center → Main Wiring Closet** (where every new device starts).
 
 1. Physical view → **Intercity** → **New City** → rename it `Jerusalem` (M25).
 2. Click it → **New Building** → rename `JLM Office`.
-3. Click the building → **New Closet** → rename `JLM Main Closet`.
-4. Go back to where the Jerusalem devices are now. **Navigation** → drag every `…-JLM-…`
-   switch and router into **Jerusalem → JLM Office → JLM Main Closet**, and every Jerusalem
-   PC, printer and server into **Jerusalem → JLM Office** (M26).
+3. Click the building → **New Closet** 4 times → rename them `JLM Main Closet`, `Floor 1 Closet`,
+   `Floor 2 Closet`, `Floor 3 Closet` (one closet per floor).
+4. **Navigation** → drag the edge router, the two core switches and SW-JLM-SRV into **JLM Main
+   Closet**, each floor switch (`SW-JLM-F1-ACC1` …) into its floor closet, and every Jerusalem
+   PC, printer and server into **Jerusalem → JLM Office** (M26). The full table is in step 13,
+   Mission 17.
 5. Go to **Intercity**. ✅ A line now joins Haifa, Jerusalem and Internet — those are the WAN
    links between the cities.
 6. Logical view: `ping` from a Jerusalem PC to the internet still works.
 
 ❌ Link down after the move → cable length effects are on — see M26 ❌.
 
-**Moving a whole logical group (cluster) into a new cluster:** Logical view → **Move Object**
-→ click the device → choose the new cluster in the menu (M27).
+**Moving a device into a cluster (Logical view, not a city):** **Move Object** → click the
+device → choose the cluster in the menu. Repeat for each device (M27).
 
 ### 4.2 Moving a device to a different network (logical)
 Example: PC-HFA-ENG-08 moves from Haifa Engineering to **Jerusalem Sales**.

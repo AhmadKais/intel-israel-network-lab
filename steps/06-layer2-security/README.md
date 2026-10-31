@@ -418,7 +418,7 @@ example. Cover the answer, say yours, then open it and compare.
 
 **Rogue DHCP server:** an attacker's device answers DHCP requests and hands out itself as the gateway (man-in-the-middle). Solution: **DHCP snooping** — only ports marked `trust` (the uplinks toward the real server) may send DHCP offers; offers from any other port are dropped.
 
-**Show it:** `show ip dhcp snooping`, `show running-config interface <uplink>` → `ip dhcp snooping trust`
+**Show it:** `show ip dhcp snooping`, `show running-config interface <uplink>` (e.g. `show running-config interface gi0/1`) → `ip dhcp snooping trust`
 </details>
 
 **2. ★3 What is DHCP starvation? How do you prevent it, and where did you configure it?**

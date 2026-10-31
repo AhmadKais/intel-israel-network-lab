@@ -8,7 +8,7 @@
 ## 🗺 Your missions in this step
 - [ ] **Mission 1** — Read "Understand it first" and do the mini-checks (60 min)
 - [ ] **Mission 2** — Learn the Haifa plan you will build (15 min)
-- [ ] **Mission 3** — Calculation exercises 1–5 on paper (30 min)
+- [ ] **Mission 3** — Calculation exercises 3.1–3.5 on paper (30 min)
 - [ ] **Mission 4** — Draw building A on paper (10 min)
 - [ ] **Mission 5** — Prepare the Packet Tracer file: 3 buildings + core (15 min)
 - [ ] **Exercise** — the IPv6 pattern

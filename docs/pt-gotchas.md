@@ -44,6 +44,6 @@ before assuming you made a mistake.
 | VTP wiped all your VLANs | A switch with a higher revision number joined the domain. Before joining any switch, set `vtp mode transparent` then back to `client` — this resets the revision to 0. |
 | A link goes red/down right after you moved a device to another city or building | **Cable length effects** are on: a copper cable is max 100 m. **Options → Preferences → Interface** → untick *Enable Cable Length Effects*. |
 | A laptop loses WiFi after you moved it in the Physical view | Wireless has a range. In the building, drag the laptop next to its access point. |
-| A new device "disappeared" from the Physical view | It was placed in the current working place (usually the first building's closet). **Navigation** → find it in the tree → drag it where it belongs. |
+| A new device "disappeared" from the Physical view | It was placed in the **working closet** (in this project: HFA Data Center → Main Wiring Closet), not where you are looking. **Navigation** → find it in the tree → drag it where it belongs. |
 | Clicking a city / building name opens it instead of renaming it | Click on the **text** of the name, just below the icon, not on the icon. |
 

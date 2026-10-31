@@ -102,7 +102,8 @@ Totals: 48 PCs per branch, **144** user PCs.
 
 4. Each PC → **Desktop → IP Configuration → DHCP** (M16).
 5. Each PC → **Command Prompt** → `ping 10.10.16.1` (the gateway) — so port-security learns its MAC.
-6. **Physical** tab → **Navigation** → the 5 new PCs are in **Haifa → HFA Data Center** → drag
+6. **Physical** tab → **Navigation** → the 5 new PCs are in **Haifa → HFA Data Center → Main Wiring Closet** (or directly under
+   HFA Data Center) → drag
    them onto **HFA Building A** (M26) → **Logical** tab.
 
 ✅ **You should see:** each PC has a `10.10.16.x` address and the ping replies.
@@ -258,7 +259,7 @@ on Windows **Win+Shift+S** (M22). Save as `test-01.png`, `test-02.png` … in a 
 
 | # | From | Do | Proves | Done |
 |---|---|---|---|---|
-| 1 | PC-HFA-ENG-01 | `ping` PC-HFA-IT-01 | inter-VLAN + OSPF areas 1 → 0 → 2 → 3 (virtual link) | - [ ] |
+| 1 | PC-HFA-ENG-01 | `ping` PC-HFA-IT-01's address (`10.10.49.x` — read it with `ipconfig` on IT-01) | inter-VLAN + OSPF areas 1 → 0 → 2 → 3 (virtual link) | - [ ] |
 | 2 | PC-HFA-ENG-01 | browse `http://www.isp-web1.com` | ASA → edge PAT → BGP internet | - [ ] |
 | 3 | PC-HOME-01 | browse `http://www.intel.lab` | static NAT + ASA ACL | - [ ] |
 | 4 | LT-HFA-GUEST-01 | `ping 10.10.1.10` ❌ / browse `www.isp-web2.com` ✅ | guest isolation | - [ ] |
@@ -268,11 +269,11 @@ on Windows **Win+Shift+S** (M22). Save as `test-01.png`, `test-02.png` … in a 
 | 8 | PC-KG-FAB-01 | browse `http://www6.isp-web.com` | IPv6 end to end | - [ ] |
 | 9 | PC-KG-LEGACY-01 | `ping 200.1.100.11` | PAT (overload) | - [ ] |
 | 10 | PC-HOME-01 | VPN client → `ping 10.10.1.10` | remote-access VPN | - [ ] |
-| 11 | PC-HFA-IT-01 | `ssh` to devices in Haifa and Jerusalem | SSH + AAA + management ACL | - [ ] |
-| 12 | PC-HFA-RND-01 | `ssh` to a switch ❌ | management ACL blocks non-admins | - [ ] |
+| 11 | PC-HFA-IT-01 | `ssh -l admin 10.10.19.11` (Haifa) and `ssh -l admin 10.20.0.11` (Jerusalem) | SSH + AAA + management ACL | - [ ] |
+| 12 | PC-HFA-RND-01 | `ssh -l admin 10.10.19.11` ❌ | management ACL blocks non-admins | - [ ] |
 | 13 | **File → Save**, then delete A-DIST1 (**Delete** tool); re-open the saved file afterwards | `ping -t` from an ENG PC keeps going | HSRP + STP + OSPF redundancy | - [ ] |
-| 14 | shut R-HFA-EDGE Gi0/1 | `show ip route` → default via 200.2.9.1 | DSL floating static | - [ ] |
-| 15 | shut ISPA-BR ↔ ISPC-BR link | PC-HOME-01 → www.intel.lab still works | BGP redundancy | - [ ] |
+| 14 | R-HFA-EDGE: `configure terminal` → `interface gi0/1` → `shutdown` → `end` | `show ip route static` → `S* 0.0.0.0/0 [10/0] via 200.2.9.1` | DSL floating static | - [ ] |
+| 15 | R-ISPA-BR: `configure terminal` → `interface gi0/2` (the link to ISPC-BR) → `shutdown` → `end` | PC-HOME-01 → www.intel.lab still works | BGP redundancy | - [ ] |
 | 16 | rogue DHCP server on an access port | PC still gets the real lease | DHCP snooping | - [ ] |
 | 17 | rogue switch on a PortFast port | port err-disabled | BPDU Guard | - [ ] |
 | 18 | `show ntp status` in each branch | synchronized | NTP hierarchy | - [ ] |

@@ -1024,7 +1024,7 @@ Area 0 is the **backbone**: every other area must connect to it, and traffic bet
 
 On Ethernet (broadcast and point-to-point): Hello 10 s, Dead 40 s. Neighbors must have the same timers to become adjacent.
 
-**Show it:** `show ip ospf interface <int>`
+**Show it:** `show ip ospf interface <int>` (e.g. `show ip ospf interface gi1/1/1`)
 </details>
 
 **4. ★1 How do you see OSPF's topology table? And the neighbor table?**
@@ -1069,7 +1069,7 @@ The BDR becomes DR and a new BDR is elected. The election is **not pre-emptive**
 
 Point-to-point: exactly two routers on the link — no DR/BDR election. Broadcast (Ethernet): many routers can share the segment — a DR/BDR is elected. An Ethernet /30 is type broadcast by default unless you set `ip ospf network point-to-point`.
 
-**Show it:** `show ip ospf interface <int>` → Network Type
+**Show it:** `show ip ospf interface <int>` (e.g. `show ip ospf interface gi1/1/1`) → Network Type
 </details>
 
 **9. ★2 What is an LSA type 1, and how is it marked in the routing table? And type 3?**
@@ -1096,7 +1096,7 @@ A router with interfaces in area 0 and in another area. In this project the dist
 
 MD5 authentication on the routed links (`ip ospf authentication message-digest` + `ip ospf message-digest-key 1 md5 <key>`) — a router without the key can't become a neighbor and inject routes (req. 22.18).
 
-**Show it:** `show ip ospf interface <int>` → "Message digest authentication enabled"
+**Show it:** `show ip ospf interface <int>` (e.g. `show ip ospf interface gi1/1/1`) → "Message digest authentication enabled"
 </details>
 
 **12. ★1 What is the role of the NTP server? Show the configuration on the server and on a switch.**

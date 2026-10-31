@@ -1475,7 +1475,7 @@ Jerusalem is **one building with 3 floors**, so it gets one building with a clos
 1. On the bar click **Navigation**.
 2. Open **Haifa → HFA Data Center → Main Wiring Closet**. Drag every name with **`-JLM-`** that
    is a switch or router to its closet (table above).
-3. Open **Haifa → HFA Data Center**. Drag every **`-JLM-`** server, PC and printer onto
+3. In the same closet (and directly under **HFA Data Center**) drag every **`-JLM-`** server, PC and printer onto
    **Jerusalem → JLM Office**.
 4. Close the window.
 

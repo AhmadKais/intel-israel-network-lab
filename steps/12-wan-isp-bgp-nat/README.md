@@ -751,8 +751,8 @@ provider.
 
 ### 14b — Move the devices (how? → M26)
 1. On the bar click **Navigation**.
-2. The new devices are in **Haifa → HFA Data Center** (routers and switches in its **Main
-   Wiring Closet**, servers and the PC in the building itself). Drag each one onto its building
+2. The new devices are in **Haifa → HFA Data Center** (look in its **Main
+   Wiring Closet**, and directly under **HFA Data Center**). Drag each one onto its building
    under **Internet** (table above).
 3. Close the window.
 

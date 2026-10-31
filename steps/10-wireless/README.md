@@ -310,7 +310,8 @@ copy running-config startup-config
 building A (step 09, Mission 19).
 
 1. **Physical** tab → on the bar click **Navigation**.
-2. Open **Haifa → HFA Data Center**. Drag **AP-HFA-A-EMP**, **AP-HFA-A-GUEST**,
+2. Open **Haifa → HFA Data Center → Main Wiring Closet** (a name isn't there? look directly under
+   **HFA Data Center**). Drag **AP-HFA-A-EMP**, **AP-HFA-A-GUEST**,
    **LT-HFA-EMP-01**, **LT-HFA-EMP-02** and **LT-HFA-GUEST-01** onto **HFA Building A**.
 3. Close the window → click **HFA Building A** on the map → the 5 devices are there, top-left.
 4. **Logical** tab → LT-HFA-EMP-01 → `ping 10.10.1.10` → still ✅.
@@ -432,7 +433,7 @@ example. Cover the answer, say yours, then open it and compare.
 
 An extended ACL on the gateway of the guest VLAN: deny from the guest subnet to the internal blocks, then permit everything else (the internet). Applied `in` on the guest SVI (`ip access-group GUEST-IN in`). This is the guest-isolation ACL of this step.
 
-**Show it:** `show access-lists GUEST-IN`, `show running-config interface vlan <guest>`
+**Show it:** `show access-lists GUEST-IN`, `show running-config interface vlan 120` (the guest VLAN)
 </details>
 
 **2. ◆ What is an SSID? Why two SSIDs?**
@@ -441,7 +442,7 @@ An extended ACL on the gateway of the guest VLAN: deny from the guest subnet to 
 
 The name of a wireless network. Each SSID is mapped to its own VLAN — employees to the employee VLAN, guests to the guest VLAN — so guests are separated from the company (req. 18).
 
-**Show it:** AP → Config → Wireless
+**Show it:** AP → Config → **Port 1** (the SSID field)
 </details>
 
 **3. ◆ What is the difference between WPA2-Personal (PSK) and WPA2-Enterprise?**
@@ -450,7 +451,7 @@ The name of a wireless network. Each SSID is mapped to its own VLAN — employee
 
 Personal: everyone shares one password. Enterprise: every user logs in with their own username/password, checked by a RADIUS server — a leaving employee is just disabled.
 
-**Show it:** AP → Config → Wireless → Authentication
+**Show it:** AP → Config → **Port 1** → Authentication
 </details>
 
 ---

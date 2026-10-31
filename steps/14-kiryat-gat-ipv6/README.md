@@ -1352,7 +1352,7 @@ and **IPv6 Configuration** below it. For IPv6-only devices, leave the **IPv4** f
 ### 15b — Move the devices (how? → M26)
 1. **Navigation** → open **Haifa → HFA Data Center → Main Wiring Closet** → drag every
    **`-KG-`** switch and router onto **Kiryat Gat → KG Fab → KG Main Closet**.
-2. Open **Haifa → HFA Data Center** → drag every **`-KG-`** server, PC and printer onto
+2. In the same closet (and directly under **HFA Data Center**) drag every **`-KG-`** server, PC and printer onto
    **Kiryat Gat → KG Fab**.
 3. Drag **SRV-ISPC-WEB6** onto **Internet → ISP-C**.
 4. Close the window.

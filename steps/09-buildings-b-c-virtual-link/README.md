@@ -470,7 +470,8 @@ router ospf 1
 ```
 
 ### 6e — Management
-⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back).
+If a line `login block-for …` or `ip tacacs source-interface …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -686,7 +687,8 @@ router ospf 1
 ```
 
 ### 7d — Management
-⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back).
+If a line `login block-for …` or `ip tacacs source-interface …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -808,7 +810,8 @@ interface vlan 99
  exit
 ip default-gateway 10.10.35.1
 ```
-⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full).
+If the line `login block-for …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -922,7 +925,8 @@ interface vlan 99
  exit
 ip default-gateway 10.10.35.1
 ```
-⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full).
+If the line `login block-for …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -1214,7 +1218,8 @@ router ospf 1
 > `network 10.10.36.0 0.0.0.15` = the 16 addresses 10.10.36.0–15: exactly the four B↔C links.
 
 ### 11e — Management
-⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back).
+If a line `login block-for …` or `ip tacacs source-interface …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -1405,7 +1410,8 @@ router ospf 1
 ```
 
 ### 12d — Management
-⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back).
+If a line `login block-for …` or `ip tacacs source-interface …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -1524,7 +1530,8 @@ interface vlan 99
  exit
 ip default-gateway 10.10.51.1
 ```
-⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full).
+If the line `login block-for …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -1638,7 +1645,8 @@ interface vlan 99
  exit
 ip default-gateway 10.10.51.1
 ```
-⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full).
+If the line `login block-for …` is rejected, skip only that line:
 ```
 ip domain-name intel.lab
 username admin privilege 15 secret Intel#Adm1n
@@ -1867,7 +1875,8 @@ Inside **Haifa**:
 1. On the bar click **Navigation** → a window with a tree opens.
 2. Open **Haifa → HFA Data Center → Main Wiring Closet**: all the switches are here.
 3. **Drag** each building-A switch (the 4 names in the table) onto **HFA Building A → Closet A**.
-4. Open **Haifa → HFA Data Center**: the PCs, printers and servers are here. Drag each
+4. The PCs, printers and servers are in the same closet (on a table) or directly under
+   **HFA Data Center** — look in both. Drag each
    building-A end device onto **HFA Building A** (the building itself, not the closet).
 5. Same for building B, then building C.
 6. Close the Navigation window.
@@ -1882,7 +1891,7 @@ Tick: - [ ] Building A - [ ] Building B - [ ] Building C
 2. PC-HFA-HR-01 → `ping 10.10.1.10` → replies.
 3. **File → Save**.
 
-> From now on, new devices you place in the Logical view usually appear in **HFA Data Center**.
+> From now on, new devices you place in the Logical view usually appear in **HFA Data Center → Main Wiring Closet**.
 > Every following step tells you where to move them. If one appears somewhere else, find it in
 > the **Navigation** tree and drag it (M26).
 

@@ -718,7 +718,7 @@ Serves web pages. HTTP = TCP 80, clear text. HTTPS = TCP 443, HTTP encrypted wit
 
 Translates names to IP addresses (`www.intel.lab` → `10.10.200.13`). UDP 53 (TCP 53 for large transfers).
 
-**Show it:** Server → Services → DNS (the records); PC → `nslookup <name>`
+**Show it:** Server → Services → DNS (the records); PC → `nslookup <name>` (e.g. `nslookup www.intel.lab`)
 </details>
 
 **6. ★1 What is the role of an FTP server? Which port? Show its configuration.**

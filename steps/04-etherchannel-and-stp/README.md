@@ -454,7 +454,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 | Root bridge per VLAN: DIST1 for 10,30,99,110 — DIST2 for 20,120 | plan part D (the "primary" column — STP root must match the HSRP primary) |
 | PortFast / BPDU guard on the user ports | your access ports from the port plan |
 
-**Check:** `show etherchannel summary` shows `(SU)` and `(P)`; `show spanning-tree vlan <yours>`
+**Check:** `show etherchannel summary` shows `(SU)` and `(P)`; `show spanning-tree vlan <yours>` (e.g. `show spanning-tree vlan 10`)
 shows the right switch as root for each of your VLANs.
 
 💾 Save as `my-project/step04.pkt`.
@@ -503,7 +503,7 @@ LACP (IEEE 802.3ad, open standard — modes `active`/`passive`) and PAgP (Cisco 
 
 To prevent Layer-2 loops in a redundant network: it blocks some ports so there is exactly one active path between any two switches, and unblocks a backup if the active path fails.
 
-**Show it:** `show spanning-tree vlan <yours>`
+**Show it:** `show spanning-tree vlan <yours>` (e.g. `show spanning-tree vlan 10`)
 </details>
 
 **5. ★2 Where is STP used in your project and which type?**
@@ -521,7 +521,7 @@ On every switch, in Rapid-PVST+ mode (`spanning-tree mode rapid-pvst`): one rapi
 
 The root has the lowest bridge ID (priority + MAC). `show spanning-tree vlan 10` → "This bridge is the root". To make another switch root: `spanning-tree vlan 10 root primary` (or `spanning-tree vlan 10 priority 4096`).
 
-**Show it:** `show spanning-tree vlan <yours>` on both distribution switches
+**Show it:** `show spanning-tree vlan <yours>` (e.g. `show spanning-tree vlan 10`) on both distribution switches
 </details>
 
 **7. ★2 Show me the port states. What does Blocking / Forwarding mean?**
@@ -530,7 +530,7 @@ The root has the lowest bridge ID (priority + MAC). `show spanning-tree vlan 10`
 
 Forwarding (FWD): the port sends and receives frames. Blocking (BLK, in RSTP "discarding"): it only listens to BPDUs and drops data frames, to break a loop. Port roles: Root, Designated, Alternate/Backup.
 
-**Show it:** `show spanning-tree vlan <yours>`
+**Show it:** `show spanning-tree vlan <yours>` (e.g. `show spanning-tree vlan 10`)
 </details>
 
 **8. ★2 What is a BPDU?**
@@ -584,7 +584,7 @@ An attacker plugs in a switch that sends BPDUs with a better (lower) priority, b
 
 BPDU Guard shuts the port if **any** BPDU arrives — for ports with end devices. Root Guard allows BPDUs but blocks the port (root-inconsistent) if a **superior** BPDU arrives — for switch-to-switch ports where a new root must never appear.
 
-**Show it:** `show running-config` on a downlink → `spanning-tree guard root`; `show spanning-tree vlan <yours>`
+**Show it:** `show running-config` on a downlink → `spanning-tree guard root`; `show spanning-tree vlan <yours>` (e.g. `show spanning-tree vlan 10`)
 </details>
 
 ---
