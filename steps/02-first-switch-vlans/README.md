@@ -496,7 +496,7 @@ interface fa0/2
  switchport access vlan 20
  end
 ```
-PC-HFA-ENG-02 → IP `10.10.17.103` / `255.255.255.0` → `ping 10.10.17.101` → replies. This is
+PC-HFA-ENG-02 → IP `10.10.17.103` / `255.255.255.0` (M14) → Command Prompt (M17) → `ping 10.10.17.101` → replies. This is
 "organisation" from 1.1: the desk moved, only the port's VLAN changed.
 Go back to `step02.pkt` (not the exercise copy) for step 03.
 </details>

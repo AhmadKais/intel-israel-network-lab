@@ -470,8 +470,43 @@ router ospf 1
 ```
 
 ### 6e — Management
-⌨️ Type the **🅼 management block for L3 switches** from section 1.6 (answer `1024` to the key
-question).
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+ip tacacs source-interface loopback 0
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]` at the end. 🔍 `show ip interface brief` → Loopback0 `10.10.5.21`, Gi1/1/1–4 and
 Vlan40/50/60/99 with the addresses from 1.5.
@@ -651,7 +686,43 @@ router ospf 1
 ```
 
 ### 7d — Management
-⌨️ Type the **🅼 management block for L3 switches** (section 1.6).
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+ip tacacs source-interface loopback 0
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]`. Press Fast Forward Time. 🔍 `show standby brief` → Active for 50, Standby for 40/60/99.
 
@@ -737,7 +808,42 @@ interface vlan 99
  exit
 ip default-gateway 10.10.35.1
 ```
-⌨️ Then the **🅰 management block for access switches** (section 1.6).
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]`.
 
@@ -816,7 +922,42 @@ interface vlan 99
  exit
 ip default-gateway 10.10.35.1
 ```
-⌨️ Then the **🅰 management block for access switches**.
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]`. 🔍 On B-ACC2: `show vtp status` → domain `HFA-B`, mode Client;
 `show interfaces trunk` → Gi0/1, Gi0/2 trunking, native 998.
@@ -1073,7 +1214,43 @@ router ospf 1
 > `network 10.10.36.0 0.0.0.15` = the 16 addresses 10.10.36.0–15: exactly the four B↔C links.
 
 ### 11e — Management
-⌨️ Type the **🅼 management block for L3 switches** (section 1.6).
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+ip tacacs source-interface loopback 0
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]`.
 
@@ -1228,7 +1405,43 @@ router ospf 1
 ```
 
 ### 12d — Management
-⌨️ Type the **🅼 management block for L3 switches** (section 1.6).
+⌨️ Type the **🅼 management block** (the same on all 4 L3 switches — here in full, so you don't have to scroll back):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+ip tacacs source-interface loopback 0
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
 
 ✅ `[OK]`.
 
@@ -1311,17 +1524,158 @@ interface vlan 99
  exit
 ip default-gateway 10.10.51.1
 ```
-⌨️ Then the **🅰 management block for access switches**. ✅ `[OK]`.
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
+
+✅ `[OK]`.
 
 ### 13b — SW-HFA-C-ACC2
 👉 **Where:** **SW-HFA-C-ACC2** → CLI → **Enter** → `Switch>`.
 
-Type the **whole 13a block again** with these **two** lines changed:
-- `hostname SW-HFA-C-ACC2`
-- under `interface vlan 99`: `ip address 10.10.51.12 255.255.255.0`
+Exactly the same as 13a, with **two changes**: `hostname SW-HFA-C-ACC2` and management IP
+`10.10.51.12`. Here is the full block so you don't have to scroll:
 
-(and `description printer` on Fa0/21 if you like — it's only a label).
-Then the **🅰 management block**. ✅ `[OK]`.
+⌨️ Type:
+```
+enable
+configure terminal
+hostname SW-HFA-C-ACC2
+no ip domain-lookup
+enable secret Intel#En4ble
+service password-encryption
+banner motd #
+*  Intel Israel - AUTHORIZED ACCESS ONLY - all activity is logged  *
+#
+vtp mode transparent
+vtp domain HFA-C
+vtp version 2
+vtp password Intel#Vtp
+vtp mode client
+spanning-tree mode rapid-pvst
+interface range gi0/1 - 2
+ description TRUNK uplink to C-DIST1 / C-DIST2
+ switchport mode trunk
+ switchport trunk native vlan 998
+ switchport trunk allowed vlan 70,80,90,99,998
+ switchport nonegotiate
+ ip dhcp snooping trust
+ no shutdown
+interface range fa0/1 - 10
+ description RND users
+ switchport mode access
+ switchport access vlan 70
+interface range fa0/11 - 20
+ description IT users
+ switchport mode access
+ switchport access vlan 80
+interface range fa0/1 - 20
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 10
+ no cdp enable
+interface fa0/21
+ description PRN-HFA-C-01
+ switchport mode access
+ switchport access vlan 90
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ switchport port-security
+ switchport port-security maximum 1
+ switchport port-security mac-address sticky
+ switchport port-security violation shutdown
+ no cdp enable
+interface range fa0/22 - 24
+ description UNUSED
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+ exit
+ip dhcp snooping
+ip dhcp snooping vlan 70,80,90,99
+no ip dhcp snooping information option
+interface vlan 99
+ description MANAGEMENT
+ ip address 10.10.51.12 255.255.255.0
+ no shutdown
+ exit
+ip default-gateway 10.10.51.1
+```
+⌨️ Then type the **🅰 management block** (the same on all 4 access switches — here in full):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ answer **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.10.19.0 0.0.0.255
+ permit 10.10.35.0 0.0.0.255
+ permit 10.10.51.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.10.1.10
+aaa new-model
+tacacs-server host 10.10.1.11 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
+
+✅ `[OK]`.
 
 🔍 On C-ACC2: `show vlan brief` → VLANs 70/80/90/99 arrived; Fa0/1 in 70, Fa0/11 in 80.
 
@@ -1330,8 +1684,8 @@ Then the **🅰 management block**. ✅ `[OK]`.
 ## Mission 14 — Building C end devices + see the problem 🔍
 
 ### 14a — End devices
-- PCs RND-01, RND-02, IT-01, IT-02 → **DHCP**.
-- PRN-HFA-C-01 → IP `10.10.50.10` / `255.255.255.0`, gateway `10.10.50.1`.
+- PCs RND-01, RND-02, IT-01, IT-02 → **DHCP** (how? → [M16](../../docs/basic-moves.md#m16--set-a-pc-to-get-its-address-automatically-dhcp)).
+- PRN-HFA-C-01 → IP `10.10.50.10` / `255.255.255.0`, gateway `10.10.50.1` (how? → [M15](../../docs/basic-moves.md#m15--give-a-printer-a-fixed-address)).
 
 ✅ The PCs get `10.10.48.x` (R&D) and `10.10.49.x` (IT) — DHCP works **inside** the building.
 
@@ -1354,6 +1708,9 @@ Write in your notebook, in one sentence, **why** it happens. Then fix it in Miss
 🧠 **Why:** give building C a "piece of area 0" through area 2.
 
 ### 15a — On B-DIST1 **and** B-DIST2 (ABRs 0/2): point to C's router-IDs
+👉 **Where (on each one):** click the switch → **CLI** → **Enter** → `Username:` **admin** →
+`Password:` **Intel#Adm1n** (nothing shows while typing) → you see the `#` prompt.
+
 ⌨️ Type on **each** of the two:
 ```
 configure terminal
@@ -1365,6 +1722,8 @@ copy running-config startup-config
 ```
 
 ### 15b — On C-DIST1 **and** C-DIST2 (ABRs 2/3): point to B's router-IDs
+👉 **Where:** log in the same way as in 15a.
+
 ⌨️ Type on **each** of the two:
 ```
 configure terminal
@@ -1399,7 +1758,10 @@ isn't `2`.
 server switch too.
 
 On **SW-HFA-A-ACC1, SW-HFA-A-ACC2, SWL3-HFA-A-DIST1, SWL3-HFA-A-DIST2, SWL3-HFA-CORE1,
-SWL3-HFA-CORE2, SW-HFA-SRV** (log in with `admin` / `Intel#Adm1n`):
+SWL3-HFA-CORE2, SW-HFA-SRV**, one after the other.
+
+👉 **Where (on each one):** click the switch → **CLI** → **Enter** → `Username:` **admin** →
+`Password:` **Intel#Adm1n** (nothing shows while typing) → you see the `#` prompt.
 
 ⌨️ Type:
 ```

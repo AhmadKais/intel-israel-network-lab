@@ -238,6 +238,8 @@ every `ipv6 ...` command says `% Invalid input`.
 ❌ **Refused?** Do 4b on **every** switch of this branch (6 switches).
 
 ### 4b — Change the template (only if 4a was refused), once per switch
+👉 **Where (on each switch):** click the switch → **CLI** → **Enter** → `enable` → you see `Switch#`.
+
 ⌨️ Type:
 ```
 configure terminal

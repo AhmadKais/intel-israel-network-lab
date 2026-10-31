@@ -801,7 +801,10 @@ Then:
 ## Mission 14 — AAA + Syslog on all 7 switches
 
 ### 14a — The block for every switch
-Type this block on **all 7**. Log in to each with `admin` / `Intel#Adm1n`.
+Type this block on **all 7**, one switch after the other.
+
+👉 **Where (on each one):** click the switch → **CLI** → **Enter** → `Username:` **admin** →
+`Password:` **Intel#Adm1n** (nothing shows while typing) → you see the `#` prompt.
 
 ⌨️ Type:
 ```
@@ -834,7 +837,7 @@ Tick each switch when it shows `[OK]`:
 - [ ] SW-HFA-SRV
 
 ### 14b — The 4 L3 switches only: talk to AAA from Loopback0
-On **DIST1, DIST2, CORE1, CORE2**:
+On **DIST1, DIST2, CORE1, CORE2** (log in the same way as in 14a):
 
 ⌨️ Type:
 ```

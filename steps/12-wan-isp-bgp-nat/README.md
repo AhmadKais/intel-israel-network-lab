@@ -494,7 +494,13 @@ Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
 ❌ `Active` or `Idle` = not up → ping the neighbour's address first. If the ping fails: cable or
 interface problem. If the ping works: wrong `neighbor` IP or AS number.
 
-Do the same on **R-ISPB-BR** and **R-ISPC-BR**. Tick (2 numbers each):
+Now check the other two routers the same way:
+1. **R-ISPB-BR** → CLI → **Enter** → `enable` → password `Intel#En4ble` → `show ip bgp summary`.
+   ✅ Two lines that end with a number: `200.0.12.1` (AS **100**) and `200.0.23.2` (AS **300**).
+2. **R-ISPC-BR** → CLI → **Enter** → `enable` → password `Intel#En4ble` → `show ip bgp summary`.
+   ✅ Two lines that end with a number: `200.0.13.1` (AS **100**) and `200.0.23.1` (AS **200**).
+
+Tick each router when both of its lines end with a number:
 - [ ] ISPA-BR  - [ ] ISPB-BR  - [ ] ISPC-BR
 
 ### 7b — Read the BGP table
