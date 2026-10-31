@@ -517,7 +517,7 @@ Write down the address each PC got (hover over it). Then (how? → M17):
 | 1 | an ENG PC | `ping 10.10.16.1` | ✅ its gateway |
 | 2 | an ENG PC | `ping` a FIN PC's address | ✅ **inter-VLAN routing works!** |
 | 3 | an ENG PC | `ping 10.10.18.10` (printer) | ✅ |
-| 4 | an ENG PC | `tracert` a FIN PC | first hop `10.10.16.2` (DIST1 — the Active for VLAN 10) |
+| 4 | an ENG PC | `tracert` a FIN PC | first hop `10.10.16.2` (DIST1 — the Active for VLAN 10; some PT versions show the gateway `10.10.16.1` — also correct) |
 | 5 | PC-HFA-ADMIN-01 | `ping 10.10.19.11` and `10.10.19.12` | ✅ the access switches' management IPs |
 
 ✅ All five as expected.

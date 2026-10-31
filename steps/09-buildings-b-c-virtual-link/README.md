@@ -1705,7 +1705,7 @@ Press **Fast Forward Time** a few times, then:
 | 1 | B-DIST1 | `show ip ospf neighbor` | C-DIST1 and C-DIST2 are FULL | area 2 works |
 | 2 | CORE1 | `show ip route ospf` | `10.10.16.0/20`, `10.10.32.0/20` — but **no** `10.10.48.0/20` | area 3 is invisible to the core |
 | 3 | PC-HFA-RND-01 | `ping 10.10.1.10` (Syslog server) | ❌ Request timed out | building C can't leave |
-| 4 | C-DIST1 | `show ip route` | no `O IA` routes from areas 0 and 1 | the island is complete |
+| 4 | CORE1 | `ping 10.10.48.2` (C-DIST1) | ❌ fails | the core has no road to building C, so no reply can come back |
 
 ✅ All four as described. **This is the expected result** — the rule from 1.2 in action.
 Write in your notebook, in one sentence, **why** it happens. Then fix it in Mission 15.
@@ -1738,6 +1738,7 @@ configure terminal
 router ospf 1
  area 2 virtual-link 10.10.5.21
  area 2 virtual-link 10.10.5.22
+ area 2 range 10.10.32.0 255.255.240.0
  end
 copy running-config startup-config
 ```
@@ -1748,6 +1749,7 @@ Press **Fast Forward Time**.
 | Command | In simple English |
 |---|---|
 | `area 2 virtual-link 10.10.63.1` | "Build a piece of area 0 **through area 2**, to the router whose router-ID is 10.10.63.1" |
+| `area 2 range ...` (on C-DIST) | "Now that I touch area 0 too, send building B's area as **one** summary" — otherwise C-DIST would announce every area-2 network to the core separately |
 
 🔍 **Check now:** on B-DIST1 `show ip ospf virtual-links`:
 ```
@@ -1910,7 +1912,7 @@ Tick: - [ ] Building A - [ ] Building B - [ ] Building C
 |---|---|
 | Virtual link stays down | You used an **interface IP** instead of the **router-ID**; or the transit area isn't `2`; or C-DIST has no FULL neighbour in area 2 yet |
 | C-DIST has no area-2 neighbours | MD5 key typo on a 10.10.36.x link, or `network 10.10.36.0 0.0.0.15 area 2` missing |
-| Core sees many small routes from area 2 | Missing `area 2 range 10.10.32.0 255.255.240.0` on B-DIST1/2 |
+| Core sees many small routes from area 2 | Missing `area 2 range 10.10.32.0 255.255.240.0` on B-DIST1/2 or C-DIST1/2 |
 | Building C PCs get no address | VTP domain `HFA-C` typo on an access switch, or snooping without `trust` on uplinks |
 | `% Access VLAN does not exist` warnings | Normal during VTP learning — see step 03 |
 | A new 3650 has every link red | Its power supply is missing (Mission 2c) |

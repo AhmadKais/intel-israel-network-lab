@@ -262,8 +262,11 @@ interface range gi1/0/1 - 2
  no shutdown
 ```
 > **3650 note:** the 3650 only speaks 802.1Q, so it doesn't need (or accept) the command
-> `switchport trunk encapsulation dot1q`. If your PT asks for it, type it before
-> `switchport mode trunk`.
+> `switchport trunk encapsulation dot1q`.
+> ❌ **If `switchport mode trunk` answers** `Command rejected: An interface whose trunk
+> encapsulation is "Auto" can not be configured to "trunk" mode` → type
+> `switchport trunk encapsulation dot1q`, then `switchport mode trunk` again, then go on with
+> the next line.
 
 > You may see `%CDP-4-NATIVE_VLAN_MISMATCH` messages now. That's normal: the access switches
 > still have native VLAN 1. It stops after Missions 7–8.

@@ -7,7 +7,7 @@ Tick each box when you finish it. Do them **in order**.
 
 - [ ] **Mission 1** — Download the course files (10 min)
 - [ ] **Mission 2** — Install Packet Tracer and log in (15 min)
-- [ ] **Mission 3** — Tour the window and turn on two settings (15 min)
+- [ ] **Mission 3** — Tour the window and set the preferences (15 min)
 - [ ] **Mission 4** — Build your first network: 2 PCs + 1 switch (15 min)
 - [ ] **Mission 5** — Give the PCs addresses and ping (10 min)
 - [ ] **Mission 6** — Your first CLI: look inside the switch (10 min)
@@ -177,7 +177,7 @@ just log in.
 
 ---
 
-## Mission 3 — Tour the window and turn on two settings
+## Mission 3 — Tour the window and set the preferences
 🧠 **Why:** every later step says "click …" with the name of a button. Know them now, and you
 won't get stuck hunting for buttons when you need to concentrate on the network.
 
@@ -216,7 +216,7 @@ Look at your screen and find each part below. Point at it with the mouse.
 ✅ You can point at: the **Connections** lightning bolt, the **Fast Forward Time** button, and
 the **Simulation** button.
 
-### 3b — Turn on two settings (once, forever)
+### 3b — Set the preferences (once, forever)
 1. Top menu: **Options** → **Preferences**.
 2. Click the **Interface** tab.
 3. Tick **Always Show Port Labels in Logical Workspace**.
@@ -648,7 +648,7 @@ running-config is in RAM — what the device is doing now; every command changes
 
 <details><summary>Answer</summary>
 
-User EXEC `>` (look only) → `enable` → privileged EXEC `#` (see everything, save) → `configure terminal` → global config `(config)#` → e.g. `interface fa0/1` → sub-mode `(config-if)#`. `exit` goes one level down, `end` goes straight back to `#`.
+User EXEC `>` (look only) → `enable` → privileged EXEC `#` (see everything, save) → `configure terminal` → global config `(config)#` → e.g. `interface fa0/1` → sub-mode `(config-if)#`. `exit` goes back one level, `end` goes straight back to `#`.
 
 **Show it:** Type them on any switch and watch the prompt change.
 </details>

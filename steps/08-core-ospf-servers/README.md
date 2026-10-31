@@ -655,7 +655,7 @@ A, reachable through **two** paths (DIST1 and DIST2) — load sharing.
 | # | From | Type | Expected |
 |---|---|---|---|
 | 1 | an ENG PC | `ping 10.10.1.1` | ✅ the servers' gateway, through the core |
-| 2 | an ENG PC | `tracert 10.10.1.1` | `10.10.16.2` → `10.10.4.2` (or `.6`) → `10.10.1.x` |
+| 2 | an ENG PC | `tracert 10.10.1.1` | first line `10.10.16.2` (DIST1), last line `10.10.1.1`. If the packet went through CORE2 you also see `10.10.4.6` in the middle — both are correct |
 | 3 | PC-HFA-ADMIN-01 | `ssh -l admin 10.10.5.1` | ✅ login to CORE1 (local user for now) |
 
 ### 10d — See the passive interfaces (Simulation mode — how? → M21)
@@ -753,6 +753,8 @@ For each server: click → **Desktop** → **IP Configuration** → **Static**:
 |---|---|---|---|---|
 | SRV-HFA-SYSLOG | 10.10.1.10 | 255.255.255.0 | 10.10.1.1 | 10.10.200.11 |
 | SRV-HFA-AAA | 10.10.1.11 | 255.255.255.0 | 10.10.1.1 | 10.10.200.11 |
+
+> The DNS server 10.10.200.11 doesn't exist yet — you build it in step 11. Type it now anyway.
 
 ### 12b — One job per server (how? → M20)
 On **each** server → **Services** tab → for **HTTP**, **DHCP**, **DNS**, **EMAIL**, **FTP**, **NTP**
@@ -1103,7 +1105,7 @@ MD5 authentication on the routed links (`ip ospf authentication message-digest` 
 
 <details><summary>Answer</summary>
 
-It keeps the clocks of all devices the same (UDP 123), so log times match between devices and certificates/keys work. Server: Services → NTP → On. Device: `ntp server <IP>`.
+It keeps the clocks of all devices the same (UDP 123), so log times match between devices and certificates/keys work. Server: Services → NTP → On. Device: `ntp server <IP>`. (In this project NTP is configured in step 11.)
 
 **Show it:** `show ntp status`, `show clock`
 </details>
