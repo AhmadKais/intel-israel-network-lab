@@ -221,7 +221,9 @@ the **Simulation** button.
 2. Click the **Interface** tab.
 3. Tick **Always Show Port Labels in Logical Workspace**.
 4. Make sure **Show Device Name Labels** is ticked.
-5. Close the window with the **X**.
+5. Make sure **Enable Cable Length Effects** is **not** ticked (it would cut links when you move
+   devices to other cities later — step 09).
+6. Close the window with the **X**.
 
 ✅ Nothing visible changes yet — you will see the port labels in Mission 4.
 
@@ -237,8 +239,21 @@ Every device opens a window when you click it. The tabs:
 | **Services** | servers | Turn services on/off: HTTP, DHCP, DNS, EMAIL, FTP, NTP, SYSLOG, AAA |
 | **Attributes** | all | Info only — ignore it |
 
+### 3d — Peek at the Physical view (how? → M24)
+🧠 **Why:** the project book needs a picture of **where** your devices are (cities, buildings).
+That lives in the Physical view. Just look now — you'll use it from step 09.
+
+1. Top-left of the workspace: click the **Physical** tab.
+2. You see a map (**Intercity**) with one city: **Home City**. Click it.
+3. You see a building: **Corporate Office**. Click it. Then click **Main Wiring Closet** (the
+   racks — empty for now).
+4. On the bar at the top of the workspace click **Intercity** to go back up.
+5. Click the **Logical** tab to come back.
+
+✅ You are back on the normal empty workspace.
+
 Now open [docs/basic-moves.md](../../docs/basic-moves.md) in a **second browser tab** and read
-the list of moves M1–M23. You don't need to remember them — just know they are there.
+the list of moves M1–M28. You don't need to remember them — just know they are there.
 
 ---
 

@@ -50,6 +50,16 @@ In the drill:
 - say out loud what each command does while you type it;
 - finish with the step's `show` commands and explain the output.
 
+### Be ready to show both views
+The examiner often opens your file and asks *"where is this switch?"* or *"how do the buildings
+connect?"*. Practise:
+- **Logical → Physical:** point at a device on the map → **Physical** tab → find it with
+  **Navigation** → say its city, building and closet.
+- **Physical → Logical:** open a building → read the device names → **Logical** tab → show
+  its cables and its addresses, and say which block of the plan the building uses.
+- **Why one block per city / building?** → summarization: one route per building or site
+  ([sites-and-views.md](sites-and-views.md)).
+
 ## 4. Which step teaches which topic of the question bank
 
 | Topic in the bank | Where you learn it |

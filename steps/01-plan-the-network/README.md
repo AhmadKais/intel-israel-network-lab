@@ -184,6 +184,25 @@ requires logical names (22.1). Full rules: [design.md §1](../../docs/design.md)
   VLAN hopping — explained in step 03).
 - **VLAN 999** = parking: every unused port goes here and is shut down.
 
+### 1.11 Dividing the network between cities and buildings — the recipe
+Do it from big to small, and always cut the small block **out of** the bigger one:
+
+| Step | You decide | Intel example |
+|---|---|---|
+| 1 | Count: cities, buildings (or floors) in each, departments in each building | Haifa: 3 buildings + core; Jerusalem: 1 building, 3 floors; Kiryat Gat: 1 site |
+| 2 | One **/16 per city**, in order, from one master block | 10.10 Haifa, 10.20 Jerusalem, 10.30 Kiryat Gat |
+| 3 | Inside the city: one **equal piece per building** + one for the core/servers (up to 16 pieces → /20 each) | Haifa: core 10.10.0.0/20, A 10.10.16.0/20, B .32.0/20, C .48.0/20 |
+| 4 | Inside the building: one **/24 per department**, counting up from the building's start | Building B: HR 10.10.32.0, Marketing 10.10.33.0 … |
+| 5 | Links, loopbacks, servers → in the **core** piece, never in a building | 10.10.4.x links, 10.10.5.x loopbacks |
+| 6 | Check every /24 sits **inside** its building's block → the building can be summarized | Exercise 3.1 below |
+
+A branch that is **one building with floors** (Jerusalem) doesn't need a block per floor: put
+its departments next to each other so they fit in **one** summary (10.20.8.0/21).
+
+The full guide — with which **device** goes in which city, building and wiring closet, and how
+this becomes the Packet Tracer **Physical view** — is
+[docs/sites-and-views.md](../../docs/sites-and-views.md).
+
 ✅ **Mission 1 is done when** you answered every mini-check correctly (or understood why not).
 
 ---
@@ -434,11 +453,13 @@ from **your** project proposal. Tick each box:
 - [ ] **3. Part B — sites and names.** Your 3 sites, a 3-letter code for each, the naming
   pattern with your codes.
 - [ ] **4. Part C — the master block.** Choose one private block; one /16 per site; at HQ, one
-  /20 per OSPF area (as in 1.5).
+  /20 per OSPF area (as in 1.5); in the branches, one block per building or floor (recipe 1.11).
 - [ ] **5. Part D — VLAN tables.** One /24 per VLAN, the `.1/.2/.3` gateway rule, and your
   port plan.
 - [ ] **6. Part E — features per site.** Which site gets which feature — from your proposal.
 - [ ] **7. Part F — passwords.** Your own passwords (not `Intel#…`).
+- [ ] **7b. Part G — physical layout.** For every site: which buildings / floors, and which
+  devices stand in each one (table in [sites-and-views.md 3.1](../../docs/sites-and-views.md#31-logical--physical-build-the-real-places)).
 - [ ] **8. Check yourself:** redo exercises 3.1–3.4 with **your** blocks. Write the answers
   under the plan.
 - [ ] **9. Different from the example?** Use **your own** numbers and names. Do not copy

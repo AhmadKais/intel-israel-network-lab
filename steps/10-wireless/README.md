@@ -15,6 +15,7 @@
 - [ ] **Mission 7** — Test **before** the ACL: see the danger (5 min)
 - [ ] **Mission 8** — The guest-isolation ACL on A-DIST1 and A-DIST2 (15 min)
 - [ ] **Mission 9** — Test again and save (10 min)
+- [ ] **Mission 10** — Physical view: put the APs and laptops in building A (5 min)
 - [ ] **Exercises** A and B
 - [ ] **🛠 Your own project**
 
@@ -304,6 +305,24 @@ copy running-config startup-config
 
 ---
 
+## Mission 10 — Physical view: put the APs and laptops in building A (how? → M26)
+🧠 **Why:** the new devices appeared in **HFA Data Center**, but they really stand in
+building A (step 09, Mission 19).
+
+1. **Physical** tab → on the bar click **Navigation**.
+2. Open **Haifa → HFA Data Center**. Drag **AP-HFA-A-EMP**, **AP-HFA-A-GUEST**,
+   **LT-HFA-EMP-01**, **LT-HFA-EMP-02** and **LT-HFA-GUEST-01** onto **HFA Building A**.
+3. Close the window → click **HFA Building A** on the map → the 5 devices are there, top-left.
+4. **Logical** tab → LT-HFA-EMP-01 → `ping 10.10.1.10` → still ✅.
+
+❌ **A laptop lost its WiFi** (no address / ping fails): WiFi has a range in the Physical view.
+In **HFA Building A**, drag the laptop right next to its access point, wait a few seconds,
+and try again.
+
+💾 **File → Save**.
+
+---
+
 ## Checkpoint
 - [ ] Both SSIDs work; laptops get addresses from the right VLAN
 - [ ] Employees reach internal servers; guests don't
@@ -382,6 +401,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 - [ ] Ping from the guest laptop **before** the ACL (see the danger)
 - [ ] Write your guest ACL for your subnets; apply `in` on **both** gateways of the guest VLAN
 - [ ] Test: employee reaches servers, guest doesn't
+- [ ] Physical view: APs and laptops in their building (Mission 10)
 
 | In the example | In your project — take it from |
 |---|---|

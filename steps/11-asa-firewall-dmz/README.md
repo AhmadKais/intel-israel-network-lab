@@ -267,6 +267,7 @@ service-policy global_policy global
 ---
 
 ## Mission 6 — ASA, part 3: the outside ACL and SSH
+👉 **Where:** still on **ASA-HFA-FW1**, prompt `ASA-HFA-FW1(config)#`. (Closed the window? Click the ASA → CLI → `enable` → `Intel#En4ble` → `configure terminal`.)
 
 ### 6a — The holes from outside (more in steps 12 and 15)
 🧠 The edge router is **outside** (level 0). It must send logs, logins and time requests
@@ -563,6 +564,10 @@ Press **Fast Forward Time** several times (NTP takes a few minutes of simulated 
 | 7 | any switch | `show ntp status` | synchronized to 10.10.200.14 | NTP |
 
 🔍 On the ASA, **while** you browse from a PC: `show conn` lists the live connections.
+
+📍 **Physical view (M24, M26):** **Physical** tab → **Navigation** → the 9 new devices (ASA,
+edge router, DMZ switch, 6 DMZ servers) must be in **Haifa → HFA Data Center** — that's where a
+firewall and a server room really are. If one is somewhere else, drag it there. Back to **Logical**.
 
 💾 `write memory` on the ASA, `copy running-config startup-config` on the rest → **File → Save**.
 

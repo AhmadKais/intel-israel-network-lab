@@ -26,6 +26,7 @@
 **Lesson 4 — the backup line**
 - [ ] **Mission 12** — The DSL modem and the cloud (15 min)
 - [ ] **Mission 13** — Redundancy tests (15 min)
+- [ ] **Mission 14** — Physical view: an "Internet" city for the providers (15 min)
 - [ ] **Exercises** A and B
 - [ ] **🛠 Your own project**
 
@@ -719,12 +720,56 @@ wrong modem port.
 
 ---
 
+## Mission 14 — Physical view: an "Internet" city for the providers
+🧠 **Why:** the providers are **not** in Haifa — they are other companies, somewhere else. In
+the Physical view they get their own city. (Background: [sites-and-views.md](../../docs/sites-and-views.md).)
+
+| Building (in city `Internet`) | Devices |
+|---|---|
+| `ISP-A` | R-ISPA-BR, R-ISPA-PE, SW-ISPA-NET, SRV-ISP-DNS, SRV-ISP-WEB1, SRV-ISP-WEB2 |
+| `ISP-B` | R-ISPB-BR, R-ISPB-PE, CLOUD-DSL |
+| `ISP-C` | R-ISPC-BR, R-ISPC-PE |
+| `Home` | SW-ISPC-HOME, PC-HOME-01 |
+
+**DSL-HFA stays in Haifa** (HFA Data Center) — the modem stands at the customer, not at the
+provider.
+
+### 14a — The city and its buildings (how? → M25)
+1. **Physical** tab → on the bar click **Intercity**.
+2. Click **New City** → it appears top-left → drag it to the right side of the map → click its
+   name → type `Internet` → **Enter**.
+3. Click the **Internet** city → **New Building** 4 times → drag each to a free place → rename
+   them `ISP-A`, `ISP-B`, `ISP-C`, `Home`.
+
+(No wiring closets here — the internet isn't ours, we only show which company owns what.)
+
+### 14b — Move the devices (how? → M26)
+1. On the bar click **Navigation**.
+2. The new devices are in **Haifa → HFA Data Center** (routers and switches in its **Main
+   Wiring Closet**, servers and the PC in the building itself). Drag each one onto its building
+   under **Internet** (table above).
+3. Close the window.
+
+✅ In **Intercity** you now see two cities, Haifa and Internet, joined by a line (the WAN links).
+Tick: - [ ] ISP-A - [ ] ISP-B - [ ] ISP-C - [ ] Home
+
+### 14c — Check nothing broke
+**Logical** tab → PC-HOME-01 → Web Browser → `http://www.intel.lab` → ✅.
+
+❌ **Links between Haifa and Internet went down:** cable length effects are on — **Options →
+Preferences → Interface** → untick *Enable Cable Length Effects* (M26).
+
+💾 **File → Save**.
+
+---
+
 ## Checkpoint
 - [ ] 6 BGP partnerships up (2 per BR)
 - [ ] Haifa PCs browse both ISP web servers
 - [ ] The home PC opens www.intel.lab
 - [ ] NAT translations visible on R-HFA-EDGE
 - [ ] DSL backup route appears when the primary is down
+- [ ] Physical view: city Internet with ISP-A, ISP-B, ISP-C and Home
 
 ## If something doesn't work
 | Problem | Fix |
@@ -807,6 +852,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 - [ ] Internet servers + DNS (with your website's **public** address)
 - [ ] Edge router: WAN link, default route, PAT, static NAT; ASA holes
 - [ ] DSL backup + floating static; both redundancy tests
+- [ ] Physical view: an Internet city with one building per provider + Home (Mission 14)
 
 | In the example | In your project — take it from |
 |---|---|

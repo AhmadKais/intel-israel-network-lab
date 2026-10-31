@@ -102,6 +102,8 @@ Totals: 48 PCs per branch, **144** user PCs.
 
 4. Each PC → **Desktop → IP Configuration → DHCP** (M16).
 5. Each PC → **Command Prompt** → `ping 10.10.16.1` (the gateway) — so port-security learns its MAC.
+6. **Physical** tab → **Navigation** → the 5 new PCs are in **Haifa → HFA Data Center** → drag
+   them onto **HFA Building A** (M26) → **Logical** tab.
 
 ✅ **You should see:** each PC has a `10.10.16.x` address and the ping replies.
 
@@ -111,18 +113,48 @@ Check with `show vlan brief` on the switch.
 ---
 
 ## Mission 3 — Scale every other department
-Repeat Mission 2 for every row of table 1.4. **Kiryat Gat:** in step 4 click **IPv6 → Automatic**
-instead of DHCP, and in step 5 ping the DNS server `2001:DB8:30:100::10`.
+Do Mission 2 again for every row below. Only three things change: the **switch ports** (table
+1.4), the **address to ping** in step 5, and the **building** in step 6.
+
+| Department | Ping in step 5 | Step 6: drag the new PCs onto |
+|---|---|---|
+| Haifa Finance | `10.10.17.1` | Haifa → HFA Building A |
+| Haifa HR / Marketing | `10.10.32.1` / `10.10.33.1` | Haifa → HFA Building B |
+| Haifa R&D / IT | `10.10.48.1` / `10.10.49.1` | Haifa → HFA Building C |
+| Jerusalem Sales / Logistics | `10.20.10.1` / `10.20.11.1` | Jerusalem → JLM Office |
+| Jerusalem Production / QA | `10.20.12.1` / `10.20.13.1` | Jerusalem → JLM Office |
+| Jerusalem Security / Admin | `10.20.14.1` / `10.20.15.1` | Jerusalem → JLM Office |
+| Kiryat Gat (all six) | `2001:DB8:30:100::10` (the DNS server) | Kiryat Gat → KG Fab |
+
+**Kiryat Gat:** in step 4 click **IPv6 → Automatic** instead of DHCP.
 
 Tick when the department has **8** PCs that all have addresses:
 
-**Haifa:** - [ ] Engineering  - [ ] Finance  - [ ] HR  - [ ] Marketing  - [ ] R&D  - [ ] IT
-**Jerusalem:** - [ ] Sales  - [ ] Logistics  - [ ] Production  - [ ] QA  - [ ] Security  - [ ] Admin
-**Kiryat Gat:** - [ ] Fab-Ops  - [ ] Quality  - [ ] Maintenance  - [ ] Safety  - [ ] Planning  - [ ] Training
+**Haifa:**
+- [ ] Engineering
+- [ ] Finance
+- [ ] HR
+- [ ] Marketing
+- [ ] R&D
+- [ ] IT
+
+**Jerusalem:**
+- [ ] Sales
+- [ ] Logistics
+- [ ] Production
+- [ ] QA
+- [ ] Security
+- [ ] Admin
+
+**Kiryat Gat:**
+- [ ] Fab-Ops
+- [ ] Quality
+- [ ] Maintenance
+- [ ] Safety
+- [ ] Planning
+- [ ] Training
 
 > 💡 Work in pairs: each pair scales one branch, then you swap files and check each other's ticks.
-> 💡 Tidy screenshots: **Logical view** → select a building's devices → right-click → **Cluster**
-> groups them into one icon (double-click to open).
 
 💾 **File → Save** after **every** department.
 
@@ -253,7 +285,8 @@ on Windows **Win+Shift+S** (M22). Save as `test-01.png`, `test-02.png` … in a 
 
 > ⚠️ Tests 13–17 **break** things. **File → Save** before each, and **File → Open** the saved
 > file (answer **No** to saving) after each, so the break doesn't stay in your final file.
-> Tests 16–17 are the attacks from step 06 — repeat them the same way.
+> Test 16 = step 06 **Mission 6** (rogue DHCP server). Test 17 = step 04 **Mission 10** (rogue
+> switch). Open that step and follow the mission click by click.
 
 ---
 
@@ -269,6 +302,21 @@ A **Hebrew draft** of the whole book is ready in [`docs/project-book-draft-he.md
 | 16 Commands | `show run` of one device of each type + the 24 test screenshots | - [ ] |
 
 Also adapt the text to **your** words — the examiner will ask you about every choice.
+
+### 9a — Screenshots for chapter 8 (Physical) and chapter 9 (Logical)
+**Chapter 8 — physical topology** (your working file):
+1. **Physical** tab → **Intercity** → screenshot (M22): the 4 cities and the lines between them.
+2. Click each city → screenshot (its buildings).
+3. Open one wiring closet (e.g. **Haifa → HFA Building A → Closet A**) → screenshot (the racks).
+4. **Navigation** → screenshot of the open tree (every device and where it is).
+
+**Chapter 9 — logical topology** (with clusters, on a copy — how? → M27):
+1. **File → Save As** `my-work/final-screens.pkt` (your `final.pkt` stays untouched).
+2. **Logical** tab. Drag a box around **all of Jerusalem** → **New Cluster** → rename it
+   `JERUSALEM`. Same for `KIRYAT GAT` and `INTERNET`.
+3. Screenshot the top level: Haifa in full + 3 cluster icons. That's the whole company on one page.
+4. Click each cluster → screenshot its inside → **Back**.
+5. **File → Save**, then **File → Open** `final.pkt` again to keep working.
 
 **Known simulator limitations** (already in the draft, chapter 6 — it shows understanding):
 - IPv6-only branch can't reach IPv4-only services (no NAT64 in PT).
@@ -309,6 +357,7 @@ answers and compare:
 - [ ] 2 email users per department, mail test passed
 - [ ] All 24 tests done with screenshots
 - [ ] Every row of [docs/requirements-matrix.md](../../docs/requirements-matrix.md) ✅
+- [ ] Physical view: 4 cities, every new PC moved to its building
 - [ ] Project book completed from the draft
 
 ---
@@ -324,6 +373,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 - [ ] Hardening sweep on every device
 - [ ] The 24 tests on **your** network, with screenshots
 - [ ] Your project book
+- [ ] Physical screenshots (chapter 8) and cluster screenshots (chapter 9) — Mission 9a
 
 | In the example | In your project — take it from |
 |---|---|

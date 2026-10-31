@@ -266,3 +266,19 @@ OSPFv3 router-IDs: EDGE 3.3.3.1 · DIST1 3.3.3.2 · DIST2 3.3.3.3.
 | Wireless | **Employee + Guest** | — | — |
 | VPN | GRE/IPsec hub + **remote-access** server | GRE/IPsec spoke | — |
 | WAN backup | **DSL** floating static route | — | — |
+
+---
+
+## 8. Physical layout (Packet Tracer Physical view)
+
+Built in steps 09, 10, 11, 12, 13, 14 and 16. How and why: [sites-and-views.md](sites-and-views.md).
+
+| City | Building | Wiring closet → network devices | In the building → end devices |
+|---|---|---|---|
+| Haifa | HFA Data Center | Main Wiring Closet → CORE1/2, SW-HFA-SRV, ASA-HFA-FW1, R-HFA-EDGE, SW-HFA-DMZ, DSL-HFA | SRV-HFA-SYSLOG, SRV-HFA-AAA, the 6 DMZ servers |
+| Haifa | HFA Building A | Closet A → A-ACC1/2, A-DIST1/2 | ENG and FIN PCs, PRN-HFA-A-01, PC-HFA-ADMIN-01, the 2 APs, the 3 laptops |
+| Haifa | HFA Building B | Closet B → B-ACC1/2, B-DIST1/2 | HR and MKT PCs, PRN-HFA-B-01 |
+| Haifa | HFA Building C | Closet C → C-ACC1/2, C-DIST1/2 | RND and IT PCs, PRN-HFA-C-01 |
+| Jerusalem | JLM Office | JLM Main Closet → R-JLM-EDGE, CC1, CC2, SW-JLM-SRV · Floor 1/2/3 Closet → F1/F2/F3-ACC1 | the 3 servers, all PC-JLM-…, all PRN-JLM-… |
+| Kiryat Gat | KG Fab | KG Main Closet → R-KG-EDGE, DIST1/2, ACC1/2/3, SW-KG-SRV | the 4 servers, all PC-KG-…, all PRN-KG-… |
+| Internet | ISP-A / ISP-B / ISP-C / Home | (no closets) | ISP-A: R-ISPA-BR/PE, SW-ISPA-NET, SRV-ISP-DNS/WEB1/WEB2 · ISP-B: R-ISPB-BR/PE, CLOUD-DSL · ISP-C: R-ISPC-BR/PE, SRV-ISPC-WEB6 · Home: SW-ISPC-HOME, PC-HOME-01 |

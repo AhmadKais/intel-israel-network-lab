@@ -106,7 +106,8 @@ and then the same step in your own project.
 
 ## Reference docs
 
-- [docs/basic-moves.md](docs/basic-moves.md) — **the basic moves M1–M23, click by click** (open/save, place, rename, cable, CLI, IP settings, DHCP, Simulation…). Every step links to them as "(how? → Mn)"
+- [docs/basic-moves.md](docs/basic-moves.md) — **the basic moves M1–M28, click by click** (open/save, place, rename, cable, CLI, IP settings, DHCP, Simulation…). Every step links to them as "(how? → Mn)"
+- [docs/sites-and-views.md](docs/sites-and-views.md) — **how to divide the network between cities and buildings**, the Logical vs Physical view, moving devices to a new city or network
 - [docs/exam-guide.md](docs/exam-guide.md) — **how the project exam works and how to prepare**
 - [docs/progress-template.md](docs/progress-template.md) — your progress table (copy it to `my-project/progress.md`)
 - [docs/project-plan-template.md](docs/project-plan-template.md) — **the plan for your own project** (copy it to `my-project/plan.md` in step 01)

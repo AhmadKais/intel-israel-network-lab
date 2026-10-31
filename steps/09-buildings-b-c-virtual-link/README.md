@@ -31,6 +31,7 @@
 - [ ] **Mission 16** — Update the 7 older devices' guest list (15 min)
 - [ ] **Mission 17** — Register the 8 new devices on the AAA server (10 min)
 - [ ] **Mission 18** — Final checks (15 min)
+- [ ] **Mission 19** — Haifa in the Physical view: one city, four buildings (20 min)
 - [ ] **Exercises** A and B
 - [ ] **🛠 Your own project**
 
@@ -1465,8 +1466,69 @@ O IA  10.10.48.0/20 ...   <- building C (area 3) — arrived through the virtual
 
 ---
 
+## Mission 19 — Haifa in the Physical view: one city, four buildings
+🧠 **Why:** the Logical view shows *who connects to whom*. The project book also needs *where*
+everything stands (chapter 8). Haifa's LAN is finished, so now we put every device in its
+real building. Nothing in the configuration changes. (The idea: [sites-and-views.md](../../docs/sites-and-views.md).)
+
+**The plan** — keep it open:
+
+| Building (in city Haifa) | Wiring closet: switches | In the building: end devices |
+|---|---|---|
+| `HFA Data Center` (the old *Corporate Office*) | Main Wiring Closet: SWL3-HFA-CORE1, SWL3-HFA-CORE2, SW-HFA-SRV | SRV-HFA-SYSLOG, SRV-HFA-AAA |
+| `HFA Building A` | `Closet A`: SW-HFA-A-ACC1, SW-HFA-A-ACC2, SWL3-HFA-A-DIST1, SWL3-HFA-A-DIST2 | PC-HFA-ENG-01/02/03, PC-HFA-FIN-01/02/03, PRN-HFA-A-01, PC-HFA-ADMIN-01 |
+| `HFA Building B` | `Closet B`: SW-HFA-B-ACC1, SW-HFA-B-ACC2, SWL3-HFA-B-DIST1, SWL3-HFA-B-DIST2 | PC-HFA-HR-01/02, PC-HFA-MKT-01/02, PRN-HFA-B-01 |
+| `HFA Building C` | `Closet C`: SW-HFA-C-ACC1, SW-HFA-C-ACC2, SWL3-HFA-C-DIST1, SWL3-HFA-C-DIST2 | PC-HFA-RND-01/02, PC-HFA-IT-01/02, PRN-HFA-C-01 |
+
+### 19a — Check one setting first
+**Options → Preferences → Interface** → **Enable Cable Length Effects** must be **unticked** →
+close. (Otherwise links may go down when devices move.)
+
+### 19b — Rename the city and the first building (how? → M24, M25)
+1. Top-left of the workspace: click the **Physical** tab → you see **Intercity**.
+2. Click once on the text **Home City** under the city icon → type `Haifa` → **Enter**.
+3. Click the city icon → you see **Corporate Office**. Click its name → type `HFA Data Center` → **Enter**.
+
+✅ The bar at the top shows **Intercity › Haifa**.
+
+### 19c — Three new buildings, each with a closet (how? → M25)
+Inside **Haifa**:
+1. Click **New Building** → it appears top-left → drag it to a free place → rename `HFA Building A`.
+2. Same twice more: `HFA Building B`, `HFA Building C`.
+3. Click **HFA Building A** → **New Closet** → drag it to a free place → rename `Closet A` → on
+   the bar click **Haifa** to go back up.
+4. Same in building B (`Closet B`) and building C (`Closet C`).
+
+✅ Haifa shows 4 buildings. Each new building has one closet.
+
+### 19d — Move the devices (how? → M26)
+1. On the bar click **Navigation** → a window with a tree opens.
+2. Open **Haifa → HFA Data Center → Main Wiring Closet**: all the switches are here.
+3. **Drag** each building-A switch (the 4 names in the table) onto **HFA Building A → Closet A**.
+4. Open **Haifa → HFA Data Center**: the PCs, printers and servers are here. Drag each
+   building-A end device onto **HFA Building A** (the building itself, not the closet).
+5. Same for building B, then building C.
+6. Close the Navigation window.
+
+✅ In the tree: the Data Center keeps only the 2 cores, SW-HFA-SRV and the 2 servers.
+Tick: - [ ] Building A - [ ] Building B - [ ] Building C
+
+❌ **A device landed in the wrong place:** drag it again in the Navigation tree.
+
+### 19e — Check nothing broke
+1. Click the **Logical** tab — the map looks exactly as before.
+2. PC-HFA-HR-01 → `ping 10.10.1.10` → replies.
+3. **File → Save**.
+
+> From now on, new devices you place in the Logical view usually appear in **HFA Data Center**.
+> Every following step tells you where to move them. If one appears somewhere else, find it in
+> the **Navigation** tree and drag it (M26).
+
+---
+
 ## Checkpoint
 - [ ] Building B and C PCs get DHCP addresses from their own DIST switches
+- [ ] Physical view: city Haifa with 4 buildings; every device in its building
 - [ ] All 4 virtual links up
 - [ ] CORE1 has exactly three `O IA` /20 routes
 - [ ] Every PC in every building reaches the servers
@@ -1541,6 +1603,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 - [ ] Configure the building that touches only the other building; **see the problem**
 - [ ] Add the virtual links; update the old devices' ACL; register the new devices on AAA
 - [ ] Mission 18 checks pass in your project
+- [ ] Physical view: your HQ city with its buildings and closets, every device moved (plan part G, Mission 19)
 
 | In the example | In your project — take it from |
 |---|---|

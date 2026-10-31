@@ -29,6 +29,7 @@
 - [ ] **Mission 14** — R-JLM-EDGE, part 2: dynamic NAT (10 min)
 - [ ] **Mission 15** — R-JLM-EDGE, part 3: CBAC firewall and management (15 min)
 - [ ] **Mission 16** — Final tests + the dynamic-NAT limit (15 min)
+- [ ] **Mission 17** — Physical view: a new city, Jerusalem (15 min)
 - [ ] **Exercises** A and B
 - [ ] **🛠 Your own project**
 
@@ -393,6 +394,7 @@ interface vlan 130
 ---
 
 ## Mission 7 — CC1, part 3: EIGRP and management
+👉 **Where:** still on **SWL3-JLM-CC1**, prompt `SWL3-JLM-CC1(config)#`.
 
 ### 7a — The EIGRP key, VLAN 100 and the uplink
 ⌨️ Type:
@@ -931,8 +933,42 @@ interface vlan 99
  exit
 ip default-gateway 10.20.0.1
 ```
-⌨️ **Management:** the same block as 9a (from `ip domain-name intel.lab` to
-`copy running-config startup-config`). ✅ `[OK]`.
+⌨️ **Management** (the same block as 9a — here in full, type it again):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.20.0.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.20.1.11
+ntp server 10.20.5.1
+aaa new-model
+tacacs-server host 10.20.1.12 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
+✅ `[OK]`.
 
 ### 9c — SW-JLM-F3-ACC1 (Security + Admin)
 👉 **Where:** **SW-JLM-F3-ACC1** → CLI → **Enter** → `Switch>`.
@@ -1009,7 +1045,42 @@ interface vlan 99
  exit
 ip default-gateway 10.20.0.1
 ```
-⌨️ **Management:** the same block as 9a. ✅ `[OK]`.
+⌨️ **Management** (the same block as 9a — here in full, type it again):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ **`1024`** → then:
+```
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+login block-for 120 attempts 3 within 60
+ip access-list standard MGMT-ONLY
+ permit 10.20.0.0 0.0.0.255
+ permit 10.10.49.0 0.0.0.255
+ deny any log
+ exit
+service timestamps log datetime msec
+logging trap informational
+logging host 10.20.1.11
+ntp server 10.20.5.1
+aaa new-model
+tacacs-server host 10.20.1.12 key Intel#Tac
+aaa authentication login default group tacacs+ local
+line vty 0 15
+ transport input ssh
+ login authentication default
+ access-class MGMT-ONLY in
+ exec-timeout 5 0
+line console 0
+ login authentication default
+ logging synchronous
+ end
+copy running-config startup-config
+```
+✅ `[OK]`.
 
 ---
 
@@ -1263,6 +1334,7 @@ And on **CC1**: `show ip route | include 0.0.0.0` → `D*EX 0.0.0.0/0 [170/...] 
 ---
 
 ## Mission 14 — R-JLM-EDGE, part 2: dynamic NAT
+👉 **Where:** still on **R-JLM-EDGE**, prompt `R-JLM-EDGE(config)#`. (Closed the window? Click the router → CLI → log in `admin` / `Intel#Adm1n` → `configure terminal`.)
 ⌨️ Type:
 ```
 ip nat pool JLM-POOL 200.2.10.1 200.2.10.6 netmask 255.255.255.248
@@ -1283,6 +1355,7 @@ ip nat inside source list 10 pool JLM-POOL
 ---
 
 ## Mission 15 — R-JLM-EDGE, part 3: CBAC firewall and management
+👉 **Where:** still on **R-JLM-EDGE**, prompt `R-JLM-EDGE(config)#`.
 
 ### 15a — CBAC
 ⌨️ Type:
@@ -1374,11 +1447,55 @@ copy running-config startup-config
 
 ---
 
+## Mission 17 — Physical view: a new city, Jerusalem
+🧠 **Why:** all of Jerusalem's devices appeared in Haifa's Data Center — but Jerusalem is a
+different city. This is how you open a **new city** and move a whole site into it. (Background:
+[sites-and-views.md, Part 4](../../docs/sites-and-views.md#part-4--moving-devices-to-a-new-city-or-a-new-network).)
+
+Jerusalem is **one building with 3 floors**, so it gets one building with a closet per floor:
+
+| Place (in city `Jerusalem` → building `JLM Office`) | Devices |
+|---|---|
+| closet `JLM Main Closet` | R-JLM-EDGE, SWL3-JLM-CC1, SWL3-JLM-CC2, SW-JLM-SRV |
+| closet `Floor 1 Closet` | SW-JLM-F1-ACC1 |
+| closet `Floor 2 Closet` | SW-JLM-F2-ACC1 |
+| closet `Floor 3 Closet` | SW-JLM-F3-ACC1 |
+| the building itself | the 3 servers (SRV-JLM-…), the 13 PCs (PC-JLM-…), the 3 printers (PRN-JLM-…) |
+
+### 17a — The city, the building, the closets (how? → M25)
+1. **Physical** tab → on the bar click **Intercity**.
+2. **New City** → drag it to a free place → click its name → type `Jerusalem` → **Enter**.
+3. Click **Jerusalem** → **New Building** → drag it → rename `JLM Office`.
+4. Click **JLM Office** → **New Closet** 4 times → drag each to a free place → rename them
+   `JLM Main Closet`, `Floor 1 Closet`, `Floor 2 Closet`, `Floor 3 Closet`.
+
+✅ The bar shows **Intercity › Jerusalem › JLM Office**, with 4 closets.
+
+### 17b — Move the devices (how? → M26)
+1. On the bar click **Navigation**.
+2. Open **Haifa → HFA Data Center → Main Wiring Closet**. Drag every name with **`-JLM-`** that
+   is a switch or router to its closet (table above).
+3. Open **Haifa → HFA Data Center**. Drag every **`-JLM-`** server, PC and printer onto
+   **Jerusalem → JLM Office**.
+4. Close the window.
+
+✅ **Haifa → HFA Data Center** has no `-JLM-` name left. **Intercity** shows Haifa, Jerusalem
+and Internet, with lines between them (the WAN links).
+
+❌ **A link went down after the move:** **Options → Preferences → Interface** → untick
+*Enable Cable Length Effects* (M26).
+
+### 17c — Check nothing broke
+**Logical** tab → PC-JLM-SAL-01 → `ping 200.1.100.11` → ✅. **File → Save**.
+
+---
+
 ## Checkpoint
 - [ ] EIGRP: edge has 2 neighbours and the `/21` summary via both
 - [ ] PAgP `Po1(SU)`; HSRP split between CC1 and CC2
 - [ ] All PCs get addresses from SRV-JLM-DHCP
 - [ ] Internet works through dynamic NAT; inbound blocked by CBAC
+- [ ] Physical view: city Jerusalem → JLM Office → 4 closets, every `-JLM-` device inside
 
 ## If something doesn't work
 | Problem | Fix |
@@ -1451,6 +1568,7 @@ This is the example's **second branch**. Build **your** second site from plan pa
 - [ ] Access switches, server switch, servers (DHCP pools!)
 - [ ] PCs get addresses through the relay
 - [ ] Edge router: EIGRP + summary, dynamic NAT, CBAC; the test table of Mission 16
+- [ ] Physical view: a new city for this site, its building and closets (Mission 17)
 
 | In the example | In your project — take it from |
 |---|---|

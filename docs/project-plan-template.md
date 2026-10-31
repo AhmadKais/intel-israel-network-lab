@@ -6,7 +6,7 @@ This repo teaches you with **one worked example** (Intel Israel). Your final pro
 
 **How to use it**
 1. Copy this file to `my-project/plan.md`.
-2. Fill it in **during step 01** (parts A–E), on paper first if you like.
+2. Fill it in **during step 01** (parts A–E and G), on paper first if you like.
 3. Show it to your teacher **before step 02**. Do not start building until it is approved.
 4. From step 02 on, every value you type in **your** project comes from this plan. When a
    step shows an Intel value (a name, a VLAN, an address, a password), look up the matching
@@ -93,6 +93,9 @@ Three example hostnames from **your** network:
 
 Blocks must be **consecutive** and must come from **one master block** (requirement 22.4).
 
+> **How to divide:** one block per city, one block per building (or floor) inside it, one /24
+> per department inside that. The recipe, step by step: [sites-and-views.md, Part 1](sites-and-views.md#part-1--dividing-the-network-between-cities-and-buildings).
+
 ### HQ areas / buildings
 
 | OSPF area | Block (/20) | What lives there |
@@ -101,6 +104,15 @@ Blocks must be **consecutive** and must come from **one master block** (requirem
 | 1 | | |
 | 2 | | |
 | 3 | | |
+
+### Branches — floors / buildings
+
+| Site | Building or floor | Departments there | Block (or the summary that covers them) |
+|---|---|---|---|
+| 2 | | | |
+| 2 | | | |
+| 3 | | | |
+| 3 | | | |
 
 ## D. VLANs (one table per site; copy it 3 times)
 
@@ -168,6 +180,20 @@ project book.
 | WiFi — employees / guests | |
 | VPN keys | |
 | Email users | |
+
+## G. Physical layout — which device in which city, building and closet
+
+You will build this in Packet Tracer's **Physical view** (steps 09, 12, 13, 14 — moves M24–M26).
+How to fill it: [sites-and-views.md, Part 3](sites-and-views.md#part-3--from-logical-to-physical-and-back).
+
+| City | Building | Wiring closet | Network devices (switches, routers, firewall) | End devices (PCs, printers, servers, APs) |
+|---|---|---|---|---|
+| (site 1) | (main building / data center) | | | |
+| (site 1) | | | | |
+| (site 1) | | | | |
+| (site 2) | | | | |
+| (site 3) | | | | |
+| Internet | (one per provider) | | | |
 
 ---
 

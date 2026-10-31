@@ -23,6 +23,16 @@ Grouped by the step where you first meet it.
 | **Running-config** | The settings active right now (in memory — lost on reboot) |
 | **Startup-config** | The saved settings loaded at boot (`copy run start` saves to it) |
 
+## Packet Tracer views (steps 00, 09, 12–16)
+| Term | Simple meaning |
+|---|---|
+| **Logical view** | The network map in Packet Tracer: who is connected to whom. You build and configure here |
+| **Physical view** | Where the devices really are: Intercity → city → building → wiring closet → rack |
+| **Intercity** | The top level of the Physical view — the country map with all the cities |
+| **Wiring closet** | The room in a building where the switches and routers stand in racks (real names: MDF = main closet, IDF = closet on a floor) |
+| **Cluster** | Many devices shown as **one** icon in the Logical view — only the drawing changes |
+| **Site** | One location of the company — in this course, one city (Haifa, Jerusalem, Kiryat Gat) |
+
 ## Addressing (step 01)
 | Term | Simple meaning |
 |---|---|

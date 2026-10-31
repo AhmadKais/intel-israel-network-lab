@@ -27,6 +27,7 @@
 **Lesson 4 — test it**
 - [ ] **Mission 13** — Checks and tests (15 min)
 - [ ] **Mission 14** — HSRPv6 failover (10 min)
+- [ ] **Mission 15** — Physical view: a new city, Kiryat Gat (15 min)
 - [ ] **Exercises** A and B
 - [ ] **🛠 Your own project**
 
@@ -440,6 +441,7 @@ interface vlan 36
 ---
 
 ## Mission 7 — DIST1, part 3: MGMT, servers, legacy VLAN, management
+👉 **Where:** still on **SWL3-KG-DIST1**, prompt `SWL3-KG-DIST1(config)#`.
 
 ### 7a — MGMT and SERVERS (static addresses there, so no DHCPv6)
 ⌨️ Type:
@@ -921,8 +923,34 @@ interface vlan 99
  no shutdown
  exit
 ```
-⌨️ **Management:** the same block as 9a (from `ip domain-name intel.lab` to
-`copy running-config startup-config`).
+⌨️ **Management** (the same block as 9a — here in full, type it again):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ **`1024`** → then:
+```
+ip ssh version 2
+login block-for 120 attempts 3 within 60
+ipv6 access-list MGMT6
+ permit ipv6 2001:DB8:30:99::/64 any
+ deny ipv6 any any log
+ exit
+line vty 0 15
+ transport input ssh
+ login local
+ ipv6 access-class MGMT6 in
+ exec-timeout 5 0
+line console 0
+ login local
+ logging synchronous
+ exit
+service timestamps log datetime msec
+logging host ipv6 2001:DB8:30:100::12
+ end
+copy running-config startup-config
+```
 
 ### 9c — SW-KG-ACC3 (Planning, Training, printer)
 👉 **Where:** **SW-KG-ACC3** → CLI.
@@ -989,7 +1017,34 @@ interface vlan 99
  no shutdown
  exit
 ```
-⌨️ **Management:** the same block as 9a.
+⌨️ **Management** (the same block as 9a — here in full, type it again):
+```
+ip domain-name intel.lab
+username admin privilege 15 secret Intel#Adm1n
+crypto key generate rsa
+```
+→ **`1024`** → then:
+```
+ip ssh version 2
+login block-for 120 attempts 3 within 60
+ipv6 access-list MGMT6
+ permit ipv6 2001:DB8:30:99::/64 any
+ deny ipv6 any any log
+ exit
+line vty 0 15
+ transport input ssh
+ login local
+ ipv6 access-class MGMT6 in
+ exec-timeout 5 0
+line console 0
+ login local
+ logging synchronous
+ exit
+service timestamps log datetime msec
+logging host ipv6 2001:DB8:30:100::12
+ end
+copy running-config startup-config
+```
 
 🔍 **Check now (on each):** `show vlan brief` → the ports in the VLANs of the table above.
 
@@ -1277,12 +1332,44 @@ and **IPv6 Configuration** below it. For IPv6-only devices, leave the **IPv4** f
 
 ---
 
+## Mission 15 — Physical view: a new city, Kiryat Gat
+🧠 **Why:** same as Jerusalem in step 13 — a new site gets its own city. (Background:
+[sites-and-views.md, Part 4](../../docs/sites-and-views.md#part-4--moving-devices-to-a-new-city-or-a-new-network).)
+
+| Place | Devices |
+|---|---|
+| `Kiryat Gat` → `KG Fab` → closet `KG Main Closet` | R-KG-EDGE, SWL3-KG-DIST1, SWL3-KG-DIST2, SW-KG-ACC1, SW-KG-ACC2, SW-KG-ACC3, SW-KG-SRV |
+| `Kiryat Gat` → `KG Fab` (the building itself) | the 4 servers (SRV-KG-…), the 15 PCs (PC-KG-…), the 2 printers (PRN-KG-…) |
+| `Internet` → `ISP-C` | **SRV-ISPC-WEB6** — it belongs to the provider, not to us |
+
+### 15a — The city, the building, the closet (how? → M25)
+1. **Physical** tab → **Intercity** → **New City** → drag it → rename `Kiryat Gat`.
+2. Click **Kiryat Gat** → **New Building** → drag it → rename `KG Fab`.
+3. Click **KG Fab** → **New Closet** → drag it → rename `KG Main Closet`.
+
+### 15b — Move the devices (how? → M26)
+1. **Navigation** → open **Haifa → HFA Data Center → Main Wiring Closet** → drag every
+   **`-KG-`** switch and router onto **Kiryat Gat → KG Fab → KG Main Closet**.
+2. Open **Haifa → HFA Data Center** → drag every **`-KG-`** server, PC and printer onto
+   **Kiryat Gat → KG Fab**.
+3. Drag **SRV-ISPC-WEB6** onto **Internet → ISP-C**.
+4. Close the window.
+
+✅ **Intercity** shows 4 cities: Haifa, Jerusalem, Kiryat Gat, Internet. **HFA Data Center** has
+no `-KG-` name left.
+
+### 15c — Check nothing broke
+**Logical** tab → PC-KG-FAB-01 → Web Browser → `http://www6.isp-web.com` → ✅. **File → Save**.
+
+---
+
 ## Checkpoint
 - [ ] PCs get IPv6 addresses automatically, with gateway FE80::1 and a DNS server
 - [ ] OSPFv3 neighbours FULL; DIST switches have the `::/0` default route
 - [ ] IPv6 browsing to www6.isp-web.com works
 - [ ] Legacy PCs reach the internet via PAT
 - [ ] HSRPv6 failover works
+- [ ] Physical view: city Kiryat Gat → KG Fab → KG Main Closet; SRV-ISPC-WEB6 in Internet → ISP-C
 
 ## If something doesn't work
 | Problem | Fix |
@@ -1357,6 +1444,7 @@ This is the example's **IPv6 branch**. Build **your** third site from plan parts
 - [ ] Access switches (each creates its own VLANs!), server switch
 - [ ] Edge: OSPFv3, static defaults, PAT for the legacy VLAN, IPv6 filter; route on the ISP
 - [ ] Servers, PCs on Automatic; the tests of Mission 13; failover
+- [ ] Physical view: a new city for this site; the provider's IPv6 server in the Internet city (Mission 15)
 
 | In the example | In your project — take it from |
 |---|---|

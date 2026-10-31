@@ -20,8 +20,10 @@ step says **"(how? → M5)"**, come here, follow M5, and go back to the step.
 | [M8](#m8--add-a-module-power-supply-wifi-card-extra-ports) | Add a module (power supply, WiFi card…) | [M20](#m20--turn-a-service-on-in-a-server) | Turn a service on in a server |
 | [M9](#m9--open-the-cli-and-reach-the--prompt) | Open the CLI and reach the `#` prompt | [M21](#m21--use-simulation-mode-slow-motion) | Simulation mode (slow motion) |
 | [M10](#m10--type-a-block-of-commands-the-rules) | Type a block of commands — the rules | [M22](#m22--take-a-screenshot-for-your-hand-in) | Take a screenshot |
-| [M11](#m11--where-am-i-read-the-prompt) | Where am I? Read the prompt | [M23](#m23--i-broke-everything--go-back-to-the-last-good-file) | I broke everything — go back |
-| [M12](#m12--i-typed-something-wrong--fix-it) | I typed something wrong — fix it | | |
+| [M11](#m11--where-am-i-read-the-prompt) | Where am I? Read the prompt | [M23](#m23--i-broke-everything-go-back-to-the-last-good-file) | I broke everything — go back |
+| [M12](#m12--i-typed-something-wrong-fix-it) | I typed something wrong — fix it | [M24](#m24--switch-between-the-logical-and-the-physical-view) | Switch between the Logical and the Physical view |
+| [M25](#m25--make-a-city-a-building-or-a-wiring-closet-and-rename-it) | Make a city / building / closet and rename it | [M26](#m26--move-a-device-to-another-city-building-or-closet) | Move a device to another city / building / closet |
+| [M27](#m27--group-devices-into-a-cluster-logical-view) | Group devices into a cluster (Logical view) | [M28](#m28--connect-a-cable-to-a-device-inside-a-cluster) | Connect a cable to a device inside a cluster |
 
 ---
 
@@ -401,3 +403,138 @@ Make sure the screenshot shows **the device name / prompt** and **the result** (
 3. Start the current step again from Mission 1.
 
 > This is why every step starts with "Save As" (M1). A step done twice is learnt twice.
+
+---
+
+## M24 — Switch between the Logical and the Physical view
+Packet Tracer shows the **same network** in two ways:
+
+| View | Shows | You use it to |
+|---|---|---|
+| **Logical** | Who is connected to whom — the network map | Place, cable and configure devices (everything in steps 00–16) |
+| **Physical** | **Where** the devices are — cities, buildings, wiring closets, racks | Show the real locations (project book chapter 8) |
+
+1. Look at the **top-left corner of the workspace** (just under the toolbars). There are two
+   tabs: **Logical** and **Physical**.
+2. Click **Physical**. You see the **Intercity** map with one city: **Home City**.
+3. Click **Home City** → you see a building: **Corporate Office**.
+4. Click **Corporate Office** → you see the end devices (PCs, printers…) and a closet:
+   **Main Wiring Closet**.
+5. Click **Main Wiring Closet** → you see the switches and routers in racks.
+6. To go **up** one level: on the bar at the top of the workspace click the name of the level
+   you want (e.g. **Intercity**), or click **Back**.
+7. Click the **Logical** tab to go back to the normal map.
+
+✅ The Logical view looks exactly as before. Changing the Physical view never changes the
+configuration.
+
+> ⚠️ Don't confuse the two "Physical" things: the **Physical tab of the workspace** (this move)
+> and the **Physical tab inside a device window** (where you add a power supply — M8).
+
+---
+
+## M25 — Make a city, a building or a wiring closet, and rename it
+👉 Physical view (M24). The bar at the top of the workspace has the buttons **Navigation**,
+**New City**, **New Building**, **New Closet**, **Move Object**, **Grid**, **Set Background**
+and **Working Closet**.
+
+**A new city:**
+1. Go to the **Intercity** level (click **Intercity** on the bar).
+2. Click **New City**. A new city icon appears in the **top-left corner** of the map.
+3. Drag it to an empty place on the map.
+
+**A new building inside a city:**
+1. Click the city to go inside it.
+2. Click **New Building**. The building appears in the top-left corner → drag it to a free place.
+
+**A new wiring closet inside a building:**
+1. Click the building to go inside it.
+2. Click **New Closet** → drag it to a free place.
+
+**Rename any of them:**
+1. Click **once** on the **name under the icon** (not on the icon). The name becomes a text box.
+2. Delete the old name, type the new one (e.g. `Haifa`, `HFA Building B`) → press **Enter**.
+
+✅ The new name shows under the icon, and in the bar at the top when you are inside it.
+
+❌ **Clicking the icon opened it instead of renaming:** click **Back**, then click on the
+**text** of the name, a little below the icon.❌ **Your version won't rename it:** keep the default name and write in your project book which
+default name is which site (e.g. "City 1 = Jerusalem").
+
+> Order is always **Intercity → City → Building → Closet**. A bigger thing can't go inside a
+> smaller one (no city inside a building).
+
+---
+
+## M26 — Move a device to another city, building or closet
+👉 Physical view (M24).
+
+**One device:**
+1. Go to the place where the device is **now** (e.g. Home City → Corporate Office → Main Wiring
+   Closet).
+2. On the bar, click **Move Object**.
+3. Click the device. A small menu opens with the tree of all places (Intercity → cities →
+   buildings → closets).
+4. Open the tree and click the destination (e.g. **Haifa → HFA Building B → Main Wiring
+   Closet**).
+5. Go to the destination and check: the device is there (in the top-left corner, or in a rack
+   in a closet).
+
+**Many devices at once (faster):**
+1. On the bar, click **Navigation**. A window with the tree of all places opens.
+2. Open the tree until you see the device's name.
+3. **Drag** the device name onto the destination place in the same tree.
+4. Repeat for the next device. Close the window when you finish.
+
+✅ In the **Logical** view nothing changed: same cables, same addresses, same configuration.
+Only the location changed.
+
+❌ **After moving, a link went red/down and was green before:** Packet Tracer can simulate cable
+length, and a copper cable is at most 100 m — between two cities that's too short. Turn it off:
+**Options → Preferences → Interface** tab → **untick** *Enable Cable Length Effects* → close.
+The link comes back. (In a real network, links between cities are WAN links from a provider.)
+
+---
+
+## M27 — Group devices into a cluster (Logical view)
+A **cluster** packs many devices into **one icon** — e.g. all of Jerusalem becomes one
+"JERUSALEM" icon. It only changes the **drawing**: no cable, address or command changes.
+Use it for clean screenshots of a big network.
+
+> 💡 Do clusters on a **copy** of your file (**File → Save As** `final-screens.pkt`), so your
+> working file stays easy to click.
+
+**Make a cluster:**
+1. Logical view. With the normal **Select** arrow, **drag a box** around all the devices you
+   want to group (they all turn highlighted).
+2. On the bar at the top of the workspace, click **New Cluster**.
+
+✅ The devices disappear and **one cloud icon** called `Cluster0` appears.
+
+**Rename it:** click **once** on the label `Cluster0` → type `JERUSALEM` → **Enter**.
+
+**Open it / leave it:**
+- Click the cluster icon → you are inside and see its devices. You can configure them as usual.
+- To leave: on the bar click **Back** (one level up) or **Root** (the top).
+
+**Move a device into (or out of) a cluster:**
+1. On the bar, click **Move Object**.
+2. Click the device.
+3. In the menu that opens, click the destination cluster (or **Root** to take it out).
+
+**Undo a cluster:** the safest way is **File → Open** the copy you saved before. (Don't
+delete the cluster icon in your working file.)
+
+> Logical **clusters** and physical **cities/buildings** are separate things. A good habit:
+> make the same groups in both — one cluster **JERUSALEM** in the Logical view, one city
+> **Jerusalem** in the Physical view.
+
+---
+
+## M28 — Connect a cable to a device inside a cluster
+1. Choose the cable as usual (M5) and click the **first** device.
+2. Click the **cluster icon**. A menu with the devices inside it opens.
+3. Click the device you want → choose its port.
+
+✅ The cable goes into the cluster icon; open the cluster to see it reach the device.
+
