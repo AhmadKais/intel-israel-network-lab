@@ -17,7 +17,7 @@ before assuming you made a mistake.
 
 | Command that fails | What to do |
 |---|---|
-| `switchport trunk encapsulation dot1q` on a 3650 | 3650 is dot1q-only — just skip it and use `switchport mode trunk`. On a 3560 it is **required** before `mode trunk`. |
+| `switchport mode trunk` on a 3650 answers `Command rejected: An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode` | Type `switchport trunk encapsulation dot1q`, then `switchport mode trunk` again (step 03). If `mode trunk` is accepted, you don't need it. On a 3560 it is **always** required before `mode trunk`. |
 | `ipv6 unicast-routing` / `ipv6 address` rejected on a switch | `sdm prefer dual-ipv4-and-ipv6 default` → `wr` → `reload`. On a 2960 use `sdm prefer lanbase-routing` if the first one is missing. |
 | `logging host 10.10.1.10` rejected | Older syntax: `logging 10.10.1.10`. |
 | `tacacs server NAME` block rejected | Older syntax: `tacacs-server host 10.10.1.11 key Intel#Tac`. |
