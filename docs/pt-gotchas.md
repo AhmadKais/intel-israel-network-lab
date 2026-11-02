@@ -27,7 +27,7 @@ before assuming you made a mistake.
 | ASA rejects `enable password` prompt | The ASA's enable password is empty on first boot — just press Enter. |
 | ASA keeps giving 192.168.1.x addresses | The default config has a DHCP server on `inside`: `no dhcpd enable inside`. |
 | `standby 31 ipv6 FE80::1` rejected | Use `standby 31 ipv6 autoconfig`, then read the virtual link-local with `show standby brief` and use that as the static gateway on servers. |
-| HSRP for IPv6 not supported on your PT build | IPv6 already has built-in gateway redundancy: both DIST switches send Router Advertisements, so hosts learn two default routers. Document this in the book. |
+| HSRP for IPv6 not supported on your PT build | IPv6 already has built-in gateway redundancy: both DIST switches send Router Advertisements, so hosts learn two default routers. Document this in the book. **But** the servers and PC-KG-ADMIN-01 have the static gateway `FE80::1`, which now doesn't exist: on DIST1 → `interface vlan 99` → `ipv6 address FE80::1 link-local`, and the same in `interface vlan 100`. Those two VLANs then have no backup gateway. Write that in the book too |
 | OSPFv3 `passive-interface default` rejected | Leave out the `passive-interface` lines. OSPFv3 then also sends hellos into the user VLANs — nothing breaks, because no router listens there, and the VLAN prefixes are still advertised. Note in the book that passive interfaces were not available. |
 | `ip summary-address eigrp` rejected on the switch | Put the command on the physical routed interface (`Gi1/1/1`), not on the SVI. |
 | `spanning-tree guard root` not shown | It is there — check with `show running-config interface gi1/0/1`; when it acts, `show spanning-tree vlan 10` shows the port blocked. |

@@ -1384,7 +1384,7 @@ no `-KG-` name left.
 | PCs get only an `FE80::` address | `ipv6 unicast-routing` missing → no RAs; or the VLAN SVI is down |
 | PCs have no DNS | `ipv6 nd other-config-flag` / `ipv6 dhcp server` missing; or type the DNS by hand |
 | `standby 31 ipv6 FE80::1` refused | Use `standby 31 ipv6 autoconfig`, read the virtual address with `show standby brief`, and use it as the servers' gateway |
-| HSRP for IPv6 not supported at all | IPv6 has its own gateway redundancy: both DISTs send RAs and PCs learn two gateways. Write this in the book |
+| HSRP for IPv6 not supported at all | IPv6 has its own gateway redundancy: both DISTs send RAs and PCs learn two gateways. Write this in the book. **But** the servers and PC-KG-ADMIN-01 have the static gateway `FE80::1`, which now doesn't exist: on DIST1 → `interface vlan 99` → `ipv6 address FE80::1 link-local`, and the same in `interface vlan 100`. Those two VLANs then have no backup gateway. Write that in the book too |
 | Everything IPv6 dies after the edge ACL | The `permit icmp any any` line is missing (IPv6 needs ICMPv6) |
 | Legacy PC has no internet | `ip route 10.30.199.0 ...` on the edge, `ip route 0.0.0.0 ... 10.30.4.1` on DIST1, NAT inside/outside |
 | Ports of one VLAN dead on an access switch | VTP is transparent — that VLAN wasn't created **on that switch** |

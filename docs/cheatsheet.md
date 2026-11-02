@@ -36,7 +36,7 @@
 | `show standby brief` | Active/Standby, VIP, priority, `P` (preempt) |
 | `show ip route` | O / O IA / O E2 / D / D EX / S / B / C codes |
 | `show ip ospf neighbor` | FULL state |
-| `show ip ospf interface brief` | area per interface |
+| `show ip ospf interface` | the `Area` of each interface; `Message digest authentication enabled` |
 | `show ip ospf virtual-links` | `Virtual Link ... is up` |
 | `show ip eigrp neighbors` | neighbours listed |
 | `show ip bgp summary` | neighbour state shows a number (prefixes), not Idle/Active |
