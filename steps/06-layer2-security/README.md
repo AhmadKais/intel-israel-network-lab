@@ -291,7 +291,17 @@ for VLAN 10. Check `show ip dhcp snooping`.
 4. Renew the PC once more → back to a real address with gateway `.1`.
 
 ### 6e — Clean up
-Delete SRV-ROGUE with the Delete tool (M7).
+1. Delete SRV-ROGUE with the Delete tool (M7).
+2. Sticky learned the rogue's MAC on Fa0/9 and wrote it into the config. Remove it. On ACC1:
+   ```
+   configure terminal
+   interface fa0/9
+    no switchport port-security mac-address sticky
+    switchport port-security mac-address sticky
+    end
+   ```
+   👉 Check: `show running-config interface fa0/9` → ✅ only the line
+   `switchport port-security mac-address sticky` is left, with **no** MAC address after it.
 
 ---
 

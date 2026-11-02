@@ -49,7 +49,7 @@ Part C **attacks your own network** and repairs it. Do every repair line before 
 | ☐ | C1 | Workspace | Add a **Server** `SRV-ROGUE`, Straight-Through: **FastEthernet0** → ACC1 **Fa0/9**. Static IP `10.10.16.250` / `255.255.255.0` | Green cable | Mission 6a |
 | ☐ | C2 | SRV-ROGUE → Services → DHCP | **On**, Default Gateway `10.10.16.250`, Start IP `10.10.16.200`, mask `255.255.255.0` → **Save** | — | Mission 6b |
 | ☐ | C3 | An ENG PC → IP Configuration | **Static**, then **DHCP** | An address `.11`–`.254` with gateway **`10.10.16.1`**. The attack failed | `.200` / gateway `.250` → Fa0/9 is trusted, or VLAN 10 isn't snooped (B1, B2) |
-| ☐ | C4 | Repair | Delete SRV-ROGUE (M7) | — | — |
+| ☐ | C4 | Repair | Delete SRV-ROGUE (M7). On ACC1: `configure terminal` → `interface fa0/9` → `no switchport port-security mac-address sticky` → `switchport port-security mac-address sticky` → `end` → `show running-config interface fa0/9` | `mac-address sticky` with **no** MAC address after it (the rogue's MAC is gone) | Mission 6e |
 
 **Attack 2: an unknown laptop on the printer port**
 
