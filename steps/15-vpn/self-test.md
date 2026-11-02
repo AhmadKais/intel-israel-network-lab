@@ -34,7 +34,7 @@ moves in [docs/basic-moves.md](../../docs/basic-moves.md).
 | ☐ | # | From / On | Type / do | Must see | If not |
 |---|---|---|---|---|---|
 | ☐ | B1 | PC-JLM-SAL-01 | `ping 10.10.16.1` | ✅ replies (the first one or two may time out while the tunnel builds) | ASA line `permit ip 10.20.0.0 255.255.0.0 10.10.0.0 255.255.0.0` (Mission 7a); A4/A5 |
-| ☐ | B2 | R-HFA-EDGE | `show crypto isakmp sa` | `200.2.1.2  200.1.1.2  QM_IDLE … ACTIVE` | No line → the two `crypto isakmp policy 10` blocks or keys differ. Compare letter by letter |
+| ☐ | B2 | R-HFA-EDGE | `show crypto isakmp sa` | A line with `200.1.1.2` and `200.2.1.2` (in either order: it depends on which side started the tunnel), `QM_IDLE`, `ACTIVE` | No line → the two `crypto isakmp policy 10` blocks or keys differ. Compare letter by letter |
 | ☐ | B3 | R-HFA-EDGE, **while** the Jerusalem PC pings | `show crypto ipsec sa` | `#pkts encaps` and `#pkts decaps` are **not 0** and grow each time you run it | The crypto ACL doesn't match GRE between the two public addresses (Mission 5b) |
 | ☐ | B4 | PC-JLM-SAL-01 | `tracert 10.10.200.13` | `10.20.10.2` → `10.20.4.1` → **`172.16.12.1`** (the tunnel) → … | A4 / A5 |
 | ☐ | B5 | PC-JLM-SAL-01 → Web Browser | `http://www.intel.lab` | **Intel Israel - Intranet** | DNS 10.10.200.11 must be reachable (B1) |

@@ -323,6 +323,9 @@ R-HFA-EDGE# show ip route static                  <- S 10.20.0.0/16 via 172.16.1
 ```
 And on **CC1**: `show ip route | include 10.10.0.0` → `D EX 10.10.0.0/16 via 10.20.4.1`.
 
+> ℹ️ The `dst` and `src` columns can be **swapped** (`200.1.1.2  200.2.1.2`). It depends on which
+> router started the tunnel. Both are correct. What matters is `QM_IDLE` and `ACTIVE`.
+
 ❌ **No `QM_IDLE`:** compare the two `crypto isakmp policy 10` blocks and keys letter by letter
 (`show running-config | section crypto`).
 ❌ **`QM_IDLE` but the ping fails:** the ASA line (7a) or the static routes (Mission 4).
