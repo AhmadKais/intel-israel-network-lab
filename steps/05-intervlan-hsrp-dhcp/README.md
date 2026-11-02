@@ -558,6 +558,9 @@ interface vlan 10
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `show standby brief` correct on both DIST switches
 - [ ] User PCs get DHCP addresses with gateway `.1`
 - [ ] Engineering ↔ Finance ping works

@@ -574,6 +574,9 @@ firewall and a server room really are. If one is somewhere else, drag it there. 
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `show nameif` shows the three zones
 - [ ] PCs browse `http://www.intel.lab`
 - [ ] DMZ can't reach the inside

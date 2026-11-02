@@ -773,6 +773,9 @@ Preferences → Interface** → untick *Enable Cable Length Effects* (M26).
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] 6 BGP partnerships up (2 per BR)
 - [ ] Haifa PCs browse both ISP web servers
 - [ ] The home PC opens www.intel.lab

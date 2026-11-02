@@ -263,8 +263,9 @@ interface range gi1/0/1 - 2
 ```
 > **3650 note:** the 3650 only speaks 802.1Q, so it doesn't need (or accept) the command
 > `switchport trunk encapsulation dot1q`.
-> ❌ **If `switchport mode trunk` answers** `Command rejected: An interface whose trunk
-> encapsulation is "Auto" can not be configured to "trunk" mode` → type
+> ❌ **If `switchport mode trunk` answers:**
+> `Command rejected: An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode`
+> → type
 > `switchport trunk encapsulation dot1q`, then `switchport mode trunk` again, then go on with
 > the next line.
 
@@ -545,6 +546,9 @@ All 4 switches were saved with `copy running-config startup-config`. Now **File 
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] DIST1 and DIST2 have power supplies and are on
 - [ ] `show vtp status` — same domain and revision on all 4 switches; DIST1 server, others client
 - [ ] `show interfaces trunk` — all uplinks trunking, native 998

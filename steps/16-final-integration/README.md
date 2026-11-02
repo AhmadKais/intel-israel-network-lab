@@ -361,6 +361,9 @@ answers and compare:
 ---
 
 ## Checkpoint — final
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `my-work/final.pkt` saved
 - [ ] 8+ PCs per department, 6 departments per branch
 - [ ] 2 email users per department, mail test passed

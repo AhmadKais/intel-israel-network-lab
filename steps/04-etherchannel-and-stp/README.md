@@ -390,6 +390,9 @@ interface fa0/9
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `show etherchannel summary` → `Po1(SU)`, both ports `(P)` — on DIST1 and DIST2
 - [ ] DIST1 is root for 10/30/99/110, DIST2 for 20/120
 - [ ] Access ports show `Edge` (PortFast) in `show spanning-tree`

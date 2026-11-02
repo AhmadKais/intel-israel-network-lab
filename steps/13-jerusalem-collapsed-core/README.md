@@ -1491,6 +1491,9 @@ and Internet, with lines between them (the WAN links).
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] EIGRP: edge has 2 neighbours and the `/21` summary via both
 - [ ] PAgP `Po1(SU)`; HSRP split between CC1 and CC2
 - [ ] All PCs get addresses from SRV-JLM-DHCP

@@ -887,6 +887,9 @@ From **PC-HFA-ADMIN-01**: `ssh -l admin 10.10.5.1` → `Intel#Adm1n`.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] CORE1 has 3 OSPF neighbours in FULL state
 - [ ] CORE1 sees `O IA 10.10.16.0/20` via two paths
 - [ ] PCs reach the servers

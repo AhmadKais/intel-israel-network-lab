@@ -411,6 +411,9 @@ Picture the workspace like this before you draw:
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] You answered the mini-checks and did the 5 exercises
 - [ ] You read every table in design.md once
 - [ ] You can explain to someone why VLAN 998 exists

@@ -478,6 +478,9 @@ building everything again.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] Packet Tracer runs, port labels are switched on
 - [ ] You did the 2-PC ping and saw the MAC table
 - [ ] You watched ARP in Simulation mode

@@ -325,6 +325,9 @@ interface fa0/21
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] Snooping on, uplinks trusted, option 82 disabled — on both access switches
 - [ ] All PCs still get DHCP addresses
 - [ ] Rogue DHCP server failed to give addresses

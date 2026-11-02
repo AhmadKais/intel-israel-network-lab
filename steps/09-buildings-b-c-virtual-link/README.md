@@ -1900,6 +1900,9 @@ Tick: - [ ] Building A - [ ] Building B - [ ] Building C
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] Building B and C PCs get DHCP addresses from their own DIST switches
 - [ ] Physical view: city Haifa with 4 buildings; every device in its building
 - [ ] All 4 virtual links up
@@ -1925,10 +1928,10 @@ Tick: - [ ] Building A - [ ] Building B - [ ] Building C
 - 🎯 **Task:** see what the area-2 summary hides from the core.
 - 📁 **Start from:** your `step09.pkt` (Save As `step09-exA.pkt`).
 - 👣 **Steps:**
-  1. On B-DIST1 **and** B-DIST2: `configure terminal` → `router ospf 1` →
+  1. On **all four** ABRs (B-DIST1, B-DIST2, C-DIST1, C-DIST2): `configure terminal` → `router ospf 1` →
      `no area 2 range 10.10.32.0 255.255.240.0` → `end`.
   2. Fast Forward Time. On CORE1: `show ip route ospf`. Count the lines that start with `10.10.3`.
-  3. Put the summary back on both.
+  3. Put the summary back on all four.
 - ✅ **Done when:** you can say how many extra lines appeared, and why the `10.10.36.x` links are
   among them.
 

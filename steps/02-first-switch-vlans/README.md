@@ -423,6 +423,9 @@ which traffic may cross.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `show vlan brief` matches Mission 7c
 - [ ] Same-VLAN pings work, cross-VLAN pings fail
 - [ ] Banner, console password and enable secret all work

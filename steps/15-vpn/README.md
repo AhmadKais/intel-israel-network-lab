@@ -466,6 +466,9 @@ not break the site-to-site VPN.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] `QM_IDLE` with Jerusalem; encaps/decaps counters growing
 - [ ] Jerusalem PCs reach Haifa's private addresses and DMZ servers by name
 - [ ] Jerusalem's NTP synchronized to Haifa

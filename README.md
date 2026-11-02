@@ -32,6 +32,11 @@ question-bank questions for that topic, with answers) and **🔁 Do it again —
 the examiner — see [docs/exam-guide.md](docs/exam-guide.md). Track your progress in
 `my-project/progress.md` (copied from [docs/progress-template.md](docs/progress-template.md)).
 
+**4. Test yourself.** Next to every step there is a **🧪 self-test** (`steps/NN-name/self-test.md`).
+Run it when you finish the step: it lists every command, the exact output your screen must
+show (including the tests that **must fail**), and what to fix when it doesn't match. All boxes
+ticked → go to the next step. Then run it again on your own project, with your values.
+
 **The rules** (from the ministry guidelines):
 - Two students may not submit the same topic or plan.
 - No branch may be a copy of another branch — each site uses different features.
@@ -144,6 +149,10 @@ steps/NN-name/README.md
   🎓 Explain it to the examiner — question-bank questions with answers
   🔁 Do it again         — rebuild the step without the guide, against the clock
   👩‍🏫 Teacher notes
+
+steps/NN-name/self-test.md
+  🧪 Self-test           — run it when the step is done: every command, the exact output to
+                           expect (including what MUST fail), and what to fix if it differs
 ```
 
 > **Golden rule:** never start a mission before the 🔍 check of the previous one passes. A

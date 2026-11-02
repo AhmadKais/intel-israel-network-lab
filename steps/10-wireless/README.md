@@ -325,6 +325,9 @@ and try again.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] Both SSIDs work; laptops get addresses from the right VLAN
 - [ ] Employees reach internal servers; guests don't
 - [ ] `GUEST-IN` applied `in` on VLAN 120 on **both** A-DIST switches

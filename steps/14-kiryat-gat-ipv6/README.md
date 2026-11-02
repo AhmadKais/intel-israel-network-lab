@@ -1366,6 +1366,9 @@ no `-KG-` name left.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] PCs get IPv6 addresses automatically, with gateway FE80::1 and a DNS server
 - [ ] OSPFv3 neighbours FULL; DIST switches have the `::/0` default route
 - [ ] IPv6 browsing to www6.isp-web.com works

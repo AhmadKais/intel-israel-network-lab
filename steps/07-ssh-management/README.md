@@ -302,6 +302,9 @@ Finally: **File → Save**.
 ---
 
 ## Checkpoint
+> 🧪 **Self-test:** run [self-test.md](self-test.md) first. It gives the exact command for every
+> box below, what your screen must show, and what to fix when it doesn't.
+
 - [ ] SSH works from the admin PC to all 4 switches with `admin` / `Intel#Adm1n`
 - [ ] Telnet is refused
 - [ ] SSH from a user PC is refused
