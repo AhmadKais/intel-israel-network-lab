@@ -202,9 +202,10 @@ SW-HFA-A-ACC1#
 ```
 4. Type `exit` to leave.
 
-❌ `% Connection refused by remote host` → the ACL name in `access-class` doesn't match the ACL
-(a typo = deny all). On ACC1: `show running-config` → compare the `line vty` part with
-`show access-lists`.
+❌ `% Connection refused by remote host` → the guest list doesn't let you in. On ACC1:
+`show access-lists MGMT-ONLY` — the permit line must be exactly `permit 10.10.19.0 0.0.0.255`.
+Then `show running-config` → in the `line vty` part, the name after `access-class` must be
+spelled exactly `MGMT-ONLY` (capitals count).
 ❌ `% Connection timed out` → no network path. Does `ping 10.10.19.11` work?
 
 ---
@@ -315,7 +316,7 @@ Finally: **File → Save**.
 |---|---|
 | `crypto key generate rsa` → `% Please define a domain-name first` | Type `ip domain-name intel.lab` first |
 | `% Please define a hostname other than Switch` | Set the hostname first |
-| SSH refused from the admin PC too | ACL name typo: `access-class` points to a name that doesn't exist = **deny all**. Compare the `line vty` part of `show running-config` with `show access-lists` |
+| SSH refused from the admin PC too | A typo in the ACL: the permit line must be exactly `permit 10.10.19.0 0.0.0.255`, and the name after `access-class` must be exactly `MGMT-ONLY`. Compare the `line vty` part of `show running-config` with `show access-lists` |
 | `% Connection timed out` from the admin PC | No network path: can it `ping 10.10.19.11`? Check its IP/gateway, and that the switch has `interface vlan 99` up and `ip default-gateway` (step 05) |
 | Locked out of everything | The console still works with `admin` / `Intel#Adm1n` |
 

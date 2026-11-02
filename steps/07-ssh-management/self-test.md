@@ -31,7 +31,7 @@ From PC-HFA-ADMIN-01 → Command Prompt, for each row: type the command → `Pas
 
 | ☐ | # | Type | Must see | If not |
 |---|---|---|---|---|
-| ☐ | B1 | `ssh -l admin 10.10.19.11` | The banner, then `SW-HFA-A-ACC1#` | `Connection refused` → the ACL name in `access-class` doesn't match `MGMT-ONLY`. `timed out` → A2 |
+| ☐ | B1 | `ssh -l admin 10.10.19.11` | The banner, then `SW-HFA-A-ACC1#` | `Connection refused` → D3 (the permit line must be exactly `permit 10.10.19.0 0.0.0.255`) and D4 (the name after `access-class` must be exactly `MGMT-ONLY`). `timed out` → A2 |
 | ☐ | B2 | `ssh -l admin 10.10.19.12` | `SW-HFA-A-ACC2#` | Mission 5 on ACC2 |
 | ☐ | B3 | `ssh -l admin 10.10.19.2` | `SWL3-HFA-A-DIST1#` | Mission 5 on DIST1 |
 | ☐ | B4 | `ssh -l admin 10.10.19.3` | `SWL3-HFA-A-DIST2#` | Mission 5 on DIST2 |
