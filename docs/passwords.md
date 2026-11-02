@@ -13,6 +13,7 @@ them on a real network.
 | Local admin user (SSH + AAA fallback) | `username admin privilege 15 secret` | `Intel#Adm1n` |
 | TACACS+ shared key | devices ↔ AAA server | `Intel#Tac` |
 | RADIUS shared key (optional WPA2-Enterprise) | AP ↔ AAA server | `Intel#Rad` |
+| WPA2-Enterprise users `emp1`, `emp2` (optional) | SRV-HFA-AAA → RADIUS users | `Emp#2026` |
 | VTP password | all switches | `Intel#Vtp` |
 | OSPF MD5 key 1 | Haifa routed links | `Intel#Ospf` |
 | EIGRP MD5 key chain | Jerusalem | `Intel#Eigrp` |
