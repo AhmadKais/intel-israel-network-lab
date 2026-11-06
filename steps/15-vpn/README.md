@@ -544,6 +544,7 @@ from **your** plan (`my-project/plan.md`). The commands are the same — only th
 - [ ] GRE tunnel + routes; ping across the tunnel
 - [ ] IPsec on both sides; firewall holes; `QM_IDLE` and counters growing
 - [ ] Remote-access server + the home PC's VPN client
+- [ ] Next: part C of the [final project guide](../../final-project/README.md) (P11–P14), then step 16
 
 | In the example | In your project — take it from |
 |---|---|

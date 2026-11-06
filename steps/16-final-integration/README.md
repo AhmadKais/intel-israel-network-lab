@@ -379,7 +379,10 @@ answers and compare:
 You did this step on the Intel example. Now do it again in **your** project, with the values
 from **your** plan (`my-project/plan.md`). The commands are the same — only the values change.
 
-- [ ] Open `my-project/step15.pkt` → **Save As** `my-project/final.pkt`
+> 🏁 This list is the short version. For the real thing, follow missions P15–P20 of the
+> [final project guide](../../final-project/README.md), and P21–P27 after them.
+
+- [ ] Open `my-project/step-extras.pkt` (from P14) → **Save As** `my-project/final.pkt`
 - [ ] Write your own port-range table (like 1.4) and scale every department to 8+ PCs
 - [ ] Mailboxes and clients: 2 per department per site; the mail tests
 - [ ] Hardening sweep on every device

@@ -23,5 +23,8 @@ Show it to your teacher at the end of every step.
 | 15 VPN | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 16 Final integration | ☐ | ☐ | ☐ | ☐ | ☐ | |
 
+The real project has its own checklist of 27 missions: tick it in the
+[final project guide](../final-project/README.md), or copy it to the end of this file.
+
 Questions I couldn't answer (ask in class):
 -

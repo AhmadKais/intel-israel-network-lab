@@ -6,7 +6,8 @@ This repo teaches you with **one worked example** (Intel Israel). Your final pro
 
 **How to use it**
 1. Copy this file to `my-project/plan.md`.
-2. Fill it in **during step 01** (parts A–E and G), on paper first if you like.
+2. Fill it in **during step 01** (parts A–E and G), on paper first if you like. Parts F, H and I
+   come from missions P2–P3 of the [final project guide](../final-project/README.md).
 3. Show it to your teacher **before step 02**. Do not start building until it is approved.
 4. From step 02 on, every value you type in **your** project comes from this plan. When a
    step shows an Intel value (a name, a VLAN, an address, a password), look up the matching
@@ -194,6 +195,54 @@ How to fill it: [sites-and-views.md, Part 3](sites-and-views.md#part-3--from-log
 | (site 2) | | | | |
 | (site 3) | | | | |
 | Internet | (one per provider) | | | |
+
+---
+
+## H. My proposal against what I build
+
+Mission [P2](../final-project/README.md). One row for each promise. Add a row for anything else your
+proposal promises that the steps do not build. The two "change" rows need your teacher's approval.
+
+| Promise in the proposal | In my proposal? | Standard decision | My decision | Teacher ✔ |
+|---|---|---|---|---|
+| Access points in every branch | ☐ | Build: P11 | | |
+| Dynamic ARP Inspection | ☐ | Build: P12 | | |
+| EtherChannel between the core switches | ☐ | Build: P13 | | |
+| Site 3 site-to-site VPN to the main branch | ☐ | Build: P14 | | |
+| Site 3 dedicated DHCP server | ☐ | Change: SLAAC + stateless DHCPv6 | | |
+| eBGP from every branch, dual BGP at the main branch | ☐ | Change: static routes to the ISP; BGP only between ISPs | | |
+| | ☐ | | | |
+
+---
+
+## I. The extra values
+
+The steps and missions ask for these. Decide them now, so that nothing is invented halfway through.
+
+| Value | Site 1 | Site 2 | Site 3 |
+|---|---|---|---|
+| Public block | | | |
+| Edge router's public address | | | |
+| Public addresses for static NAT (Web, others) | | — | — |
+| NAT pool (first–last) | — | | — |
+| Routing protocol ID | OSPF process: | EIGRP AS: | OSPFv3 process: |
+| WiFi VLAN number | | | |
+| WiFi network or prefix | | | |
+| SSID | | | |
+| AP names and switch ports | | | |
+
+| Value | Mine |
+|---|---|
+| BGP AS number of each ISP | |
+| DSL backup link (network and both addresses) | |
+| Site 1 ↔ site 2 tunnel `/30` | |
+| Site 1 ↔ site 3 tunnel `/30` (`<T3-1>` / `<T3-3>`) | |
+| Site 3 IPv4 VLAN and network (`<LEGACY>`) | |
+| Remote-access address pool | |
+| Remote-access group name and user | |
+| Site 3 VPN key (`<KEY3>`) | |
+| DNS names of your servers and the ISP's servers | |
+| Email domain | |
 
 ---
 

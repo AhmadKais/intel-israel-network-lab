@@ -95,3 +95,15 @@ connect?"*. Practise:
   in your own project.
 - **Before the exam:** do the final rehearsal in step 16 twice — a classmate picks requirements
   for you to show, and breaks something for you to find and fix.
+
+## 6. The practical task
+
+The ministry guidelines say the examiner can ask you to **add components, from department up to
+branch level**, with working communication, routing and security, and can **inject a fault** for you
+to find and fix. Practise exactly that in the [final project guide](../final-project/README.md):
+
+- **P21** — your 3-minute opening
+- **P22** — add a department
+- **P23** — add a branch
+- **P24** — find the fault
+- **P25** — the questions

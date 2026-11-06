@@ -23,12 +23,12 @@
 | 19 | One main branch | Haifa | — |
 | 20.1 | 3 buildings/floors, access/dist/core | HFA 3 buildings · JLM 3 floors · KG 3 access switches | 02–09, 13, 14 |
 | 20.2 | 6 departments × ≥ 8 PCs | every branch | 16 |
-| 20.3–20.6 | switches, routers, printers, APs | every branch | — |
+| 20.3–20.6 | switches, routers, printers, APs | switches, routers and printers in every branch. APs in the example: Haifa only. **Your project needs APs in every branch:** [P11](../final-project/README.md) | 10 |
 | 20.7 | DHCP server (router or dedicated) | HFA L3 switches · JLM server · KG DHCPv6 | 05, 13, 14 |
 | 20.8 | NTP synced to the main NTP | DMZ NTP is master; JLM via VPN, KG via public static NAT | 11, 13, 14 |
 | 20.9 | Syslog server + logging on all devices | SRV-HFA-SYSLOG, SRV-JLM-SYSLOG, SRV-KG-SYSLOG | 08, 13, 14 |
 | 20.10 | AAA server | SRV-HFA-AAA, SRV-JLM-AAA, SRV-KG-AAA | 08, 13, 14 |
-| 21 | DMZ: DNS, Email, Web, NTP, FTP, AAA — reachable via VPN | Haifa DMZ | 11, 15 |
+| 21 | DMZ: DNS, Email, Web, NTP, FTP, AAA — reachable via VPN | Haifa DMZ; Jerusalem by VPN, Kiryat Gat by public NAT. If your proposal gives site 3 a VPN: [P14](../final-project/README.md) | 11, 15 |
 | 22.1 | Logical hostnames | [design.md §1](design.md) | all |
 | 22.2 | Banner on all switches/routers | | 02 → all |
 | 22.3 | Hashed passwords | `enable secret`, `username ... secret`, `service password-encryption` | 02 → all |

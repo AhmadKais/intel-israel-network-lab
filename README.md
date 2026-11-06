@@ -37,6 +37,10 @@ Run it when you finish the step: it lists every command, the exact output your s
 show (including the tests that **must fail**), and what to fix when it doesn't match. All boxes
 ticked → go to the next step. Then run it again on your own project, with your values.
 
+**5. Finish the real project.** The steps teach. [final-project/README.md](final-project/README.md) is
+the checklist of 27 missions that takes **your** project from the proposal to exam day: what the
+proposal promises beyond the example, the proof of every requirement, the book and the exam practice.
+
 **The rules** (from the ministry guidelines):
 - Two students may not submit the same topic or plan.
 - No branch may be a copy of another branch — each site uses different features.
@@ -109,8 +113,12 @@ and then the same step in your own project.
 | 15 | [VPN](steps/15-vpn) | GRE over IPsec site-to-site, remote-access VPN | 2 h |
 | 16 | [Final integration](steps/16-final-integration) | Email accounts, scale to 8 PCs/dept, full test plan, project book | 3 h |
 
+**After the roadmap:** [the real project](final-project/README.md), missions P1–P27. Read it when you
+start, because P1–P4 come before step 02 and part C comes between steps 15 and 16.
+
 ## Reference docs
 
+- [final-project/README.md](final-project/README.md) — **the real project, from your proposal to exam day**
 - [docs/basic-moves.md](docs/basic-moves.md) — **the basic moves M1–M28, click by click** (open/save, place, rename, cable, CLI, IP settings, DHCP, Simulation…). Every step links to them as "(how? → Mn)"
 - [docs/sites-and-views.md](docs/sites-and-views.md) — **how to divide the network between cities and buildings**, the Logical vs Physical view, moving devices to a new city or network
 - [docs/exam-guide.md](docs/exam-guide.md) — **how the project exam works and how to prepare**
