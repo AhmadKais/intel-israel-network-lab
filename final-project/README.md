@@ -175,11 +175,11 @@ decided for the standard proposal. Check each line against **your own** proposal
 | Dynamic ARP Inspection ("Dynamic ARP Inspection") | **Build it:** P12 | You promised it |
 | EtherChannel between the core switches ("EtherChannel בין מתגי הליבה") | **Build it:** P13 | You promised it. The example has it between distribution switches |
 | Site 3 has a site-to-site VPN to the main branch | **Build it:** P14, for the small IPv4 VLAN | Ministry 21: the DMZ must be reachable through VPN from the other branches |
-| Site 3 uses a dedicated DHCP server ("DHCP על שרת ייעודי") | **Don't build. Change it, with your teacher's approval:** SLAAC + stateless DHCPv6 on the two L3 switches | Ministry 22.11 lets you choose for the third branch. The server would sit in another VLAN, and Packet Tracer (checked in 9.0.1) has no `ipv6 dhcp relay` command to reach it |
-| An eBGP connection from every branch, and a double BGP connection at the main branch ("חיבור eBGP מכל סניף") | **Don't build. Change it, with your teacher's approval:** static routes from each branch to its ISP. BGP runs only **between the ISPs** | Ministry 22.17: routing from a branch to the WAN must be static. The same proposal says this too, in its WAN section. The main branch's second connection is the DSL backup |
+| Site 3 uses a dedicated DHCP server ("DHCP על שרת ייעודי") | **Don't build. Your teacher approved this change:** SLAAC + stateless DHCPv6 on the two L3 switches | Ministry 22.11 lets you choose for the third branch. The server would sit in another VLAN, and Packet Tracer (checked in 9.0.1) has no `ipv6 dhcp relay` command to reach it |
+| An eBGP connection from every branch, and a double BGP connection at the main branch ("חיבור eBGP מכל סניף") | **Don't build. Your teacher approved this change:** static routes from each branch to its ISP. BGP runs only **between the ISPs** | Ministry 22.17: routing from a branch to the WAN must be static. The same proposal says this too, in its WAN section. The main branch's second connection is the DSL backup |
 
-✍️ **Your job:** for the two "Don't build" lines, ask your teacher to approve the change, and write
-it in chapter 6 of your book. If your proposal has any other line that isn't in the steps, add it to
+✍️ **Your job:** your teacher already approved the two "Don't build" changes, so write them in
+chapter 6 of your book. If your proposal has any other line that isn't in the steps, add it to
 the table and ask your teacher.
 
 > 💡 The proposal's background also lists company systems, such as cameras or cloud services. That
@@ -362,7 +362,18 @@ start. Do it on `my-project/step15.pkt`, and **File → Save** after each missio
 subnet. `<NET>` is the first 3 numbers of the subnet (for `10.50.33.0/24`, `<NET>` is `10.50.33`).
 The subnet must sit inside the block of that building or site. Then no routing change is needed.
 
-`<TRUNKS>` = the trunk ports of that switch, from your cabling table.
+**The other signs:**
+
+| Sign | Means | Take it from |
+|---|---|---|
+| `<TRUNKS>` on an L3 switch | The trunk ports to the access switches, and in site 3 also the link to the other DIST. **Not** the port-channel members: the `interface port-channel 1` line covers them | Your cabling table |
+| `<TRUNKS>` on an access switch | Its uplink ports | Your cabling table |
+| `<PORTS>` | Free user ports on that access switch | Your port plan |
+| `<SITE>` | The site code | Plan part A |
+| `<DNS>` | The DNS address your other pools use | Plan part D |
+| `<DHCP-SERVER>` | Site 2's DHCP server address | Plan part D |
+| `<PREFIX>` | The first 4 groups of the new /64, like `2001:DB8:30:60` | Plan part C |
+| `<V6-POOL>` | The name of your stateless DHCPv6 pool from step 14 | Your step 14 config |
 
 ### Recipe A — site 1 (3-tier)
 👉 **Where:** the building's DIST1 (the VTP server, and the primary for this VLAN).

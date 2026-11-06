@@ -201,7 +201,7 @@ How to fill it: [sites-and-views.md, Part 3](sites-and-views.md#part-3--from-log
 ## H. My proposal against what I build
 
 Mission [P2](../final-project/README.md). One row for each promise. Add a row for anything else your
-proposal promises that the steps do not build. The two "change" rows need your teacher's approval.
+proposal promises that the steps do not build. Your teacher has already approved the two "change" rows.
 
 | Promise in the proposal | In my proposal? | Standard decision | My decision | Teacher ✔ |
 |---|---|---|---|---|
