@@ -225,7 +225,7 @@ The steps and missions ask for these. Decide them now, so that nothing is invent
 | Edge router's public address | | | |
 | Public addresses for static NAT (Web, others) | | — | — |
 | NAT pool (first–last) | — | | — |
-| Routing protocol ID | OSPF process: | EIGRP AS: | OSPFv3 process: |
+| Routing protocol ID | OSPF process: 1 (keep) | EIGRP AS: | OSPFv3 process: 1 (keep) |
 | WiFi VLAN number | | | |
 | WiFi network or prefix | | | |
 | SSID | | | |
@@ -242,7 +242,19 @@ The steps and missions ask for these. Decide them now, so that nothing is invent
 | Remote-access group name and user | |
 | Site 3 VPN key (`<KEY3>`) | |
 | DNS names of your servers and the ISP's servers | |
-| Email domain | |
+| Email domain, sites 1–2 | |
+| Email domain, site 3 | |
+
+### Tables I make during the steps
+
+Paste each one here when you finish the step. Your book's chapter 13 needs them.
+
+- Links and loopbacks (steps 08, 09)
+- WAN addresses (step 12)
+- Site 2 addresses (step 13)
+- IPv6 tables (step 14)
+- VPN mirror table (step 15)
+- Port ranges for the 8 PCs (step 16)
 
 ---
 

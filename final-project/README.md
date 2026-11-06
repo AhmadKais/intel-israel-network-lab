@@ -21,6 +21,51 @@ The practical task is set by the examiner. The guidelines say it can be **adding
 one department up to a whole branch**, with working communication, routing and security. The
 examiner may also **cause a fault** and ask you to find and fix it. P22–P24 train exactly this.
 
+## What "finished" means
+
+⛔ **The Intel files in `my-work/` are practice. You never hand them in.** Each step builds only a piece.
+Your project is finished only when `final.pkt` holds **everything** in these two tables, P19 is fully
+ticked, and P26 passes.
+
+**1. Count your devices.** These are the numbers when you follow the steps and P11. A different
+number is fine only if your teacher approved it in your plan. Departments and PCs may never be fewer.
+
+| Device | Site 1 | Site 2 | Site 3 | ISPs | Total |
+|---|---|---|---|---|---|
+| Routers | 1 | 1 | 1 | 6 | 9 |
+| ASA firewall | 1 | — | — | — | 1 |
+| Layer-3 switches | 8 | 2 | 2 | — | 12 |
+| Layer-2 switches | 8 | 4 | 4 | 2 | 18 |
+| Access points | 2 | 2 | 2 | — | 6 |
+| Servers | 8 | 3 | 4 | 4 | 19 |
+| Department PCs (6 × 8) | 48 | 48 | 48 | — | 144 |
+| Other PCs | 1 admin | 1 admin | 1 admin, 2 IPv4 | 1 home | 6 |
+| Laptops | 3 | 2 | 2 | — | 7 |
+| Printers | 3 | 3 | 2 | — | 8 |
+| DSL modem and cloud | — | — | — | 1 + 1 | 2 |
+
+**2. Check what runs where.**
+
+| What | Site 1 | Site 2 | Site 3 |
+|---|---|---|---|
+| Layout | 3 buildings, access–distribution–core | 3 floors, collapsed core | 3 access switches, 2 L3 switches |
+| Addresses | IPv4 | IPv4 | IPv6, plus one small IPv4 VLAN |
+| Routing | OSPF areas, virtual link, MD5 | EIGRP, summary, MD5 | OSPFv3 |
+| Gateway redundancy | HSRP | HSRP | HSRP for IPv6 |
+| EtherChannel | LACP, plus core (P13) | PAgP | — |
+| DHCP | On the L3 switches | Dedicated server + relay | SLAAC + stateless DHCPv6 |
+| NAT | Static + PAT | Dynamic | Overload |
+| Firewall | ASA, inside/outside/DMZ | CBAC | IPv6 filter on the edge |
+| Servers | 6 DMZ + AAA + Syslog | DHCP, AAA, Syslog | DNS, Mail, AAA, Syslog |
+| WiFi | Employees + guests | Employees (P11) | Employees (P11) |
+| Internet link | ISP + DSL backup | ISP | ISP |
+| VPN | Ends both tunnels + remote access | Site-to-site | Site-to-site (P14) |
+| Layer-2 protection | Port security, snooping, DAI | Port security, snooping, DAI | Port security |
+| Management | SSH, AAA, management VLAN | SSH, AAA, management VLAN | SSH, AAA, management VLAN |
+| Time and logs | Main NTP, Syslog | Branch NTP, Syslog | Branch NTP, Syslog |
+
+**Between the sites:** 3 ISPs with BGP between them, OSPF inside each ISP, ISP DNS and web servers.
+
 ## The rules
 
 - ⛔ Two students may not submit the same topic.
@@ -104,7 +149,8 @@ Example: if your plan says the VLAN is 60, then `vlan <V>` means you type `vlan 
 ## P1 — Check your proposal against the ministry
 🧠 **Why:** your proposal is what you promised. Every problem found now saves weeks later.
 
-👣 **Steps.** Open your proposal and tick each box:
+👣 **Steps.** First do [step 00](../steps/00-getting-started), including its **🛠 Your own project** list.
+Then open your proposal and tick each box:
 
 - [ ] 3 branches in different places, one defined as the **main** branch
 - [ ] **6 different departments** in **every** branch, at least **8 PCs** in each
@@ -135,6 +181,9 @@ decided for the standard proposal. Check each line against **your own** proposal
 ✍️ **Your job:** for the two "Don't build" lines, ask your teacher to approve the change, and write
 it in chapter 6 of your book. If your proposal has any other line that isn't in the steps, add it to
 the table and ask your teacher.
+
+> 💡 The proposal's background also lists company systems, such as cameras or cloud services. That
+> describes the company, and it isn't a promise to build them. Don't write them in the book as built.
 
 ✅ **Done when:** part H of your plan is filled in and every line has a decision.
 
@@ -204,6 +253,9 @@ Show your teacher `my-project/plan.md`, including part H.
 5. Run the step's **🧪 self-test again**, with your values (its last table tells you what to swap).
 6. Save: `copy running-config startup-config` on every device you changed, then **File → Save**.
 7. Tick columns 2 and 3 of `my-project/progress.md`.
+8. Copy every table you made in this step into the end of part I of your plan. Your book needs them.
+9. Write this step's topics in your book now, from the table in P20. Leaving the book to the end is
+   the most common way to fail the deadline.
 
 > ⚠️ Never go on with a failing test. Fix it now: a mistake found after 2 minutes takes 2 minutes.
 
@@ -482,11 +534,33 @@ only in site 1 (req. 18). In sites 2 and 3, the access points are for employees.
 **You place:** a WiFi VLAN, 2 access points, 2 laptops, in **each** of the two sites.
 
 ### P11a — The WiFi VLAN
-Do the **Recipe** with `<NAME>` = `WIFI`: recipe **B** for site 2, recipe **C** for site 3.
+On the L3 switches, do the **Recipe** with `<NAME>` = `WIFI`: recipe **B** for site 2 (CC1, CC2 and the
+DHCP server), recipe **C** for site 3 (DIST1 and DIST2).
 
-On the access switches, **leave out** the `interface range <PORTS>` block, because AP ports are set up
-differently (P11c). Type everything else: the trunk line, in site 2 `ip dhcp snooping vlan <V>`, and in
-site 3 the `vlan` lines.
+**Don't** do the recipe's access-switch block, because AP ports are set up differently (P11c). Type this:
+
+👉 **Where:** site 2, each access switch with an AP.
+```
+configure terminal
+interface range <TRUNKS>
+ switchport trunk allowed vlan add <V>
+ exit
+ip dhcp snooping vlan <V>
+ end
+copy running-config startup-config
+```
+
+👉 **Where:** site 3, each access switch with an AP.
+```
+configure terminal
+vlan <V>
+ name <NAME>
+ exit
+interface range <TRUNKS>
+ switchport trunk allowed vlan add <V>
+ end
+copy running-config startup-config
+```
 
 ### P11b — Place and cable
 1. **Network Devices** → **Wireless Devices** → drag **AccessPoint-PT**, twice, one near each of two
@@ -758,6 +832,7 @@ Missions 2–3 with your values.
 - [ ] Each PC has an address, and pinged once, so port-security learned its MAC
 - [ ] Sites 1–2, if you did P12: each new PC uses DHCP, so it is in the binding table
 - [ ] Each new PC is in its building in the Physical view
+- [ ] Your file matches table 1 of **What "finished" means**: count every row
 
 ✅ **Done when:** you counted 8 in every department, and each new port is in the right VLAN.
 
@@ -766,10 +841,11 @@ Missions 2–3 with your values.
 ## P16 — Email
 Do Missions 4–6 of step 16 with your domain, your users, your password.
 
-- [ ] 2 email users per department, in every branch (req. 22.19)
+- [ ] 2 email users per department, in every branch (req. 22.19). Sites 1 and 2 use the DMZ mail server. Site 3 uses its own IPv6 mail server and its own domain
 - [ ] The client is set on 2 PCs in every department
 - [ ] A mail sent between two departments arrives
 - [ ] A mail from site 1 to a site 2 user arrives, through the VPN
+- [ ] A mail between two departments of site 3 arrives
 - [ ] The user table is copied to chapter 15 of your book
 
 ---
@@ -848,8 +924,8 @@ Tick each row only when you **showed** it on your own file. Don't tick from memo
 | 20.6 | Access points in each branch | T4, T25 | ☐ |
 | 20.7 | DHCP in each branch | `ipconfig /all` on a PC of each site | ☐ |
 | 20.8 | NTP synced to the main NTP | T18 | ☐ |
-| 20.9 | Syslog server + logging on all devices | T19, P17 | ☐ |
-| 20.10 | AAA server | T11, SRV AAA tab in each site | ☐ |
+| 20.9 | Syslog server + logging on all devices | T19 in sites 1–2, the Syslog server's log in site 3, P17 | ☐ |
+| 20.10 | AAA server | T11, the server's AAA tab in each site. Site 3: the note in step 14, Mission 12 | ☐ |
 | 21 | 6 DMZ servers, reachable through VPN | T6, T28 | ☐ |
 | 22.1–22.3 | Hostnames, banner, hashed passwords | P17 | ☐ |
 | 22.4 | Hierarchical addressing from one master block | Your plan, part C | ☐ |
@@ -885,12 +961,12 @@ text you can't explain will hurt you at the exam.
 | 1 | דף שער | School, project name, "פרויקט גמר הנדסאים", "מגמת תקשוב", your name, ID, school year, mentor | You |
 | 2 | תוכן עניינים | Automatic, from the word processor. Update it last | Word processor |
 | 3 | מבוא | What the project is, its goals, why it matters | Proposal |
-| 4 | אודות החברה | The real company and its sites | Proposal |
+| 4 | אודות החברה | The real company and its sites, an organization chart, and how many people work in each department | Proposal |
 | 5 | דרישות הארגון מהרשת | What the company needs, in plain words | Proposal, P19 |
-| 6 | בחירות וחלופות | Each choice, the alternatives, and **why**. Include all of part H and the simulator's limits | Plan E, H |
-| 7 | סניפים ומחלקות | Every branch and its 6 departments | Plan A |
-| 8 | טופולוגיה פיזית | Physical view screenshots. The ministry recommends **realistic building drawings** | Step 16 Mission 9a |
-| 9 | טופולוגיה לוגית | Logical view: one per branch + the WAN | Step 16 Mission 9a |
+| 6 | בחירות וחלופות | Each choice, the alternatives, and **why**. Include all of part H, step 16's list of simulator limits, and IP Source Guard (Packet Tracer 9.0.1 has no such command) | Plan E, H |
+| 7 | סניפים ומחלקות | Every branch, its 6 departments, and what each department does | Plan A |
+| 8 | טופולוגיה פיזית | Physical view: all branches together, then one per branch. The ministry recommends **realistic building drawings** | Step 16 Mission 9a |
+| 9 | טופולוגיה לוגית | Logical view: all branches together, then one per branch + the WAN | Step 16 Mission 9a |
 | 10 | חלוקת ציוד | How many of each device, per branch | Your file |
 | 11 | מפרט ציוד | The models (2960, 3650, 2911, ASA 5506-X, AccessPoint-PT…) and why | Plan |
 | 12 | טבלת שמות | Every device name, **with the meaning of each abbreviation** | Plan B |
@@ -901,15 +977,54 @@ text you can't explain will hurt you at the exam.
 | 17 | ביבליוגרפיה | The sources you really used | You |
 
 ### Chapter 16 — commands
-For **each** technology you built: a short definition in your words, the commands **per branch**, and
-a screenshot that proves it works (a `show` output or a test). Then the full `show running-config` of
-each main device, and `show ip route` of each main router.
+This is the biggest part of the book. The ministry's sample contents page gives every technology its
+own section, split by branch, and runs to about 218 pages.
 
-Order: banners and passwords · VLAN · trunk · VTP · STP, PortFast, BPDU Guard, Root Guard ·
-EtherChannel · inter-VLAN · HSRP · DHCP, snooping, DAI · port security · SSH, ACL · AAA, Syslog, NTP ·
-OSPF, virtual link · EIGRP · BGP · NAT · ASA, DMZ · CBAC · VPN · IPv6 · WiFi · email, DNS, web, FTP.
+**Every topic in the table gets the same 4 parts:**
+1. **What it is and why you need it,** in your own words. Sources: part 1 of the step, and its 🎓 answers.
+2. **Advantages and disadvantages,** where the topic has them.
+3. **The commands,** with one line explaining each. The steps have these tables.
+4. **One sub-section per branch that has it:** your real configuration, then a screenshot of the proof.
+
+| # | Topic | Theory to include | Sites | Proof | Learn in |
+|---|---|---|---|---|---|
+| 1 | Hostnames, banners, passwords | What a banner is, hashing | 1, 2, 3 | `show running-config` | 02 |
+| 2 | VLAN | Types, advantages, disadvantages | 1, 2, 3 | `show vlan brief`, port table | 02 |
+| 3 | Trunk | 802.1Q tag, native VLAN | 1, 2, 3 | `show interfaces trunk` | 03 |
+| 4 | VTP | Modes, password | 1, 2, 3 | `show vtp status` | 03 |
+| 5 | STP | How loops form, root election, port roles | 1, 2, 3 | `show spanning-tree vlan <V>` | 04 |
+| 6 | PortFast, BPDU Guard, Root Guard | The attack each one stops | 1, 2, 3 | `show running-config interface <port>` | 04 |
+| 7 | EtherChannel | LACP against PAgP | 1, 2 | `show etherchannel summary` | 04, 13, P13 |
+| 8 | Layer-2 against layer-3 switch | Differences, advantages, disadvantages | — | — | 05 |
+| 9 | Routing and inter-VLAN routing | What a router does, SVI, route choice | 1, 2, 3 | `show ip route`, `show ipv6 route` | 05 |
+| 10 | HSRP | Priority, preempt, what happens on failure | 1, 2, 3 | `show standby brief` | 05, 14 |
+| 11 | DHCP | DORA, relay and `ip helper-address` | 1, 2, 3 | `show ip dhcp binding`, `ipconfig /all` | 05, 13, 14 |
+| 12 | DHCP snooping | Starvation and spoofing attacks | 1, 2 | `show ip dhcp snooping` | 06 |
+| 13 | Dynamic ARP Inspection | ARP poisoning | 1, 2 | `show ip arp inspection` | P12 |
+| 14 | Port security | Violation modes, sticky | 1, 2, 3 | `show port-security` | 06 |
+| 15 | CDP, VLAN hopping, `no ip domain-lookup` | The risk of each, parking VLAN | 1, 2, 3 | `show running-config` | 02, 06 |
+| 16 | SSH and the management VLAN | SSH against Telnet | 1, 2, 3 | SSH test, refused test | 07 |
+| 17 | ACL | How they work, types, wildcard | 1, 2, 3 | `show access-lists` | 07, 10, 11 |
+| 18 | AAA | RADIUS against TACACS+ | 1, 2, 3 | Login test, server's AAA tab | 08 |
+| 19 | Syslog | Severity levels | 1, 2, 3 | The server's log | 08 |
+| 20 | NTP | Main server, branch sync | 1, 2, 3 | `show ntp status` | 08, 11 |
+| 21 | OSPF | Areas, neighbor states, LSA, LSDB, MD5, passive, summary, virtual link | 1 | `show ip ospf neighbor`, `show ip ospf virtual-links` | 08, 09 |
+| 22 | EIGRP | Neighbor conditions, tables, summary | 2 | `show ip eigrp neighbors` | 13 |
+| 23 | IPv6 and OSPFv3 | Address types, SLAAC, stateless DHCPv6 | 3 | `show ipv6 ospf neighbor` | 14 |
+| 24 | BGP | Message types, neighbor process, tables | ISPs | `show ip bgp summary` | 12 |
+| 25 | NAT | Terms, 3 types | 1, 2, 3 | `show ip nat translations` | 12, 13, 14 |
+| 26 | ASA and DMZ | Security levels, zones | 1 | `show nameif`, `show access-list` | 11 |
+| 27 | CBAC | What it inspects | 2 | `show ip inspect sessions` | 13 |
+| 28 | VPN | IPsec, GRE, remote access | 1, 2, 3 | `show crypto isakmp sa`, `show crypto ipsec sa` | 15, P14 |
+| 29 | WiFi | WPA2, guest isolation | 1, 2, 3 | Laptop `ipconfig` and ping | 10, P11 |
+| 30 | HTTP, DNS, FTP, email | What each service does | 1, 3, ISPs | Browser, `nslookup`, mail screenshots | 11, 12, 14, 16 |
+| 31 | Redundancy and DSL backup | What fails, what takes over | 1 | T13, T14, T15 | 12 |
+
+**End chapter 16 with:** all the `show` commands you used, the full `show running-config` of each main
+device, and `show ip route` of each main router.
 
 👣 **The final book check:**
+- [ ] All 31 topics are there, each with a sub-section for every branch that has it
 - [ ] Every value in the book matches your file: open the file and compare 10 random values
 - [ ] No "Intel", no example address, no "טיוטה", no ✍️ left
 - [ ] Every figure and table has a caption and is on the contents page
@@ -1033,6 +1148,8 @@ protocols. Read [docs/exam-guide.md](../docs/exam-guide.md).
 # Part G — Submit
 
 ## P26 — Freeze the file and do the cold start
+⛔ Don't start until P15–P20 are done.
+
 🧠 **Why:** a project that works while it's open can fail after a reopen, if something wasn't saved.
 This is the last and most important test.
 
