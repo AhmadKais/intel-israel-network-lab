@@ -259,9 +259,8 @@ Show your teacher `my-project/plan.md`, including part H.
 
 > ⚠️ Never go on with a failing test. Fix it now: a mistake found after 2 minutes takes 2 minutes.
 
-> ⚠️ **Packet Tracer version.** Build on the same version as the computer you will show it on. A
-> file saved in a newer version doesn't open in an older one. Ask your teacher which version the
-> exam computer has, and test this early.
+> ⚠️ **Packet Tracer version.** The course uses 9.x. A file saved in a newer version doesn't open in
+> an older one, so check early that the exam computer has 9.x too, the same or newer than yours.
 
 ✅ **Done when:** `my-project/step01.pkt` opens, and you know the routine.
 

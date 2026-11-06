@@ -162,7 +162,7 @@ not in the commands.
 1. Go to **netacad.com** and create a free account (or log in).
 2. After logging in, look in the top menu for **Resources → Download Packet Tracer**.
    If you can't find it, go straight to `https://www.netacad.com/resources/lab-downloads`.
-3. Choose the version for your computer (8.2 or newer) and download it.
+3. Choose the newest 9.x version for your computer and download it. Files saved in 9.x don't open in 8.x.
 4. Install it:
    - **Windows:** double-click the downloaded `.exe` → click **Next** on every screen →
      **Finish**.

@@ -177,6 +177,6 @@ git commit -m "Step 05: inter-VLAN routing + HSRP working"
 git push
 ```
 
-Built for Packet Tracer **8.2.x**. Commands were written against IOS 15 / IOS-XE syntax as
+Use Packet Tracer **9.x**, the same version as your teacher. Commands were written against IOS 15 / IOS-XE syntax as
 Packet Tracer implements it; where Packet Tracer is known to be picky, the step says so and
 [docs/pt-gotchas.md](docs/pt-gotchas.md) has the workaround.
