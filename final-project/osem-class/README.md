@@ -55,6 +55,8 @@ In every lesson you will find **📖 The story** at the beginning and **⏭ What
 
 🧱 **Want to build everything alone, without start files?** [From an empty file to the whole project](from-zero/): every device, cable and command that the start files do for you, and 14 tests at the end.
 
+📝 **Practise for the exam:** [questions, missions, faults and three mock exams (PDF)](exam/osem-exam-practice.pdf). The answer key is with the teacher.
+
 The start file of each lesson is the result of the previous one, so a student who missed a lesson or
 got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version we tested with.
 
