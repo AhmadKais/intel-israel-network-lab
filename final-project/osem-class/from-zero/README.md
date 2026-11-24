@@ -23,6 +23,9 @@ complete project.
 
 ✔️ **Tested.** All the commands and the server forms on this page and in the five lessons were typed, one after the other, into factory-empty devices.
 The result was identical to the finished project (30 of 30 configured devices, 3 servers), and the 14 tests of the [final check](#final-check) passed.
+The building was tested too: 60 devices, 14 HWIC cards and 72 cables were placed **by clicking**, from an empty file, only from the tables of these pages. All 60 devices and 72 cables came out identical to the finished project, including the DCE side of the nine serial lines:
+
+![Built from an empty file, only from the tables](images/built-by-hand.png)
 
 **How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution.
 
@@ -174,6 +177,10 @@ For the other four, the same block. Only one line changes:
 
 ⚠️ The **3560** (MLS-…) starts with a question, like a router: `Would you like to enter the initial configuration dialog? [yes/no]:`. Write `no`, press Enter, and Enter again until `Switch>`. After that it takes exactly the same commands:
 
+⚠️ **Or you see `(config)#` and no question.** Opening the **Config** tab (to change the name) answers the question and enters configuration mode by itself. Write `end` and press Enter, and then write the block from its first line. The same is true for every switch and router:
+
+![After the Config tab: the question is already answered](images/cfg-tab.png)
+
 ![MLS-S-ASM](images/base-mls.png)
 
 <details><summary><b>📘 The commands of this mission, explained</b></summary>
@@ -270,7 +277,7 @@ PC → **Desktop** → **IP Configuration** → **Static**, like in lesson 1. Th
 
    ![1941](images/tb-routers.png)
 2. Click the router → **Physical** tab. Click the **power switch** (1): its green light goes off.
-3. Drag **HWIC-2T** (2) from the list to the **right** slot (3).
+3. Drag **HWIC-2T** (2) from the list to the **right** slot (3). Press the mouse button on the name **HWIC-2T**, keep it pressed until you are above the black slot, and release.
 4. Click the power switch (1) again: the light is green.
 
    ![The card in the right slot](images/hwic-one.png)
@@ -304,6 +311,8 @@ The triangles stay **red**: router ports are off until `no shutdown` (lesson 3).
 Click **R-S-MAIN** → **CLI**. At `Would you like to enter the initial configuration dialog? [yes/no]:` write `no` and press Enter. Press Enter again until `Router>`:
 
 ![The question of a new router](images/dialog.png)
+
+No question, but `Router(config)#`? You opened the **Config** tab after the power was turned on. Write `end`, press Enter, and continue with the block.
 
 **R-S-MAIN**:
 

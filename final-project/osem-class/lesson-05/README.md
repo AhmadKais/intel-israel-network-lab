@@ -863,6 +863,8 @@ A router passes everything that isn't forbidden, so an ACL alone must list every
 ### 🖱 The solution: what to click and what to write
 Click **ASA-S** → **CLI** → `enable` → **Enter** (there is no password):
 
+⚠️ If you opened the **Config** tab of the ASA, you may already see `ciscoasa#` or `ciscoasa(config)#`. Then don't write `enable` again. From `(config)#` write `end` first.
+
 ![ciscoasa#](images/step-login.png)
 
 **ASA-S** → CLI. `enable`, and just **Enter** at the password:

@@ -224,6 +224,8 @@ click the second device → choose its port.
 | 3 | Straight-Through (3) | PC-SAL-2 | FastEthernet0 | SW-S-SAL | FastEthernet0/3 |
 | 4 | Straight-Through (3) | PC-SAL-3 | FastEthernet0 | SW-S-SAL | FastEthernet0/5 |
 
+⚠️ Choose exactly the port of the table. The menu of a PC begins with `RS 232`, `USB0`, `USB1`, and the menu of a switch begins with `Console`. They are **not** the network: go down to **FastEthernet**.
+
 ![Port menu](images/07-port-menu.png)
 
 💡 Ports already in use **disappear** from the list. Here Fa0/2 and Fa0/3 are taken:
@@ -258,6 +260,8 @@ click the second device → choose its port.
 
 ![enable, and you are the manager. Nobody asked who you are](images/step-nopass.png)
 
+(If you see `(config)#`, write `end` first. Why? It is explained in the solution below.)
+
 The prompt became `#`: whoever reaches the switch can erase everything. It is also still called `Switch`.
 
 **🎯 What we want now.** A name on every switch, a password at every door, and a saved configuration.
@@ -268,6 +272,10 @@ The prompt became `#`: whoever reaches the switch can erase everything. It is al
 
 ### 🖱 The solution: what to click and what to write
 Click **SW-S-MAIN** → **CLI** → press **Enter** until you see `Switch>`. Type line by line:
+
+⚠️ Do you see `Switch(config)#`? When you opened the **Config** tab to change the name, Packet Tracer wrote `enable` and `configure terminal` by itself. Write `end` and press Enter, then start with the first line.
+
+![The Config tab wrote these two lines](images/step-cfg-tab.png)
 
 ```
 enable
