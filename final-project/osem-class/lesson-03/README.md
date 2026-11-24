@@ -29,6 +29,19 @@ One cable (trunk) from the switch to the router carries all the VLANs. We cut th
 into **sub-interfaces**: g0/0.10 for VLAN 10, g0/0.20 for VLAN 20... Each has an IP and is the
 **gateway** of its VLAN. The physical port itself has **no IP**.
 
+💬 **In simple words:** the router is a corridor between the classes (VLANs). One physical door (g0/0), with
+several signs on it: .10, .20, .30...
+
+**Example — PC-SAL-1 (VLAN 20) pings PC-IT-1 (VLAN 40):**
+
+| # | Where | VLAN tag | What happens |
+|---|---|---|---|
+| 1 | PC-SAL-1 | — | 192.168.40.x is not my network → I send it to my gateway .252 |
+| 2 | trunk up to the router | 20 | arrives at g0/0.20 |
+| 3 | inside the router | — | routing table: 192.168.40.0 is on g0/0.40 |
+| 4 | trunk down to the switch | **40** | the same cable, a different tag |
+| 5 | PC-IT-1 | — | arrived |
+
 ### 1.2 HSRP — two routers, one gateway
 A PC can have only **one** default gateway. If that router dies, the department is cut off.
 **HSRP**: two routers share a **virtual IP** (VIP). The PCs use the VIP and don't know which router answers.
@@ -41,10 +54,40 @@ A PC can have only **one** default gateway. If that router dies, the department 
 
 `preempt` = when the main router returns, it takes the Active role back.
 
+💬 **In simple words:** a store has one phone number. Two employees can answer it. The customers dial the same
+number and don't notice that the employee changed.
+
+**Example — what each router "says":**
+
+| Situation | R-S-MAIN | R-S-BKP | Active |
+|---|---|---|---|
+| normal | 110 | 105 | R-S-MAIN |
+| g0/0 of the main falls | silent | 105 | R-S-BKP (after about 10 seconds without hello) |
+| the main returns, with `preempt` | 110 | 105 | R-S-MAIN again |
+| the main returns, **without** `preempt` | 110 | 105 | R-S-BKP stays |
+
 ### 1.3 DHCP and relay
 DHCP gives a PC its address in four steps, **DORA**: **D**iscover → **O**ffer → **R**equest → **A**ck.
 Discover is a **broadcast**, and a router does not forward broadcasts. `ip helper-address` on the
 router turns it into a direct message to the server: this is the **relay**.
+
+**Example — PC-SAL-1 asks for an address:**
+
+| Step | From → to | Content |
+|---|---|---|
+| Discover | 0.0.0.0 → 255.255.255.255 | "is there a DHCP server?" |
+| relay | 192.168.20.254 → 192.168.50.1 | the router passes it on and notes "I received it on **192.168.20.254**" |
+| Offer | server → PC, through the router | "take 192.168.20.20" |
+| Request | PC → everybody | "I accept" |
+| Ack | server → PC | "it's yours" + gateway .252 + DNS |
+
+❓ **Ask the class:** the server has four pools. How does it know to give an address from 192.168.20?
+
+<details><summary>Answer</summary>
+
+From the router's note (the field is called *giaddr*): the request came through 192.168.20.254, so the pool of 192.168.20.0.
+
+</details>
 
 ### 1.4 The services
 | Service | Port | What for |
@@ -54,6 +97,10 @@ router turns it into a direct message to the server: this is the **relay**.
 | FTP | TCP 20/21 | files |
 | SMTP | TCP 25 | **sending** mail |
 | POP3 | TCP 110 | **reading** mail |
+
+**Example — what happens when you open `http://www.osem.com`:** the PC asks DNS (UDP 53) "what is the IP?" →
+192.168.50.1 → the browser opens a connection to TCP port 80 at that IP → the page arrives. If the site opens by IP
+but not by name, the problem is DNS.
 
 ### 1.5 DHCP snooping
 A student brings a home router from home, and it gives everyone a wrong gateway. With **DHCP
@@ -278,6 +325,45 @@ show ip dhcp snooping
 
 ✅ On a PC: `ipconfig /release` and `ipconfig /renew` still work.
 
+### 6.1 See the attack
+A "stranger" gives addresses. For the demonstration **R-S-BKP** plays the attacker:
+```
+configure terminal
+ip dhcp excluded-address 192.168.20.1 192.168.20.199
+ip dhcp pool ROGUE
+network 192.168.20.0 255.255.255.0
+default-router 192.168.20.99
+dns-server 6.6.6.6
+end
+```
+On **PC-SAL-2**: `ipconfig /release`, `ipconfig /renew`. The gateway is **192.168.20.99** and the DNS **6.6.6.6**: all
+the PC's traffic now goes to the attacker!
+
+![The fake server answered first](images/24-rogue.png)
+
+Why did snooping not stop it? Because the port to R-S-BKP is **trusted**. On **SW-S-MAIN** take the trust away:
+```
+configure terminal
+interface fa0/5
+no ip dhcp snooping trust
+end
+```
+Release and renew again on PC-SAL-2: gateway **.252** and DNS **192.168.50.1**. The switch dropped the fake offer.
+
+![Top: the fake address. Then, twice: the real one](images/25-rogue-blocked.png)
+
+**Clean up** on R-S-BKP:
+```
+configure terminal
+no ip dhcp pool ROGUE
+no ip dhcp excluded-address 192.168.20.1 192.168.20.199
+end
+```
+And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
+
+🧠 Snooping protects only the switch that runs it. A rogue server on SW-S-SAL can still cheat its neighbors on the
+**same** switch, so a full protection puts it on every department switch (exercise 4).
+
 ## Mission 7 — Kill the main router
 1. **R-S-MAIN**: `configure terminal` → `interface g0/0` → `shutdown`.
 2. After about 10 seconds on **R-S-BKP**: `show standby brief` → **Active**.
@@ -290,6 +376,16 @@ show ip dhcp snooping
 
    ![Back to normal](images/23-back.png)
 5. `copy running-config startup-config` on the routers and on SW-S-MAIN, File → Save.
+
+### 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| `% Configuring IP routing on a LAN subinterface is only allowed if...` | the IP came before `encapsulation dot1Q` | write encapsulation first |
+| both routers are Active | they don't see each other | trunk on Fa0/5 and Fa0/6, the same VLAN number |
+| `DHCP request failed` | helper missing, the service is Off, or STP isn't ready | `show run`, server → DHCP → On, wait and `/renew` |
+| an address 169.254.x.x | nobody answered the request | same as above |
+| ping by IP works, by name doesn't | DNS | `nslookup`, check the record and the PC's DNS |
+| mail is not sent | domain not set, or wrong user | EMAIL → Set, check `sakhnin1` / `Osem#Mail` |
 
 ---
 
@@ -313,12 +409,60 @@ show ip dhcp snooping
 2. Make R-S-BKP Active only for VLAN 40 (hint: priority). Why would we do that?
 3. Add `ftp.osem.com` to DNS and connect with `ftp ftp.osem.com`.
 
+4. Put DHCP snooping on **SW-S-SAL** too: VLAN 20, trust only on the trunks Fa0/1 and Fa0/4. Check that PC-SAL-2 still gets an address.
+
+<details><summary>Answers (we tested them)</summary>
+
+1. `DHCP request failed.` PC-IT-1 in VLAN 40 still gets an address: the helper is set on each sub-interface separately. After you put it back, the address arrives.
+2. On R-S-BKP, `interface g0/0.40`: `standby 40 priority 120`. `show standby brief` shows it Active in group 40 and Standby in the others. Reason: share the load between the two routers. Put 105 back.
+3. `Connected to ftp.osem.com`, user `sakhnin`. DNS only translates the name: FTP itself does not change.
+4. These commands, and the PC still gets an address:
+
+```
+configure terminal
+ip dhcp snooping
+ip dhcp snooping vlan 20
+no ip dhcp snooping information option
+interface range fa0/1 , fa0/4
+ip dhcp snooping trust
+end
+```
+
+</details>
+
 ## 🎓 Explain it to the examiner
 - What is a sub-interface and why do we need `encapsulation dot1Q`?
 - What is the VIP? What happens, step by step, when R-S-MAIN falls?
 - Explain DORA. Why is a relay needed?
 - What is the difference between SMTP and POP3?
 - What attack does DHCP snooping prevent, and which ports are trusted?
+
+<details><summary>Model answers</summary>
+
+1. A logical part of a physical port, one for each VLAN. `encapsulation dot1Q 20` says that frames tagged 20 belong to it.
+2. The virtual IP that the PCs use as a gateway. The main stops sending hello → after about 10 seconds the backup becomes Active, takes the VIP and its virtual MAC → the PCs continue.
+3. Discover, Offer, Request, Ack. Discover is a broadcast and a router stops broadcasts, so the router passes it on as a direct message.
+4. SMTP (25) sends and passes mail between servers. POP3 (110) downloads mail from the mailbox.
+5. A fake DHCP server that gives a wrong gateway (man in the middle). Trusted: the port of the real server, the routers and the link to the backup switch.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. Which address do we write as the gateway of a PC in VLAN 30?
+2. Priority 110 and 105: who is Active?
+3. What is written on the physical port g0/0?
+4. Which port does DNS use?
+5. Where is `ip helper-address` written?
+
+<details><summary>Answers</summary>
+
+1. 192.168.30.252.
+2. 110.
+3. Only `no shutdown`, no IP.
+4. UDP 53.
+5. On the sub-interface that the PCs' request arrives at.
+
+</details>
 
 ## 🛠 Your own project
 - [ ] A table: VLAN, main .254, backup .253, VIP .252.
@@ -327,5 +471,3 @@ show ip dhcp snooping
 - [ ] DNS, web, FTP and mail with **your** domain and users.
 - [ ] DHCP snooping.
 - [ ] Screenshots: `show standby brief` on both routers, DHCP on a PC, the website by name, mail received, the failure test with two tracerts.
-</content>
-</invoke>

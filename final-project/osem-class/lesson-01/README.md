@@ -32,6 +32,25 @@ so it decides using **MAC addresses**, not IP addresses.
 3. **Flood:** if it doesn't know the MAC, or the frame is a broadcast, it sends it to every
    port in the VLAN except the one it came from.
 
+💬 **In simple words:** a switch is like a mail sorter who learns which room each person sits in. The first
+letter is shouted to everybody; after the answer, letters go only to the right room.
+
+**Example.** The MAC table is empty. PC-SAL-1 (port Fa0/2) pings PC-SAL-2 (port Fa0/3):
+
+| # | Frame | The switch learns | The switch sends it to |
+|---|---|---|---|
+| 1 | ARP request, PC-SAL-1 → everybody | PC-SAL-1 is on Fa0/2 | **all** ports except Fa0/2 (flood) |
+| 2 | ARP reply, PC-SAL-2 → PC-SAL-1 | PC-SAL-2 is on Fa0/3 | only Fa0/2 |
+| 3 | ping, PC-SAL-1 → PC-SAL-2 | nothing new | only Fa0/3 |
+
+❓ **Ask the class:** did PC-SAL-3 see frame 1? Frame 3?
+
+<details><summary>Answer</summary>
+
+Frame 1 yes, it is a broadcast. Frame 3 no: the switch already knows where PC-SAL-2 is.
+
+</details>
+
 ### 1.2 MAC, IP and ARP
 | | MAC address | IP address |
 |---|---|---|
@@ -43,10 +62,29 @@ so it decides using **MAC addresses**, not IP addresses.
 PC-SAL-1 knows the IP of PC-SAL-2 but needs its MAC. It **broadcasts an ARP request**: "who has
 192.168.20.22?" PC-SAL-2 replies with its MAC, and PC-SAL-1 keeps it in its ARP table.
 
+💬 **In simple words:** the IP is like a home address: it changes when you move to another network. The MAC is
+like a serial number stamped on the network card: it stays the same.
+
 ### 1.3 Subnet mask
 `192.168.20.21` with mask `255.255.255.0` (`/24`): the first three numbers are the **network**
 (192.168.20), the last is the **device**. Same network → talk directly. Different network → you
 need a router, which we add in a later lesson.
+
+**Example — same network or not?** (mask 255.255.255.0)
+
+| First device | Second device | Same network? | What happens |
+|---|---|---|---|
+| 192.168.20.21 | 192.168.20.23 | yes, 192.168.20 | they talk directly |
+| 192.168.20.21 | 192.168.30.23 | no, 20 against 30 | a router is needed |
+| 192.168.20.21 | 192.168.20.254 | yes | directly (.254 will be our router) |
+
+❓ **Ask the class:** how many devices fit in a /24 network?
+
+<details><summary>Answer</summary>
+
+**254**: there are 256 numbers, but .0 is the name of the network and .255 is its broadcast address.
+
+</details>
 
 ### 1.4 Which cable?
 | Between | Cable | Why |
@@ -203,6 +241,16 @@ empty: there is no router yet.
 
    ![Save As](images/19-save-as.png)
 
+### 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| orange dot for more than a minute | the link is still in STP, or the window was paused | wait, check that Realtime is selected at the bottom right |
+| red triangles | wrong port or a port that is off | hover over the cable and compare with the port table |
+| `Request timed out` | wrong IP or mask | `ipconfig` on both PCs |
+| `% Invalid input detected at '^'` | typing mistake, or the wrong mode | look under the `^`, check the prompt: `>`, `#` or `(config)#` |
+| the CLI shows nothing | the console is waiting | click inside the window and press Enter |
+| the password is refused | upper/lower case, or Hebrew keyboard | Alt+Shift, `Osem#Con` and then `Osem#En1` |
+
 ---
 
 ## 🔎 Find the bug — from a real project
@@ -224,12 +272,47 @@ wrong and how to fix it** before opening the answer.
 2. Disconnect PC-SAL-2 and ping it. Which message do you get?
 3. Remove `login` from the console of SW-S-SAL, `exit`, and go in again. What changed? Put it back.
 
+<details><summary>Answers (we tested them)</summary>
+
+1. **Request timed out.** The PCs are now in different networks (20 and 30). Without a gateway PC-SAL-1 has no way to another network. Cables and switches know nothing about IP.
+2. **Request timed out**: PC-SAL-2 does not answer.
+3. After Enter you get the banner and `SW-S-SAL>` **without a password**. `password` alone is not enough: `login` is what asks for it.
+
+</details>
+
 ## 🎓 Explain it to the examiner
 - How does a switch know where to send a frame?
 - Why do we need ARP if we already know the IP?
 - What is the difference between `enable secret` and the console password?
 - Why cross-over between switches and straight-through to a PC?
 - What is the difference between running-config and startup-config?
+
+<details><summary>Model answers</summary>
+
+1. It learns the source MAC of every frame into the MAC table, and looks up the destination MAC there. Unknown or broadcast: it floods.
+2. The IP finds the destination, but a frame in the LAN is delivered by MAC. ARP translates IP → MAC.
+3. The console password lets you connect with the cable (you reach `>`). `enable secret` lets you manage (`#`) and is stored as a hash.
+4. Between devices of the same type transmit and receive must be crossed. PC and switch are already opposite.
+5. running-config is in RAM and works now. startup-config is in NVRAM and is loaded at boot. `copy running-config startup-config` saves.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. At which OSI layer does a 2960 switch work?
+2. Which command saves the configuration?
+3. Is `192.168.10.5/24` in the same network as `192.168.20.5/24`?
+4. What does the switch do with a broadcast?
+5. What is wrong: `line console 0` → `password 1234` → `end`?
+
+<details><summary>Answers</summary>
+
+1. Layer 2.
+2. `copy running-config startup-config`.
+3. No.
+4. Sends it to all ports of the VLAN except the one it came from.
+5. `login` is missing, so nobody is asked.
+
+</details>
 
 ## 🛠 Your own project
 In **your** company's file, with **your** names, addresses and passwords:

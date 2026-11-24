@@ -32,12 +32,29 @@ A VLAN cuts one physical switch into several separate networks. A broadcast from
 department does not reach IT. Fewer broadcasts, more security, and a person can move desks and
 stay in the same network.
 
+💬 **In simple words:** one school building with several classes. Everybody is under the same roof, but a
+teacher who speaks in class 20 is not heard in class 40. A VLAN is a class with closed doors.
+
+**Example.** SW-S-SAL has 3 PCs in VLAN 20. If one PC is moved to VLAN 40 (same cable, same switch), it can
+no longer ping the two others.
+
 ### 1.2 Access and trunk
 | | Access | Trunk |
 |---|---|---|
 | Carries | one VLAN | many VLANs |
 | Connects | PC, server, printer | switch ↔ switch, switch ↔ router |
 | 802.1Q tag | no | yes: 4 bytes that say "this frame is VLAN 20" |
+
+**Example — a frame from PC-SAL-1 to the backup switch:**
+
+| Place | Tag | Why |
+|---|---|---|
+| PC-SAL-1 → SW-S-SAL (access) | none | a PC doesn't know what a VLAN is |
+| SW-S-SAL → SW-S-MAIN (trunk) | **VLAN 20** | many VLANs share this cable |
+| SW-S-MAIN → server switch (access 50) | not sent | this link carries only VLAN 50 |
+
+The VLAN number has 12 bits in the tag, so there are VLANs 1–4094. A frame of the **native VLAN** (1 by
+default) travels on the trunk without a tag.
 
 ### 1.3 VTP
 VTP copies the VLAN list between switches over trunks, so we create each VLAN once.
@@ -62,9 +79,29 @@ link falls, the blocked port wakes up.
 | BPDU Guard | PC ports | shuts the port if somebody connects a **switch** |
 | Root Guard | main switch, towards the departments | no department switch can become root |
 
+💬 **In simple words:** a loop is like a rumor in a group chat in which everybody forwards every message to
+everybody, forever. STP is the rule "this person doesn't forward, unless somebody else is missing".
+
+**Example — who is root in VLAN 20?** (the lowest number wins)
+
+| Switch | Priority | + VLAN | Total |
+|---|---|---|---|
+| SW-S-MAIN | 24576 | 20 | **24596 → root** |
+| SW-S-BKP | 28672 | 20 | 28692 |
+| SW-S-SAL | 32768 (default) | 20 | 32788 |
+
+**And which way does SW-S-SAL choose?** A 100 Mb/s link costs 19. Directly to the root: 19. Through the backup
+switch: 19 + 19 = **38**. The cheaper way forwards, the other one is blocked. Equal priorities → the lowest MAC wins.
+
 ### 1.5 Port security
 The port learns the MAC of the first PC (`sticky`) and allows only it. A different MAC → the port
 goes to **err-disabled**.
+
+| Violation mode | Stranger's frames | Counts and logs | Port |
+|---|---|---|---|
+| `protect` | dropped | no | stays up |
+| `restrict` | dropped | yes | stays up |
+| `shutdown` (default) | dropped | yes | **err-disabled** |
 
 ### 1.6 The plan
 | VLAN | Name | Network | Department switch |
@@ -112,6 +149,13 @@ end
 show vlan brief
 ```
 ![Five new VLANs, still without ports](images/03-vlan.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `vtp domain SAKHNIN` | the name of the VTP group | only switches with the same name talk |
+| `vtp password` | a shared secret | a strange switch cannot change our VLANs |
+| `vtp mode server` | this switch manages the list | one place to create VLANs |
+| `vlan 20` + `name` | creates a VLAN and names it | the name is documentation; the number is what counts |
 
 ## Mission 2 — VTP client on the others
 On **SW-S-BKP, SW-S-MGMT, SW-S-SAL, SW-S-IT and MLS-S-ASM** (not MLS-S-SRV):
@@ -295,6 +339,16 @@ pass and VLAN 50 is created by hand in transparent mode.
 
 ![The trunks](images/08-trunk.png)
 
+| Command | What it does | Why |
+|---|---|---|
+| `switchport mode access` | a port for one device | a PC must not open a trunk |
+| `switchport access vlan 20` | puts the port in VLAN 20 | this is the department |
+| `spanning-tree portfast` | green immediately | a PC cannot create a loop |
+| `spanning-tree bpduguard enable` | shuts the port if a switch is connected | protects PortFast |
+| `switchport port-security` | turns it on | **without this line the lines below do nothing** |
+| `maximum 1` + `sticky` | one MAC, learned by itself | no need to type MAC addresses |
+| `switchport trunk encapsulation dot1q` | chooses the tag kind (3560 only) | a 3560 also knows ISL; a 2960 knows only dot1q |
+
 ## Mission 5 — STP: we choose who is root
 **SW-S-MAIN:**
 ```
@@ -366,6 +420,15 @@ ping 192.168.10.21
    ![Ping works again](images/17-recover-ping.png)
 7. Save on every switch: `copy running-config startup-config`. Then File → Save.
 
+### 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| no VLANs on a client | no trunk, or a different domain/password | `show interfaces trunk`, `show vtp status`, `show vtp password` |
+| `Command rejected: ... trunk encapsulation is "Auto"` | a 3560 | first `switchport trunk encapsulation dot1q` |
+| port in VLAN 1 | you forgot `switchport access vlan` | `show vlan brief` |
+| `BKN*` / `root-inconsistent` | VLAN 1 missing in `root primary` | add it, wait 50 seconds |
+| err-disabled comes back | the stranger is still connected | return the original MAC **before** `shutdown` / `no shutdown` |
+
 ---
 
 ## 🔎 Find the bug — from a real project
@@ -384,9 +447,21 @@ ping 192.168.10.21
 </details>
 
 ## 🏋 Exercises
-1. Delete the cable SW-S-MAIN ↔ SW-S-SAL. How long until Fa0/1 turns green? Draw the new path and reconnect.
+1. Fail the main path: on SW-S-MAIN `interface fa0/3` → `shutdown`. On SW-S-SAL run `show spanning-tree vlan 20` every 10 seconds. How long until Fa0/1 is FWD? What is the new cost? Draw the new path and do `no shutdown`.
 2. Try to create `vlan 60` on SW-S-SAL. Which message do you get, and why?
 3. Set `switchport port-security violation restrict` on Fa0/5 and attack again. What is different from `shutdown`? Put `shutdown` back.
+
+<details><summary>Answers (we tested them)</summary>
+
+1. About 30–35 seconds: LIS (15) → LRN (15) → FWD. Fa0/1 is now the Root port and the cost is **38** (19 + 19). The path: SW-S-SAL → SW-S-BKP → SW-S-MAIN.
+
+   ![The backup path is forwarding, cost 38](images/18-stp-backup.png)
+2. `VTP VLAN configuration not allowed when device is in CLIENT mode.` Only the server creates VLANs.
+3. The stranger's ping fails, but the port stays **connected** (Secure-up), the counter rises and a message appears. With `shutdown` the port goes down and the administrator must open it. Don't forget to return the PC's MAC.
+
+   ![restrict: the port stays up, 5 violations](images/19-restrict.png)
+
+</details>
 
 ## 🎓 Explain it to the examiner
 - What is the difference between access and trunk? What is in the 802.1Q tag?
@@ -394,6 +469,33 @@ ping 192.168.10.21
 - What is the difference between PortFast, BPDU Guard and Root Guard?
 - Why is VTP dangerous, and why did MLS-S-SRV get transparent mode?
 - What are sticky MAC and err-disabled, and how do you recover?
+
+<details><summary>Model answers</summary>
+
+1. Access = one VLAN, without a tag, to an end device. Trunk = many VLANs, with an 802.1Q tag of 4 bytes that contains the VLAN number (12 bits).
+2. Broadcasts multiply, the MAC table jumps between ports and the network collapses. Root = the lowest bridge ID (priority, then MAC).
+3. PortFast skips the wait on PC ports. BPDU Guard shuts a PC port that hears a switch. Root Guard blocks a port from which somebody tries to become root.
+4. A switch with a higher revision overwrites the VLAN list. MLS-S-SRV is connected by an access link, VTP doesn't reach it, so it keeps its own list.
+5. Sticky = the switch learns the MAC and writes it in the configuration. err-disabled = a port shut by a protection. Recovery: fix the cause, `shutdown`, `no shutdown`.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. Which VTP mode can create VLANs and pass them on?
+2. Which switch becomes root: priority 28672 or 24576?
+3. A PC was connected to a port with BPDU Guard, and then a switch instead. What happens?
+4. Which command is missing: `switchport port-security maximum 1`, `mac-address sticky` — and nothing is protected?
+5. Why does a ping from VLAN 20 to VLAN 10 fail now?
+
+<details><summary>Answers</summary>
+
+1. Server.
+2. 24576.
+3. The port goes to err-disabled.
+4. `switchport port-security` itself.
+5. There is no router yet.
+
+</details>
 
 ## 🛠 Your own project
 - [ ] A VLAN table: number, name, network, switch. One VLAN per department + servers.

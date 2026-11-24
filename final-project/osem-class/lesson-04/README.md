@@ -35,6 +35,9 @@ In the start file Sakhnin is the end of lesson 3, and the LANs of Ashdod and Eil
 A serial line has two ends: **DCE** sets the clock, **DTE** follows it. In this project the DCE side
 is the router nearer to the provider: EXT towards the branch, ISP towards EXT.
 
+💬 **In simple words:** two people carry a sofa, and one of them says "one, two, one, two". The one who sets the
+pace is the DCE. `show controllers s0/0/0` says which side you are on.
+
 ### 1.2 Three routing protocols
 | | OSPF | EIGRP | BGP |
 |---|---|---|---|
@@ -46,6 +49,26 @@ is the router nearer to the provider: EXT towards the branch, ISP towards EXT.
 | Number | process 52, area 0 | AS 54, AS 84 | AS 511, 411, 611, 311 |
 
 The OSPF process number is **local**; the EIGRP AS number must be **identical** on all the routers of the branch.
+
+💬 **In simple words:** OSPF is a navigation app that knows the **whole map** and calculates the best way. EIGRP knows its
+neighbors and what they told it. BGP is the agreement between **countries**: which countries you pass on the way.
+
+**Example — the wildcard mask** (what may change). Subtract the mask from 255.255.255.255:
+
+| Mask | Wildcard | Meaning |
+|---|---|---|
+| 255.255.255.0 (/24) | 0.0.0.255 | one network |
+| 255.255.252.0 (/22) | 0.0.3.255 | 4 networks: 192.168.80–83 |
+| 255.255.192.0 (/18) | 0.0.63.255 | 64 networks: 192.168.0–63 |
+
+**Example — how a router chooses** (R-S-EXT): first the **most specific** route, and only between equal routes the lower
+admin distance.
+
+| Destination | Matching routes | Chosen |
+|---|---|---|
+| 192.168.20.20 | `O 192.168.20.0/24`, `S* 0.0.0.0/0` | O: /24 is more specific |
+| 200.200.0.10 | `B 200.200.0.0/24`, `S* 0.0.0.0/0` | B: /24 |
+| 8.8.8.8 | `S* 0.0.0.0/0` | the default route, to the provider |
 
 ### 1.3 AS
 An **autonomous system** is a network under one management. Each branch is an AS, and the provider (311) is another.
@@ -64,6 +87,20 @@ Private addresses (192.168.x.x) don't travel on the internet. The edge router **
 |---|---|
 | Inside local | the real address of our PC (192.168.20.20) |
 | Inside global | how the internet sees it (200.130.0.1) |
+
+💬 **In simple words:** an office with one outside phone number (PAT). The secretary remembers which employee made
+each call and passes the answer to that employee. Static = an employee with a direct number. Pool = a drawer with 11 direct
+numbers, first come first served.
+
+**Example — two PCs go out together with PAT:**
+
+| PC (inside local) | Port | Goes out as (inside global) | The answer returns to |
+|---|---|---|---|
+| 192.168.20.20 | 1025 | 200.130.0.1 : 1025 | 192.168.20.20 |
+| 192.168.40.21 | 1025 | 200.130.0.1 : **1024** | 192.168.40.21 |
+
+Both chose the same port, so the router changed one of them: that is why it's called **port** address translation.
+(The numbers are an illustration.)
 
 ### 1.5 The WAN plan
 | Link | Network | First side | Second side |
@@ -366,6 +403,19 @@ end
 ```
 🧠 The line falls → 110 − 10 = **100**, which is less than 105 → the backup takes over.
 
+| Serial line | Main | Backup | Active |
+|---|---|---|---|
+| up | 110 | 105 | R-S-MAIN |
+| down | 110 − 10 = **100** | 105 | R-S-BKP |
+
+❓ **Ask the class:** what would happen if the backup's priority were 99?
+
+<details><summary>Answer</summary>
+
+100 is still higher than 99: the main router would stay Active without internet. The difference must be **smaller than 10**.
+
+</details>
+
 ## Mission 3 — OSPF in Sakhnin
 **R-S-MAIN:**
 ```
@@ -440,9 +490,22 @@ neighbor 200.200.0.1 remote-as 411
 neighbor 200.150.0.1 remote-as 611
 end
 ```
-✅ ISP: `show ip bgp summary`. Three neighbors with a **number** in the last column (a word like `Idle` or `Active` = not connected).
+| Command | What it does |
+|---|---|
+| `router bgp 511` | our AS number |
+| `neighbor 200.130.0.2 remote-as 311` | who the neighbor is and which AS it's in; both sides must agree |
+| `network 200.130.0.0 mask 255.255.255.0` | announces our public network; the mask must be exactly as in the routing table |
+
+✅ ISP: `show ip bgp summary`. Three neighbors, and **MsgRcvd** is above 0.
 
 ![Three BGP neighbors](images/05-bgp.png)
+
+✅ The real proof — R-E-EXT: `show ip route bgp`. The public networks of the other branches arrived with `B`:
+
+![BGP routes](images/16-bgp-route.png)
+
+⚠️ In real equipment a word like `Idle` in the last column means "not connected". In Packet Tracer the column shows a number
+**even when the AS is wrong** (we checked), so trust `show ip route bgp`.
 
 ✅ ISP: `show ip route`. It does **not** know a single 192.168 network, and that is correct: a provider must not know our inside.
 
@@ -503,6 +566,17 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 3. `no shutdown`, and after about 30 seconds R-S-MAIN is Active again.
 4. Save on all routers: `copy running-config startup-config`. File → Save.
 
+### 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| a serial link is red on one side | `no shutdown` is missing on one end | `show ip interface brief` on both ends |
+| `up/down` | `clock rate` is missing on the DCE | `show controllers`, then `clock rate 2000000` |
+| no OSPF neighbor | wrong network/wildcard, or a different area | `show ip protocols`, `show run` |
+| no EIGRP neighbor | a different AS number | 54 in Ashdod, 84 in Eilat, on all three routers |
+| ping to the internet fails, OSPF is fine | NAT | `ip nat inside` / `outside` on the right ports |
+| `show ip nat translations` is empty | the entries expired | ping, and look immediately |
+| the first ping is lost | ARP / routes are still being learned | ping again |
+
 ---
 
 ## 🔎 Find the bug — from a real project
@@ -525,12 +599,49 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 2. Change the AS of the neighbor in R-E-EXT to 312. What does `show ip bgp summary` show? Put it back.
 3. Calculate the wildcard of 255.255.252.0. Which networks does `192.168.80.0 0.0.3.255` cover?
 
+<details><summary>Answers (we tested 1 and 2)</summary>
+
+1. `Request timed out`, and the translation table is empty. The packet goes out as 192.168.20.x; the provider doesn't know this network, so the answer cannot return. After `ip nat inside` the ping works.
+2. `%BGP-3-NOTIFICATION ... (peer in wrong AS)`, and `show ip route bgp` is **empty**. To return: `no neighbor 200.150.0.2 remote-as 312` and then `neighbor 200.150.0.2 remote-as 311`.
+
+   ![A wrong AS: a notification and no routes](images/17-bgp-wrong-as.png)
+3. 0.0.3.255. 192.168.80.0, 81.0, 82.0 and 83.0.
+
+</details>
+
 ## 🎓 Explain it to the examiner
 - What is the difference between an IGP and an EGP? Why not OSPF to the provider?
 - What are DCE and DTE?
 - Why is the admin distance important when there are two protocols?
 - What is the difference between PAT, static and dynamic NAT? What are inside local and inside global?
 - What does `standby track` do, and why on the serial and not on the LAN?
+
+<details><summary>Model answers</summary>
+
+1. IGP = inside one company (OSPF, EIGRP). EGP = between companies (BGP). With OSPF the provider would learn our whole inside, and our faults would reach it.
+2. The two ends of a serial line. DCE gives the clock, DTE receives it.
+3. If the same network is learned from two protocols, the one with the lower distance enters the table: EIGRP 90 before OSPF 110.
+4. PAT: many → one, by ports. Static: one ↔ one, permanent, allows entering. Dynamic: one ↔ one, temporary, from a pool. Local = the real address inside, global = how the world sees it.
+5. Lowers the priority when a port falls. HSRP already notices a LAN failure by itself, but without track it doesn't know that the internet line fell.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. Which protocol runs between R-S-EXT and the ISP?
+2. What is the wildcard of /24?
+3. Which NAT would you choose for a web server?
+4. What does `S*` mean in the routing table?
+5. EIGRP 54 on one router and EIGRP 84 on its neighbor. What happens?
+
+<details><summary>Answers</summary>
+
+1. eBGP.
+2. 0.0.0.255.
+3. Static.
+4. A static default route.
+5. They don't become neighbors.
+
+</details>
 
 ## 🛠 Your own project
 - [ ] An address plan for **all** branches, without duplicates.

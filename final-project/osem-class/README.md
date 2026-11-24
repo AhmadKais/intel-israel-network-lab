@@ -18,6 +18,21 @@ Each lesson ends with **"Your own project"**: do the same in your company's netw
 The start file of each lesson is the result of the previous one, so a student who missed a lesson or
 got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version we tested with.
 
+## What you find in every lesson
+| Sign | What it is | How to use it in class |
+|---|---|---|
+| 💬 | the idea in simple words | say it before the definition |
+| **Example** | a worked example with our addresses | solve it on the board, one row at a time |
+| ❓ | a question for the class | wait for answers before you open the answer |
+| ✅ | a check | nobody continues before it is true on their screen |
+| 🧯 | "It doesn't work?" | the student looks here first, then calls you |
+| 🔎 | find the bug | in pairs, 3 minutes |
+| 🏋 | exercises, with answers | for those who finish early, or homework |
+| 🎓 | examiner questions, with model answers | one student asks, another answers |
+| ✏️ | exit quiz | 3 minutes at the end, on paper |
+
+Every lesson has more material than 90 minutes: the missions are the core, and 🏋, 🎓 and ✏️ can move to homework.
+
 ## The address plan
 | Branch | VLAN | Name | Network | Gateway (VIP) |
 |---|---|---|---|---|

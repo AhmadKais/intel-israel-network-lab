@@ -35,6 +35,27 @@ A list of rules, read from **top to bottom**. The first match wins, and at the e
 | Numbers | 1–99 | 100–199 |
 | Placed | near the **destination** | near the **source** |
 
+💬 **In simple words:** a guard at the door with a list. The guard reads from the top, acts on the **first** line that fits, and
+whoever isn't on the list doesn't enter.
+
+**Example — read our list (Mission 2) as the router does:**
+
+| Packet | First line that fits | Result |
+|---|---|---|
+| 0.0.0.0 → 255.255.255.255, UDP 67 (DHCP) | `permit udp any any eq bootps` | ✅ passes |
+| 192.168.62.22 → 192.168.60.21, ping | `deny ip ...62.0 ...60.0` | ❌ blocked |
+| 192.168.62.22 → 192.168.63.1, TCP 80 | `permit tcp ... eq www` | ✅ passes |
+| 192.168.62.22 → 192.168.63.1, ping | `deny ip ...62.0 ...63.0` | ❌ blocked |
+| 192.168.62.22 → 200.200.0.2, ping | `permit ip ...62.0 any` | ✅ passes |
+
+❓ **Ask the class:** what happens if the last line is written first?
+
+<details><summary>Answer</summary>
+
+It fits everything that VLAN 62 sends, so the deny lines are never reached and nothing is blocked.
+
+</details>
+
 ### 1.2 VPN IPsec
 | Phase | What happens | Command |
 |---|---|---|
@@ -43,6 +64,17 @@ A list of rules, read from **top to bottom**. The first match wins, and at the e
 
 - **Encryption** (AES) — nobody can read. **Hash** (SHA) — nobody changed it. **Pre-shared key** — it's really you. **DH group** — creating a shared secret over an open line.
 - **Interesting traffic**: an ACL that says what enters the tunnel.
+
+💬 **In simple words:** two branches send letters by regular mail, inside a locked safe. The mail carriers see only the
+addresses of the branches, not what is inside or who wrote to whom.
+
+**Example — a ping from PC-E-MEET-1 (192.168.82.23) to the Sakhnin server:**
+
+| Where | Source → destination | Can be read? |
+|---|---|---|
+| in the Eilat LAN | 192.168.82.23 → 192.168.50.1 | yes |
+| on the internet | **200.150.0.1 → 200.130.0.1** (ESP) | no, encrypted |
+| in the Sakhnin LAN | 192.168.82.23 → 192.168.50.1 | yes |
 
 ### 1.3 AAA
 | | Question |
@@ -57,11 +89,25 @@ A list of rules, read from **top to bottom**. The first match wins, and at the e
 | Encrypts | the whole message | only the password |
 | Good for | managing network devices | Wi-Fi and VPN users |
 
+💬 **In simple words:** entering a company building. The guard checks who you are (authentication), your card opens only
+some doors (authorization), and the camera records where you were (accounting).
+
+**Example — `ssh -l osemuser 192.168.10.254`:** the router asks the TACACS+ server "is this password right?" → yes → in. If the server
+**doesn't answer**, the router checks its own local users (`local`). If the server answers "no", there is **no** second chance.
+
 ### 1.4 The rest
 - **SSH** — encrypted management. Telnet sends passwords as plain text.
 - **NTP** — the same time everywhere, otherwise the logs are worthless. With authentication, so nobody can fake it.
 - **Syslog** — all messages to one server.
 - **ASA** — a firewall: from security level 100 (inside) to 0 (outside) is allowed, the other way is **blocked**. `inspect` lets the **answers** return.
+
+**Example — the ASA decides:**
+
+| Packet | Levels | Result |
+|---|---|---|
+| PC-LAB-1 → server, new connection | 100 → 0 | ✅ |
+| server → PC-LAB-1, the **answer** | 0 → 100 | ✅ thanks to `inspect` |
+| PC-MGMT-1 → PC-LAB-1, new connection | 0 → 100 | ❌ |
 
 ---
 
@@ -82,6 +128,13 @@ Below: Username (6) `osemuser`, Password `Osem#User` → **Add** (7).
 ![NTP](images/03-ntp.png)
 
 **SYSLOG** → check that it is On.
+
+| Field | What it is | Must match |
+|---|---|---|
+| Client | the router that will ask the server | its address towards the server (VLAN 50) |
+| Secret | a key between router and server | `tacacs-server host ... key` |
+| ServerType | the language: Tacacs / Radius | `group tacacs+` on the router |
+| Username | the person who logs in | only here, not on the router |
 
 ## Mission 2 — ACL in Ashdod and Eilat
 **Goal:** accounting (VLAN 62) does not reach management (VLAN 60), and gets only web, DNS and FTP from the server.
@@ -124,6 +177,33 @@ the **backup** relayed the request. An ACL on one router is full of holes.
 
 ![matches](images/09-acl-show.png)
 
+### 2.1 🔎 FTP connects, but `dir` hangs. Why?
+From **PC-A-ACC-2**: `ftp 192.168.63.1`, user `ashdod`, password `Osem#Ftp`. Login works. Now `dir`:
+
+![Logged in, but the list never arrives](images/32-ftp-hang.png)
+
+<details><summary>Answer</summary>
+
+FTP uses **two** connections: commands on port 21, and data on another port. In *passive mode* the server chooses a high
+port (above 1023) for the data. We opened only 21, so the data falls on the `deny ip ... 192.168.63.0` line.
+
+</details>
+
+The fix, on **R-A-MAIN and R-A-BKP**. Number 52 puts the line **before** the deny (60):
+```
+configure terminal
+ip access-list extended 110
+52 permit tcp 192.168.62.0 0.0.0.255 host 192.168.63.1 gt 1023
+end
+copy running-config startup-config
+```
+![The new line is before the deny](images/33-acl-ftp-fix.png)
+
+✅ From PC-A-ACC-3 the list arrives, and a ping to the server is still blocked. (`quit` leaves FTP.)
+
+![dir works](images/34-ftp-ok.png)
+
+### 2.2 Eilat
 **Eilat** (assembly 81 does not reach management 80), **R-E-MAIN and R-E-BKP**:
 ```
 configure terminal
@@ -266,7 +346,8 @@ copy running-config startup-config
 
 ![The tunnel is up](images/18-vpn-sa.png)
 
-💡 Stuck? `clear crypto isakmp` on both sides, and ping from one side only.
+💡 Stuck? Restart the tunnel: on the outgoing port of **both** edge routers `no crypto map VPN-MAP` and then `crypto map VPN-MAP`,
+and ping from one side only. (Real routers also have `clear crypto isakmp`; Packet Tracer doesn't.)
 
 ## Mission 4 — SSH, AAA, NTP and Syslog
 ### 4.1 R-S-MAIN, and the same on R-S-BKP
@@ -494,6 +575,26 @@ write memory
 
 ![Both attempts fail](images/31-asa-block.png)
 
+| Command | What it does | Why |
+|---|---|---|
+| `nameif inside` / `outside` | gives the port a role | the ASA works with names, not with numbers |
+| `security-level 100` / `0` | how much we trust the side | high → low is allowed |
+| `route outside 0.0.0.0 0.0.0.0 192.168.10.252` | default route | one only, to the HSRP VIP |
+| `object network` + `nat ... dynamic interface` | PAT through the outside port | the branch doesn't know 192.168.1.0 |
+| `dhcpd address ... inside` | the ASA is a DHCP server | for the lab PCs |
+| `inspect icmp` | remembers outgoing pings | otherwise the answers are blocked |
+
+### 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| `renew` fails after an ACL | no bootps line, or only on one router | `show access-lists` on both |
+| `crypto` → `Invalid input` | no licence, or no `reload` | `show version`, include security |
+| the VPN doesn't come up | key, peer, or policy is different | compare the two configurations line by line |
+| the tunnel is up, ping fails | NAT takes the packet | the `5 deny` line on both sides |
+| SSH `Connection refused` | no RSA key, or access-class | `show ip ssh`, from VLAN 10 |
+| locked out | AAA without a local user | console: `admin` / `Osem#Adm1` |
+| NTP is not synchronized | the key, or too little time | the same key number on the server, wait 5 minutes |
+
 ---
 
 ## Final tests — the whole project
@@ -506,7 +607,7 @@ write memory
 | DHCP snooping | `show ip dhcp snooping` | trusted ports |
 | Port security | a strange MAC | err-disabled |
 | OSPF / EIGRP | `show ip ospf neighbor`, `show ip eigrp neighbors` | FULL / two neighbors |
-| BGP | `show ip bgp summary` | three neighbors |
+| BGP | `show ip route bgp` on an EXT router | `B` routes to the other branches |
 | NAT | `show ip nat translations` | static, pool, PAT |
 | VPN | `show crypto isakmp sa` | QM_IDLE |
 | ACL | `show access-lists` | matches |
@@ -534,9 +635,19 @@ Finally: save on all devices, save the file, **close Packet Tracer, open again**
 </details>
 
 ## 🏋 Exercises
-1. Change the key on R-E-EXT to `Osem123` and run `clear crypto isakmp`. What does `show crypto isakmp sa` show now? Put it back.
+1. On R-E-EXT replace the key with `Osem123` and restart the tunnel (`no crypto map VPN-MAP` and `crypto map VPN-MAP` on s0/0/0). Ping from Eilat. What does `show crypto isakmp sa` show now? Put it back.
 2. Allow accounting (62) also `ping` to the server only. Where in the list must the line be?
 3. Stop the AAA service on the server and connect by SSH with `admin`. Why does it work?
+
+<details><summary>Answers (we tested them)</summary>
+
+1. The ping fails, and instead of `QM_IDLE` you see `MM_KEY_EXCH ... (deleted)`: phase 1 stopped at the key. Without restarting the tunnel nothing changes, because the old tunnel keeps working! To return: `no crypto isakmp key Osem123 address 200.130.0.1`, the original key, and restart.
+
+   ![Wrong key](images/35-wrong-key.png)
+2. Before the deny of 63.0 (line 60): `ip access-list extended 110` → `55 permit icmp 192.168.62.0 0.0.0.255 host 192.168.63.1`. Remove it with `no 55`.
+3. `osemuser` gets `Login invalid`, and `admin` enters: the server doesn't answer, so `local` is used. Put the service back On.
+
+</details>
 
 ## 🎓 Explain it to the examiner
 - Why must the order of the ACL lines be right? What is the invisible line?
@@ -544,6 +655,33 @@ Finally: save on all devices, save the file, **close Packet Tracer, open again**
 - Why must VPN traffic be exempted from NAT?
 - TACACS+ against RADIUS: three differences.
 - What is the difference between the ASA and a router with an ACL? What does `inspect` do?
+
+<details><summary>Model answers</summary>
+
+1. The first match decides. At the end there is an invisible `deny ip any any`.
+2. Phase 1: the routers authenticate (key) and build a protected channel. Phase 2: encrypts the data itself. Interesting traffic: what the ACL in `match address` permits.
+3. NAT happens before encryption: the source changes, the packet no longer fits the VPN list, and it goes out unencrypted.
+4. TCP 49 against UDP; encrypts everything against only the password; separates authentication and authorization, so it suits device management.
+5. A firewall remembers connections (stateful) and has security levels. A regular ACL checks every packet by itself. `inspect` follows a protocol so that its answers may return.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. An ACL has only one line: `deny ip host 1.1.1.1 any`. What passes?
+2. Which state shows that phase 1 is OK?
+3. Why must the local user exist before `aaa new-model`?
+4. From inside (100) to outside (0): allowed or blocked?
+5. Why does a log need NTP?
+
+<details><summary>Answers</summary>
+
+1. Nothing, because of the invisible deny.
+2. QM_IDLE.
+3. So you don't get locked out.
+4. Allowed.
+5. So that the times of all the devices can be compared.
+
+</details>
 
 ## 🛠 Your own project
 - [ ] Two extended ACLs and one standard, on **every** router that can be Active.
