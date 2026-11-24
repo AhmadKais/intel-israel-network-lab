@@ -111,7 +111,31 @@ some doors (authorization), and the camera records where you were (accounting).
 
 ---
 
+## 🔑 Opening a device
+Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` → `enable` → `Osem#En1`. With pictures: [lesson 2](../lesson-02/).
+
+![Click CLI](images/step-login-1.png)
+
+**How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
+
 ## Mission 1 — The server
+**🌐 The network now.** Three branches on the internet. We start from the server of Sakhnin:
+
+![1 SRV-SAKHNIN](images/step-map-m1.png)
+
+**❗ The problem.** Almost 30 devices with the same password, written on a note. An employee leaves: you change them all. Something happened at night: each device shows a different time and keeps its own log. The AAA service is empty and off:
+
+![AAA before: off, no clients, no users](images/step-aaa0.png)
+
+**💡 The solution.** One server that checks users (**AAA**), gives the time (**NTP**) and collects the messages (**Syslog**). We prepare the server now and connect the routers in Mission 4.
+
+**📋 Do it in the project.** Two AAA clients (the two routers), one user, NTP with key 1, Syslog on.
+
+### 🖱 The solution: what to click and what to write
+Click **SRV-SAKHNIN** → **Services** (1) → AAA (2), NTP (3), SYSLOG (4):
+
+![1 Services, 2 AAA, 3 NTP, 4 SYSLOG](images/step-srv.png)
+
 **SRV-SAKHNIN** → Services → **AAA** → On (1). Client Name (2), Client IP (3), Secret (4), ServerType → **Tacacs** → **Add** (5):
 
 | Client Name | Client IP | Secret | Type |
@@ -129,6 +153,10 @@ Below: Username (6) `osemuser`, Password `Osem#User` → **Add** (7).
 
 **SYSLOG** → check that it is On.
 
+![Syslog is On](images/step-sys.png)
+
+Messages from the routers appear in this list only after Mission 4.
+
 | Field | What it is | Must match |
 |---|---|---|
 | Client | the router that will ask the server | its address towards the server (VLAN 50) |
@@ -137,6 +165,17 @@ Below: Username (6) `osemuser`, Password `Osem#User` → **Add** (7).
 | Username | the person who logs in | only here, not on the router |
 
 ## Mission 2 — ACL in Ashdod and Eilat
+**🌐 The network now.** Ashdod: accounting is VLAN 62, management VLAN 60, the server 63. Eilat: assembly 81, management 80.
+
+![1 R-A-MAIN, 2 R-A-BKP, 3 PC-A-ACC-1, 4 PC-A-MGMT-2, 5 R-E-MAIN, 6 R-E-BKP](images/step-map-m2.png)
+
+**❗ The problem.** In lesson 3 we opened everything to everybody. An accounting PC can ping the manager's PC and try to enter any service on the server. We'll see it in the first screenshot.
+
+**💡 The solution.** An **extended ACL**, close to the source: on the sub-interface of VLAN 62, on **both** routers (1.1).
+
+**📋 Do it in the project.** Before looking: write in words, line by line, what is allowed and what is not, in the right order. Don't forget how a PC gets its address.
+
+### 🖱 The solution: what to click and what to write
 **Goal:** accounting (VLAN 62) does not reach management (VLAN 60), and gets only web, DNS and FTP from the server.
 
 Before: from **PC-A-ACC-1** check the address of PC-A-MGMT-2 and ping it. It works.
@@ -157,7 +196,14 @@ interface g0/0.62
 ip access-group 110 in
 end
 ```
+
+**R-A-MAIN:**
+
 ![The ACL](images/06-acl.png)
+
+**R-A-BKP, the same commands:**
+
+![R-A-BKP](images/step-m2-abkp.png)
 
 ❓ **Why the first line?** A PC asking for DHCP has no address yet: it sends from 0.0.0.0, and no
 other line allows that. We tested without it, on both routers: `ipconfig /renew` hangs.
@@ -197,6 +243,11 @@ ip access-list extended 110
 end
 copy running-config startup-config
 ```
+
+![The same on R-A-BKP](images/step-ftp-abkp.png)
+
+On R-A-MAIN, check with `show access-lists`:
+
 ![The new line is before the deny](images/33-acl-ftp-fix.png)
 
 ✅ From PC-A-ACC-3 the list arrives, and a ping to the server is still blocked. (`quit` leaves FTP.)
@@ -204,6 +255,9 @@ copy running-config startup-config
 ![dir works](images/34-ftp-ok.png)
 
 ### 2.2 Eilat
+
+❗ The same problem in Eilat: assembly reaches management. 💡 The same idea, one deny line.
+
 **Eilat** (assembly 81 does not reach management 80), **R-E-MAIN and R-E-BKP**:
 ```
 configure terminal
@@ -215,8 +269,30 @@ ip access-group 120 in
 end
 ```
 
+![R-E-MAIN](images/step-m2-emain.png)
+
+![R-E-BKP](images/step-m2-ebkp.png)
+
 ## Mission 3 — VPN Sakhnin ↔ Eilat
+**🌐 The network now.** Sakhnin and Eilat, each behind NAT, with the internet in between:
+
+![1 R-S-EXT, 2 R-E-EXT, 3 PC-E-MEET-1, 4 SRV-SAKHNIN](images/step-map-m3.png)
+
+**❗ The problem.** An employee in Eilat needs the server in Sakhnin. PC-E-MEET-1 → `ping 192.168.50.1`:
+
+![The provider answers: unreachable](images/step-m3-before.png)
+
+The provider doesn't know private addresses. And even if we published the server with static NAT, everything would travel **unencrypted** and everybody could try to get in.
+
+**💡 The solution.** A site-to-site **IPsec VPN**: the private packet travels, encrypted, inside a public packet (1.2).
+
+**📋 Do it in the project.** License → tunnel on both sides → test → find out why it fails → fix. The two sides must be a mirror image.
+
+### 🖱 The solution: what to click and what to write
 ### 3.1 The license
+
+❗ The router doesn't know the `crypto` commands. 💡 Activate the security license, save and restart.
+
 On R-S-EXT try `crypto isakmp policy 10`. The 1941 doesn't know the command:
 
 ![No licence](images/10-no-licence.png)
@@ -232,6 +308,21 @@ end
 copy running-config startup-config
 reload
 ```
+
+After `yes`, on R-E-EXT:
+
+![R-E-EXT accepted the license](images/step-lic-e.png)
+
+At `Proceed with reload? [confirm]` press **Enter**. The router restarts:
+
+![Restarting](images/step-reload.png)
+
+On R-E-EXT after the restart:
+
+![The license works](images/step-lic-ok-e.png)
+
+On R-S-EXT:
+
 ![Licence accepted](images/11-licence.png)
 
 After the boot, log in again: `show version | include security` → `securityk9`
@@ -239,6 +330,9 @@ After the boot, log in again: `show version | include security` → `securityk9`
 ![Licence active](images/12-licence-ok.png)
 
 ### 3.2 The tunnel
+
+❗ The routers must agree on a language and recognise each other before they encrypt. 💡 Phase 1 (policy + key), phase 2 (transform-set), what enters the tunnel (ACL), and everything tied together in a crypto map on the outgoing port.
+
 **R-S-EXT:**
 ```
 configure terminal
@@ -287,6 +381,11 @@ interface s0/0/0
 crypto map VPN-MAP
 end
 ```
+
+![R-E-EXT](images/step-vpn-e.png)
+
+And R-S-EXT:
+
 ![R-S-EXT](images/13-vpn.png)
 
 | Command | What it does |
@@ -336,6 +435,11 @@ end
 clear ip nat translation *
 copy running-config startup-config
 ```
+
+![R-E-EXT](images/step-nat-e.png)
+
+And on R-S-EXT:
+
 ![Line 5 is before line 10](images/16-nat-exempt.png)
 
 ✅ Ping again, **from Eilat only**. The first reply may be lost while the tunnel goes up.
@@ -350,6 +454,23 @@ copy running-config startup-config
 and ping from one side only. (Real routers also have `clear crypto isakmp`; Packet Tracer doesn't.)
 
 ## Mission 4 — SSH, AAA, NTP and Syslog
+**🌐 The network now.** The server is ready since Mission 1. Now the devices learn to use it:
+
+![1 R-S-MAIN, 2 R-S-BKP, 3 PC-MGMT-1, 4 PC-SAL-1, 5 SW-S-MAIN](images/step-map-m4.png)
+
+**❗ The problem.** PC-MGMT-1 → `telnet 192.168.10.254`. The router opens the line and closes it: no remote management at all. And if we only set a password, Telnet would send it **unencrypted**:
+
+![The connection is closed](images/step-m4-before.png)
+
+R-S-MAIN, `show clock`: the year is 1993, and NTP is off. Such a log proves nothing:
+
+![1993, NTP is not enabled](images/step-m4-clock.png)
+
+**💡 The solution.** SSH (encrypted), AAA (the user is checked on the server, with a local user as backup), NTP with a key, Syslog, and an access-class so that only management enters (1.3, 1.4).
+
+**📋 Do it in the project.** The order matters: first a local user, and only then `aaa new-model`. Why?
+
+### 🖱 The solution: what to click and what to write
 ### 4.1 R-S-MAIN, and the same on R-S-BKP
 ```
 configure terminal
@@ -381,6 +502,11 @@ service timestamps log datetime msec
 end
 copy running-config startup-config
 ```
+
+![1 — R-S-MAIN](images/step-ssh-smain.png)
+
+![2 — R-S-BKP](images/step-ssh-sbkp.png)
+
 | Command | What it does | Why |
 |---|---|---|
 | `username admin` **before** `aaa new-model` | a local user | otherwise you lock yourself out |
@@ -407,9 +533,14 @@ copy running-config startup-config
    ![NTP](images/22-ntp-ok.png)
 5. On R-S-MAIN: `interface g0/1` → `no shutdown` → `shutdown`. Server → SYSLOG: the messages arrived. Notice the jump of the date from 1993 to today: NTP!
 
+   ![Two messages on the screen, and the same ones go to the server](images/step-sysgen.png)
+
    ![Syslog](images/23-syslog.png)
 
 ### 4.3 Ashdod and Eilat
+
+❗ The same problem in two more branches. 💡 The same commands, each branch with **its own** server.
+
 Ashdod uses **RADIUS**, Eilat **TACACS+**. The type must be the same on the router and on the server!
 
 <details><summary>R-A-MAIN, R-A-BKP (paste the same on both)</summary>
@@ -441,6 +572,10 @@ logging host 192.168.63.1
 service timestamps log datetime msec
 end
 ```
+
+![R-A-MAIN](images/step-ssh-amain.png)
+
+![R-A-BKP](images/step-ssh-abkp.png)
 
 </details>
 
@@ -474,9 +609,16 @@ service timestamps log datetime msec
 end
 ```
 
+![R-E-MAIN](images/step-ssh-emain.png)
+
+![R-E-BKP](images/step-ssh-ebkp.png)
+
 </details>
 
 ### 4.4 Switches and edge routers (homework)
+
+❗ A layer 2 switch has no IP address, so nobody can manage it from far away. 💡 An address on a VLAN interface, a gateway, and SSH with the local user.
+
 On ISP and the EXT routers use `line vty 0 4`, and on the switches `line vty 0 15`:
 ```
 configure terminal
@@ -489,6 +631,9 @@ transport input ssh
 login local
 end
 ```
+
+![SW-S-MAIN](images/step-ssh-sw.png)
+
 A management address for the main switches, for example **SW-S-MAIN** (Ashdod: VLAN 60, Eilat: VLAN 80):
 ```
 configure terminal
@@ -499,11 +644,33 @@ exit
 ip default-gateway 192.168.10.252
 end
 ```
+
+![The management address](images/step-sw-ip.png)
+
 ✅ `ssh -l admin 192.168.10.240`
 
 ![SSH to the switch](images/24-ssh-switch.png)
 
 ## Mission 5 — The ASA firewall
+**🌐 The network now.** A test lab (PC-LAB-1, PC-LAB-2) behind a firewall that is still not configured:
+
+![1 ASA-S, 2 PC-LAB-1, 3 PC-MGMT-1](images/step-map-m5.png)
+
+**❗ The problem.** The lab must reach the server, but nobody should reach **into** the lab. PC-LAB-1 → `ipconfig`, `ping 192.168.50.1`: no address and no network.
+
+![0.0.0.0, and the ping fails](images/step-m5-before.png)
+
+A router passes everything that isn't forbidden, so an ACL alone must list every danger.
+
+**💡 The solution.** A firewall works the other way: from outside **everything** is forbidden unless it's an answer to somebody inside (security levels + `inspect`, 1.4).
+
+**📋 Do it in the project.** inside = 100, outside = 0, default route to the VIP, NAT, DHCP for the lab, inspect for icmp, http, dns. Predict who can ping whom.
+
+### 🖱 The solution: what to click and what to write
+Click **ASA-S** → **CLI** → `enable` → **Enter** (there is no password):
+
+![ciscoasa#](images/step-login.png)
+
 **ASA-S** → CLI. `enable`, and just **Enter** at the password:
 ```
 configure terminal

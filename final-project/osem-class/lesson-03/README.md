@@ -108,7 +108,29 @@ snooping**, the switch accepts DHCP answers only from **trusted** ports.
 
 ---
 
+## 🔑 Opening a device
+Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` → `enable` → `Osem#En1`. With pictures: [lesson 2](../lesson-02/).
+
+![Click CLI](images/step-login-1.png)
+
+**How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
+
 ## Mission 1 — Sub-interfaces and HSRP on R-S-MAIN
+**🌐 The network now.** Five VLANs that can't talk to each other. We configure the main router:
+
+![1 R-S-MAIN](images/step-map-m1.png)
+
+**❗ The problem.** Salaries needs a file from IT. PC-SAL-1 → Command Prompt → `ping 192.168.40.21`:
+
+![Another VLAN: nothing comes back](images/step-m1-before.png)
+
+A switch does not pass frames from VLAN to VLAN, and the PC has no gateway. And buying a router port for every VLAN is expensive: a 1941 has only two.
+
+**💡 The solution.** Router-on-a-stick: **one** cable, five sub-interfaces (theory 1.1). In each one we already prepare HSRP (1.2) and a DHCP relay (1.3).
+
+**📋 Do it in the project.** On R-S-MAIN: turn on g0/0 without an IP, and for each VLAN a sub-interface with .254, VIP .252, priority 110, preempt, helper 192.168.50.1 (not in VLAN 50).
+
+### 🖱 The solution: what to click and what to write
 **R-S-MAIN** → CLI → log in → `enable`:
 ```
 configure terminal
@@ -156,7 +178,12 @@ standby 50 preempt
 end
 copy running-config startup-config
 ```
-![The first two sub-interfaces](images/02-subif.png)
+
+![Part 1: the port and the first VLAN](images/step-m1-1.png)
+
+![Part 2: VLANs 20 and 30](images/step-m1-2.png)
+
+![Part 3: VLANs 40 and 50, and saving](images/step-m1-3.png)
 
 | Command | What it does | Why |
 |---|---|---|
@@ -169,6 +196,21 @@ copy running-config startup-config
 | `ip helper-address` | forwards DHCP to the server | not needed in VLAN 50, where the server is |
 
 ## Mission 2 — R-S-BKP
+**🌐 The network now.** R-S-MAIN (2) routes for everybody. We configure R-S-BKP (1):
+
+![1 R-S-BKP, 2 R-S-MAIN](images/step-map-m2.png)
+
+**❗ The problem.** One router = one failure stops five departments. R-S-MAIN, `show standby brief`:
+
+![The Standby column is unknown: nobody is behind R-S-MAIN](images/step-m2-before.png)
+
+`Standby: unknown` means that there is no backup. (`Speak` = still starting, `Active` after a few seconds.)
+
+**💡 The solution.** The second router joins the **same** groups with the **same** VIP and a lower priority (105). If the main goes silent, it takes over.
+
+**📋 Do it in the project.** Copy the block of Mission 1 and change only two things. Which two?
+
+### 🖱 The solution: what to click and what to write
 The same, with **.253** and **priority 105**:
 ```
 configure terminal
@@ -216,6 +258,13 @@ standby 50 preempt
 end
 copy running-config startup-config
 ```
+
+![Part 1](images/step-m2-1.png)
+
+![Part 2](images/step-m2-2.png)
+
+![Part 3. For a moment the backup says Active, until it hears the main](images/step-m2-3.png)
+
 ✅ Wait about 20 seconds. `show standby brief` on both: main **Active**, backup **Standby**.
 
 ![R-S-MAIN](images/03-hsrp-main.png)
@@ -223,7 +272,37 @@ copy running-config startup-config
 ![R-S-BKP](images/04-hsrp-bkp.png)
 
 ## Mission 3 — The server
+**🌐 The network now.** The departments are connected. The server is on, but empty:
+
+![1 SRV-SAKHNIN](images/step-map-m3.png)
+
+**❗ The problem.** PC-SAL-1 → Desktop → **Web Browser** → `http://www.osem.com` → Go. Nothing appears:
+
+![The page stays empty](images/step-m3-before.png)
+
+Nobody knows the name, there is no site, addresses are typed by hand on each PC, and there is no mail.
+
+**💡 The solution.** Five services on one server:
+
+| Service | The problem without it | What it does |
+|---|---|---|
+| DHCP | typing an address on every PC, with mistakes | gives the address, gateway and DNS automatically |
+| DNS | remembering 192.168.50.1 | translates www.osem.com to an IP |
+| HTTP | no company site | shows the page |
+| FTP | files walk on a disk-on-key | a shared folder with a user and password |
+| EMAIL | no mail between employees | SMTP sends, POP3 reads |
+
+**📋 Do it in the project.** One student per service, with the values of the tables below. Fixed address first!
+
+### 🖱 The solution: what to click and what to write
+Click **SRV-SAKHNIN** → **Services** (1). The list is on the left, for example DHCP (2) and DNS (3):
+
+![1 Services, 2 DHCP, 3 DNS](images/step-srv.png)
+
 ### 3.1 Fixed address
+
+❗ If the server's address changes, every PC, DNS record and helper points to the wrong place. 💡 A static address, with the **VIP** as gateway.
+
 **SRV-SAKHNIN** → **Desktop** → **IP Configuration** → Static: address `192.168.50.1` (1), mask
 `255.255.255.0` (2), gateway **`192.168.50.252`** — the VIP (3), DNS `192.168.50.1` (4).
 
@@ -232,6 +311,9 @@ copy running-config startup-config
 🧠 A server must have a **fixed** address, because everyone looks for it there.
 
 ### 3.2 DHCP
+
+❗ PCs in four different networks ask one server. 💡 A **pool** per network, each with its own gateway.
+
 **Services** (1) → **DHCP** (2). For each row fill the form (3) and click **Add** (4):
 
 | Pool Name | Default Gateway | DNS Server | Start IP | Mask | Max users |
@@ -248,27 +330,52 @@ Then **Service: On** (1) and **Save** (2).
 ![Four pools and the service is on](images/07-dhcp-done.png)
 
 ### 3.3 DNS
+
+❗ People remember names, computers need an IP. 💡 An **A record**: name → IP.
+
 **DNS** → On (1). Name (2) `www.osem.com`, Address (3) `192.168.50.1` → **Add** (4). Again for `mail.osem.com`.
 
 ![DNS records](images/08-dns.png)
 
 ### 3.4 Website
+
+❗ Opening the default Cisco page proves nothing. 💡 Our own text: if you see it, you reached **our** server.
+
+![1 HTTP, 2 (edit) next to index.html](images/step-http.png)
+
 **HTTP** → next to `index.html` click **(edit)** → change the line after `<hr>` to
 `Welcome to Osem - Sakhnin branch` → **Save** (confirm if asked).
 
 ![Editing the page](images/09-http-edit.png)
 
 ### 3.5 FTP
+
+❗ Anyone could take the company's files. 💡 A user, a password and permissions.
+
 **FTP** → Username (1) `sakhnin`, Password (2) `Osem#Ftp`, tick all five permissions → **Add** (3).
 
 ![FTP user](images/11-ftp.png)
 
 ### 3.6 Mail
+
+❗ The server has no mailboxes and doesn't know which domain it serves. 💡 A domain and a user for every employee.
+
 **EMAIL** → Domain Name (1) `osem.com` → **Set** (2). User (3) `sakhnin1`, Password (4) `Osem#Mail` → **+** (5). Again for `sakhnin2`.
 
 ![Mail users](images/12-mail.png)
 
 ## Mission 4 — PCs get an address
+**🌐 The network now.** The server gives addresses. The seven PCs still have the addresses typed by hand, **without a gateway**:
+
+![The seven PCs](images/step-map-m4.png)
+
+**❗ The problem.** Without a gateway a PC can't leave its VLAN, and the server is in another VLAN. Worse: a PC that asks for DHCP sends a broadcast, and a broadcast stops at the router.
+
+**💡 The solution.** DHCP on the PC + the relay (`ip helper-address`) that we wrote in Missions 1 and 2. DORA is explained in theory 1.3.
+
+**📋 Do it in the project.** Move all the PCs to DHCP and write down for each one: address, gateway, DNS. Is the gateway .254 or .252? Why?
+
+### 🖱 The solution: what to click and what to write
 Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and the DNS arrive by themselves:
 
 ![DHCP successful](images/13-pc-dhcp.png)
@@ -276,6 +383,17 @@ Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and 
 ⚠️ The first request sometimes fails while STP and HSRP are still starting. Click Static and DHCP again, or `ipconfig /renew`.
 
 ## Mission 5 — Test everything
+**🌐 The network now.** Five services, two routers, seven PCs with addresses.
+
+![1 PC-IT-1, 2 PC-SAL-2, 3 PC-SAL-1, 4 SRV-SAKHNIN](images/step-map-m5.png)
+
+**❗ The problem.** One page that opens doesn't prove that DNS, FTP and mail work. When something fails we must know **which** link of the chain broke.
+
+**💡 The solution.** One test per service, from different VLANs, in this order: DNS → web → ping and FTP → path → mail.
+
+**📋 Do it in the project.** Do the five tests. For each one say which service and which port it checks.
+
+### 🖱 The solution: what to click and what to write
 1. **PC-IT-1**: `nslookup www.osem.com`
 
    ![DNS](images/14-nslookup.png)
@@ -301,6 +419,19 @@ Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and 
    ![The mail arrived](images/19-mail-received.png)
 
 ## Mission 6 — DHCP snooping
+**🌐 The network now.** Everyone gets an address automatically. Whoever answers **first** wins:
+
+![1 SW-S-MAIN, 2 R-S-BKP (plays the attacker), 3 PC-SAL-2](images/step-map-m6.png)
+
+**❗ The problem.** A PC believes **any** DHCP server. A home router connected by mistake, or an attacker, can give a false gateway and read all the traffic. The switch does not check. SW-S-MAIN, `show ip dhcp snooping`:
+
+![DHCP snooping is disabled](images/step-m6-before.png)
+
+**💡 The solution.** DHCP snooping: answers of a server are accepted only from **trusted** ports (theory 1.5).
+
+**📋 Do it in the project.** Turn it on for VLANs 10–40 and decide which ports of SW-S-MAIN are trusted. Then attack, in 6.1.
+
+### 🖱 The solution: what to click and what to write
 **SW-S-MAIN:**
 ```
 configure terminal
@@ -313,6 +444,9 @@ end
 copy running-config startup-config
 show ip dhcp snooping
 ```
+
+![The commands and the result](images/step-m6-cfg.png)
+
 | Port | Connected to | Why trusted |
 |---|---|---|
 | Fa0/2 | server switch | the real DHCP server is there |
@@ -336,6 +470,9 @@ default-router 192.168.20.99
 dns-server 6.6.6.6
 end
 ```
+
+![The attacker is ready](images/step-m6-rogue.png)
+
 On **PC-SAL-2**: `ipconfig /release`, `ipconfig /renew`. The gateway is **192.168.20.99** and the DNS **6.6.6.6**: all
 the PC's traffic now goes to the attacker!
 
@@ -348,6 +485,9 @@ interface fa0/5
 no ip dhcp snooping trust
 end
 ```
+
+![No more trust in Fa0/5](images/step-m6-untrust.png)
+
 Release and renew again on PC-SAL-2: gateway **.252** and DNS **192.168.50.1**. The switch dropped the fake offer.
 
 ![Top: the fake address. Then, twice: the real one](images/25-rogue-blocked.png)
@@ -359,13 +499,32 @@ no ip dhcp pool ROGUE
 no ip dhcp excluded-address 192.168.20.1 192.168.20.199
 end
 ```
+
+![The attacker is gone](images/step-m6-clean.png)
+
 And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
+
+![Fa0/5 is trusted again](images/step-m6-retrust.png)
 
 🧠 Snooping protects only the switch that runs it. A rogue server on SW-S-SAL can still cheat its neighbors on the
 **same** switch, so a full protection puts it on every department switch (exercise 4).
 
 ## Mission 7 — Kill the main router
+**🌐 The network now.** Two routers with HSRP. We break one on purpose:
+
+![1 R-S-MAIN, 2 R-S-BKP, 3 PC-SAL-1](images/step-map-m7.png)
+
+**❗ The problem.** A backup that was never tested is not a backup. In the real project we started from, part of the backup never worked, and nobody knew.
+
+**💡 The solution.** A planned failure: turn off the main, check that work continues, bring it back.
+
+**📋 Do it in the project.** Before: which hop does `tracert` show? Guess what it will show during the failure and after it.
+
+### 🖱 The solution: what to click and what to write
 1. **R-S-MAIN**: `configure terminal` → `interface g0/0` → `shutdown`.
+
+   ![The main router goes down](images/step-m7-shut.png)
+
 2. After about 10 seconds on **R-S-BKP**: `show standby brief` → **Active**.
 
    ![The backup took over](images/21-fail-bkp.png)
@@ -374,8 +533,12 @@ And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
    ![Through the backup router](images/22-fail-pc.png)
 4. Return it: `no shutdown`, wait 30 seconds. R-S-MAIN is Active again, thanks to `preempt`.
 
+   ![The main router comes back](images/step-m7-noshut.png)
+
    ![Back to normal](images/23-back.png)
 5. `copy running-config startup-config` on the routers and on SW-S-MAIN, File → Save.
+
+   ![Saved](images/step-m7-save.png)
 
 ## 👀 See it happen — the relay and the virtual MAC
 Simulation was explained in [lesson 1](../lesson-01/).

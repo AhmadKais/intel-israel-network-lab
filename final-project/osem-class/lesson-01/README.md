@@ -108,6 +108,15 @@ about 30 seconds: 15 listening + 15 learning. Orange = checking, green = forward
 ---
 
 ## Mission 1 — Place and name the switches
+**🌐 The network now.** An empty workspace. In this mission two devices appear: the main switch of the branch and the switch of the Salaries department.
+
+**❗ The problem.** People in one department want to share files and a printer, but a PC has only **one** network port. You can connect two PCs with a cable, not three. And a device called `Switch0` tells nobody what it does: imagine 30 of them.
+
+**💡 The solution.** A **switch** has 24 ports and passes each frame to the right one (theory 1.1). A naming rule, `type-branch-job`, tells who each device is.
+
+**📋 Do it in the project.** Place two 2960 switches, one above the other. Name the top one `SW-S-MAIN` and the bottom one `SW-S-SAL`. Try alone, then check with the steps below.
+
+### 🖱 The solution: what to click and what to write
 1. Bottom left: **Network Devices** (1) → **Switches** (2) → **2960** (3).
 
    ![Choosing a 2960 switch](images/01-choose-switch.png)
@@ -123,6 +132,15 @@ about 30 seconds: 15 listening + 15 learning. Orange = checking, green = forward
 name knows what and where the device is.
 
 ## Mission 2 — Place and name the PCs
+**🌐 The network now.** Two named switches, nobody uses them yet.
+
+**❗ The problem.** A network with no users does nothing. And if all the PCs are called `PC0`, `PC1`..., in lesson 2 you won't know which department a PC belongs to.
+
+**💡 The solution.** Three PCs, named by department and number. `PC-SAL-2` = the second PC of Salaries.
+
+**📋 Do it in the project.** Place three PCs under SW-S-SAL and name them from left to right `PC-SAL-1`, `PC-SAL-2`, `PC-SAL-3`.
+
+### 🖱 The solution: what to click and what to write
 1. **End Devices** (1) → **PC** (2) → click under the switch. Repeat for 3 PCs.
 
    ![Choosing a PC](images/04-choose-pc.png)
@@ -131,6 +149,17 @@ name knows what and where the device is.
 2. Click each PC → **Config** → **Display Name**. From left to right: `PC-SAL-1`, `PC-SAL-2`, `PC-SAL-3`.
 
 ## Mission 3 — Cables
+**🌐 The network now.** Five devices, no connection between them. At the end of the mission it looks like this (numbers = the devices we connect):
+
+![The five devices we connect](images/step-map-m3.png)
+
+**❗ The problem.** Without a cable no signal passes. With the **wrong** cable or the **wrong port**, the drawing looks right but the configuration of the next lessons (VLAN on Fa0/2, trunk on Fa0/4) falls on the wrong device.
+
+**💡 The solution.** Cross-over between switches, straight-through to PCs (theory 1.4), and a **port table** that everybody follows.
+
+**📋 Do it in the project.** Make the four connections of the table. Before each one, say aloud which cable and why.
+
+### 🖱 The solution: what to click and what to write
 ![Cable menu: 1 Connections, 2 Cross-Over, 3 Straight-Through](images/06-cable-menu.png)
 
 For each row: **Connections** (1) → choose the cable → click the first device → choose its port →
@@ -154,6 +183,21 @@ click the second device → choose its port.
 ![Orange: STP is checking](images/09-amber.png)
 
 ## Mission 4 — Configure the switches
+**🌐 The network now.** Everything is connected and green. We configure two devices:
+
+![1 SW-S-MAIN, 2 SW-S-SAL](images/step-map-m4.png)
+
+**❗ The problem.** A new switch has **no password at all**. Click SW-S-SAL → **CLI** → Enter → write `enable`:
+
+![enable, and you are the manager. Nobody asked who you are](images/step-nopass.png)
+
+The prompt became `#`: whoever reaches the switch can erase everything. It is also still called `Switch`.
+
+**💡 The solution.** Three things: a name (`hostname`), two passwords (console and `enable secret`, theory 1.6) and a warning (`banner`). Then save, otherwise it all disappears when the power goes off.
+
+**📋 Do it in the project.** On both switches: name, no domain lookup, enable secret `Osem#En1`, encrypted passwords, a banner, console password `Osem#Con` with login, and save.
+
+### 🖱 The solution: what to click and what to write
 Click **SW-S-MAIN** → **CLI** → press **Enter** until you see `Switch>`. Type line by line:
 
 ```
@@ -193,6 +237,8 @@ At `Destination filename [startup-config]?` press **Enter**. You must see `[OK]`
 
 Repeat on **SW-S-SAL** with `hostname SW-S-SAL`.
 
+![The same on SW-S-SAL](images/step-sal.png)
+
 ✅ `show running-config` shows `enable secret 5 $1$...` and not the password itself:
 
 ![show running-config](images/12-show-run.png)
@@ -202,6 +248,17 @@ Repeat on **SW-S-SAL** with `hostname SW-S-SAL`.
 ![Port status](images/13-ports-status.png)
 
 ## Mission 5 — PC addresses
+**🌐 The network now.** The switches are ready. The PCs have cables but no addresses:
+
+![The three PCs](images/step-map-m5.png)
+
+**❗ The problem.** A PC without an IP address can't send a ping, and nobody can ask for it. Two PCs with the **same** address are just as bad.
+
+**💡 The solution.** A plan: all the department in the network 192.168.20.0/24, each PC with a different last number (theory 1.3).
+
+**📋 Do it in the project.** Give the three PCs the addresses in the table, mask 255.255.255.0, with no gateway.
+
+### 🖱 The solution: what to click and what to write
 Click PC-SAL-1 → **Desktop** (1) → **IP Configuration** (2):
 
 ![PC desktop](images/14-pc-desktop.png)
@@ -217,7 +274,24 @@ empty: there is no router yet.
 | PC-SAL-2 | 192.168.20.22 | 255.255.255.0 |
 | PC-SAL-3 | 192.168.20.23 | 255.255.255.0 |
 
+PC-SAL-2 and PC-SAL-3 the same way. When finished they look like this:
+
+![PC-SAL-2](images/step-pc2.png)
+
+![PC-SAL-3](images/step-pc3.png)
+
 ## Mission 6 — Test
+**🌐 The network now.** Complete: names, cables, passwords and addresses.
+
+![1 PC-SAL-1, 2 SW-S-SAL](images/step-map-m6.png)
+
+**❗ The problem.** "Everything is green" does not prove that it works. Green means only that the cable is fine; the address, the mask or the password may still be wrong.
+
+**💡 The solution.** Test every layer: `ping` (IP), `arp -a` (IP → MAC), `show mac address-table` (what the switch learned), and a login test (the passwords).
+
+**📋 Do it in the project.** Prove four things: PC-SAL-1 reaches the two others, you can find the MAC of PC-SAL-2 on the switch, the console asks for a password, the file is saved.
+
+### 🖱 The solution: what to click and what to write
 1. PC-SAL-1 → **Desktop** → **Command Prompt** (3 in the desktop picture):
    ```
    ping 192.168.20.22

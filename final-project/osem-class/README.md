@@ -21,6 +21,11 @@ got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version 
 ## What you find in every lesson
 | Sign | What it is | How to use it in class |
 |---|---|---|
+| 🌐 | the network now, with a numbered map | say where we are. The numbers show which device to click |
+| ❗ | the problem | show it on the screen **before** solving it |
+| 💡 | the solution, in words | after it, ask a student to explain it back |
+| 📋 | do it yourself in the project | 5 minutes alone, without looking down |
+| 🖱 | the full solution: what to click, what to write, what you must see | compare screen to screenshot, step by step |
 | 💬 | the idea in simple words | say it before the definition |
 | **Example** | a worked example with our addresses | solve it on the board, one row at a time |
 | ❓ | a question for the class | wait for answers before you open the answer |

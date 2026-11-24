@@ -117,7 +117,29 @@ Both chose the same port, so the router changed one of them: that is why it's ca
 
 ---
 
+## 🔑 Opening a device
+Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` → `enable` → `Osem#En1`. With pictures: [lesson 2](../lesson-02/).
+
+![Click CLI](images/step-login-1.png)
+
+**How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
+
 ## Mission 1 — WAN addresses
+**🌐 The network now.** Three finished branches, three islands. Ten routers are waiting:
+
+![1 R-S-MAIN, 2 R-S-BKP, 3 R-S-EXT, 4 ISP, 5 R-A-MAIN, 6 R-A-BKP, 7 R-A-EXT, 8 R-E-MAIN, 9 R-E-BKP, 10 R-E-EXT](images/step-map-m1.png)
+
+**❗ The problem.** All the serial lines are red. R-S-MAIN, `show ip interface brief`:
+
+![Serial0/0/0: no address, administratively down](images/step-m1-before.png)
+
+`Serial0/0/0` has no address and is turned off. A router port is born turned off.
+
+**💡 The solution.** For each end: an address from the WAN plan (1.5), `no shutdown`, and on the **DCE** side also `clock rate` (1.1).
+
+**📋 Do it in the project.** Find your router's rows in table 1.5, mark which ends are DCE, and configure. When do the two triangles turn green?
+
+### 🖱 The solution: what to click and what to write
 **R-S-MAIN:**
 ```
 configure terminal
@@ -126,6 +148,9 @@ ip address 200.100.0.1 255.255.255.0
 no shutdown
 end
 ```
+
+![1 — R-S-MAIN. "down": the other side isn't ready yet](images/step-m1-smain.png)
+
 **R-S-BKP:**
 ```
 configure terminal
@@ -134,6 +159,9 @@ ip address 200.90.0.1 255.255.255.0
 no shutdown
 end
 ```
+
+![2 — R-S-BKP](images/step-m1-sbkp.png)
+
 **R-S-EXT:**
 ```
 configure terminal
@@ -152,6 +180,9 @@ ip address 200.130.0.1 255.255.255.0
 no shutdown
 end
 ```
+
+![3 — R-S-EXT](images/step-m1-sext.png)
+
 **ISP:**
 ```
 configure terminal
@@ -171,6 +202,9 @@ clock rate 2000000
 no shutdown
 end
 ```
+
+![4 — ISP](images/step-m1-isp.png)
+
 ❓ Which side gets `clock rate`? Only the **DCE**. On a DTE side the command is not needed.
 
 **Ashdod and Eilat:** each group pastes one router. These blocks contain **everything** for the
@@ -213,6 +247,10 @@ ip route 0.0.0.0 0.0.0.0 200.110.0.1
 end
 ```
 
+![R-A-MAIN, beginning](images/step-m1-amain-1.png)
+
+![R-A-MAIN, end](images/step-m1-amain-2.png)
+
 **R-A-BKP**
 ```
 configure terminal
@@ -235,6 +273,8 @@ exit
 ip route 0.0.0.0 0.0.0.0 200.120.0.2
 end
 ```
+
+![R-A-BKP](images/step-m1-abkp.png)
 
 **R-A-EXT**
 ```
@@ -276,6 +316,10 @@ exit
 end
 ```
 
+![R-A-EXT, beginning](images/step-m1-aext-1.png)
+
+![R-A-EXT, end](images/step-m1-aext-2.png)
+
 </details>
 
 <details><summary>R-E-MAIN, R-E-BKP, R-E-EXT</summary>
@@ -315,6 +359,10 @@ ip route 0.0.0.0 0.0.0.0 200.140.0.1
 end
 ```
 
+![R-E-MAIN, beginning](images/step-m1-emain-1.png)
+
+![R-E-MAIN, end](images/step-m1-emain-2.png)
+
 **R-E-BKP**
 ```
 configure terminal
@@ -337,6 +385,8 @@ exit
 ip route 0.0.0.0 0.0.0.0 200.160.0.1
 end
 ```
+
+![R-E-BKP](images/step-m1-ebkp.png)
 
 **R-E-EXT**
 ```
@@ -380,11 +430,30 @@ exit
 end
 ```
 
+![R-E-EXT, beginning](images/step-m1-eext-1.png)
+
+![R-E-EXT, end](images/step-m1-eext-2.png)
+
 </details>
 
 ✅ All serial links are green.
 
 ## Mission 2 — HSRP watches the internet line
+**🌐 The network now.** R-S-MAIN (1) and R-S-BKP (2) each have their own line to R-S-EXT.
+
+![1 R-S-MAIN, 2 R-S-BKP](images/step-map-m2.png)
+
+**❗ The problem.** Turn off the **internet** line of the main (`interface s0/0/0`, `shutdown`), wait 15 seconds, and write `show standby brief`:
+
+![The line is down, and the main is still Active](images/step-m2-before.png)
+
+It is **still Active**! Its LAN side is fine, so HSRP sees no problem. All the PCs keep sending to a router that has no way out. (Bring it back: `no shutdown`.)
+
+**💡 The solution.** `track`: HSRP watches the serial line. If it falls, the priority drops by 10.
+
+**📋 Do it in the project.** Add track to the five groups of R-S-MAIN. Calculate first: what will the priority be, and who will be Active?
+
+### 🖱 The solution: what to click and what to write
 In lesson 3 the backup took over only if the LAN failed. Now the main router also loses priority
 when its **serial line** fails. On **R-S-MAIN**:
 ```
@@ -401,6 +470,9 @@ interface g0/0.50
 standby 50 track s0/0/0
 end
 ```
+
+![Bringing the line back, and the five track commands](images/step-m2.png)
+
 🧠 The line falls → 110 − 10 = **100**, which is less than 105 → the backup takes over.
 
 | Serial line | Main | Backup | Active |
@@ -417,6 +489,21 @@ end
 </details>
 
 ## Mission 3 — OSPF in Sakhnin
+**🌐 The network now.** The lines are up. Each router knows only its neighbors:
+
+![1 R-S-MAIN, 2 R-S-BKP, 3 R-S-EXT, 4 R-A-EXT](images/step-map-m3.png)
+
+**❗ The problem.** R-S-EXT, `show ip route`:
+
+![Not a single 192.168 network, and no default route](images/step-m3-before.png)
+
+Not one 192.168 network. When an answer comes from the internet for a PC, R-S-EXT doesn't know where to send it and throws it away.
+
+**💡 The solution.** A routing protocol: the routers **tell** each other what they know. OSPF in Sakhnin, EIGRP in Ashdod and Eilat (1.2). Writing five static routes in three routers would work too, until a line falls: static routes don't react.
+
+**📋 Do it in the project.** OSPF 52, area 0, router-id 1.1.1.1 / 1.1.1.2 / 1.1.1.3, passive on every LAN sub-interface, and a default route to the next router towards the internet.
+
+### 🖱 The solution: what to click and what to write
 **R-S-MAIN:**
 ```
 configure terminal
@@ -437,8 +524,34 @@ exit
 ip route 0.0.0.0 0.0.0.0 200.100.0.2
 end
 ```
+
+![1 — R-S-MAIN](images/step-m3-smain.png)
+
 **R-S-BKP:** the same, with `router-id 1.1.1.2`, `network 200.90.0.0 0.0.0.255 area 0` instead of 200.100, and
 `ip route 0.0.0.0 0.0.0.0 200.90.0.2`.
+
+The full block of R-S-BKP:
+```
+configure terminal
+router ospf 52
+router-id 1.1.1.2
+network 192.168.10.0 0.0.0.255 area 0
+network 192.168.20.0 0.0.0.255 area 0
+network 192.168.30.0 0.0.0.255 area 0
+network 192.168.40.0 0.0.0.255 area 0
+network 192.168.50.0 0.0.0.255 area 0
+network 200.90.0.0 0.0.0.255 area 0
+passive-interface g0/0.10
+passive-interface g0/0.20
+passive-interface g0/0.30
+passive-interface g0/0.40
+passive-interface g0/0.50
+exit
+ip route 0.0.0.0 0.0.0.0 200.90.0.2
+end
+```
+
+![2 — R-S-BKP](images/step-m3-sbkp.png)
 
 **R-S-EXT:**
 ```
@@ -451,6 +564,9 @@ exit
 ip route 0.0.0.0 0.0.0.0 200.130.0.2
 end
 ```
+
+![3 — R-S-EXT](images/step-m3-sext.png)
+
 | Command | What it does | Why |
 |---|---|---|
 | `router-id` | the router's name in OSPF | fixed, so it doesn't change with the addresses |
@@ -473,6 +589,21 @@ end
 ❓ Why is there `no auto-summary`? So that EIGRP announces the exact networks and not a whole class.
 
 ## Mission 4 — BGP to the provider
+**🌐 The network now.** Every branch knows itself. Between the branches stands the provider:
+
+![1 R-S-EXT, 2 ISP, 3 R-E-EXT](images/step-map-m4.png)
+
+**❗ The problem.** The provider is **another company**: you can't run OSPF together, because then it would see your whole inside network and could change your routes. On the ISP, `show ip bgp summary` returns nothing: no neighbor, so it passes nobody's networks on.
+
+![Empty: BGP isn't running](images/step-m4-before.png)
+
+🧠 To be honest: in our small model the three branches touch the **same** provider router, so the default route alone would already reach them. On the real internet there are thousands of providers, and only BGP tells them who is where.
+
+**💡 The solution.** eBGP: each branch is an AS, and it announces **only** its public network to the provider (1.3).
+
+**📋 Do it in the project.** Sakhnin = AS 511, ISP = AS 311. Configure both sides. Which AS is written after `remote-as`, yours or the neighbor's?
+
+### 🖱 The solution: what to click and what to write
 **R-S-EXT:**
 ```
 configure terminal
@@ -481,6 +612,9 @@ neighbor 200.130.0.2 remote-as 311
 network 200.130.0.0 mask 255.255.255.0
 end
 ```
+
+![1 — R-S-EXT](images/step-m4-sext.png)
+
 **ISP:**
 ```
 configure terminal
@@ -490,6 +624,9 @@ neighbor 200.200.0.1 remote-as 411
 neighbor 200.150.0.1 remote-as 611
 end
 ```
+
+![2 — ISP. "neighbor ... Up" for the three branches](images/step-m4-isp.png)
+
 | Command | What it does |
 |---|---|
 | `router bgp 511` | our AS number |
@@ -512,6 +649,21 @@ end
 ![The provider's routes](images/06-isp-routes.png)
 
 ## Mission 5 — NAT
+**🌐 The network now.** The routes exist. We go out to the internet from 2, and from 5 we enter Ashdod's server:
+
+![1 R-S-EXT, 2 PC-SAL-1, 3 R-A-EXT, 4 R-E-EXT, 5 PC-E-MEET-1](images/step-map-m5.png)
+
+**❗ The problem.** PC-SAL-1 → `ping 200.130.0.2`:
+
+![It has an address and a gateway, and still no internet](images/step-m5-before.png)
+
+The ping **does** arrive at the provider, but the answer is for 192.168.20.x, and no provider has a route to a private address. The answer dies there.
+
+**💡 The solution.** NAT on the edge router: on the way out replace the private address with a public one, and remember it for the answer (1.4).
+
+**📋 Do it in the project.** PAT on R-S-EXT: who is translated, to which address, which ports are inside and which is outside? Then find the static NAT and the pool in the blocks of Ashdod and Eilat.
+
+### 🖱 The solution: what to click and what to write
 **R-S-EXT (PAT):**
 ```
 configure terminal
@@ -527,6 +679,9 @@ interface s0/0/1
 ip nat outside
 end
 ```
+
+![R-S-EXT](images/step-m5.png)
+
 | Command | What it does |
 |---|---|
 | `permit ip 192.168.0.0 0.0.63.255 any` | who is translated: 192.168.0–192.168.63 |
@@ -557,13 +712,29 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 ![Dynamic NAT](images/11-nat-eilat.png)
 
 ## Mission 6 — Cut the line
+**🌐 The network now.** Everything works, with two ways out:
+
+![1 R-S-MAIN, 2 R-S-BKP, 3 PC-SAL-1](images/step-map-m6.png)
+
+**❗ The problem.** In Mission 2 we saw the main stay Active without internet. Did `track` really solve it? We have to prove it.
+
+**💡 The solution.** Cut the same line again and compare: this time the priority must drop to 100 and the backup must take over.
+
+**📋 Do it in the project.** Cut, check `show standby brief`, check `tracert` from PC-SAL-1, bring it back.
+
+### 🖱 The solution: what to click and what to write
 1. **R-S-MAIN**: `interface s0/0/0` → `shutdown`. Wait 15 seconds, `show standby brief`: priority **100**, and it's no longer Active (it passes through *Speak* to *Standby*).
+
+   ![The line is cut, and OSPF loses its neighbor](images/step-m6-shut.png)
 
    ![Priority dropped](images/14-track.png)
 2. **PC-SAL-1**: `tracert 200.130.0.2` → .253 → 200.90.0.2: through the backup, and the internet still works.
 
    ![Internet through the backup](images/15-track-pc.png)
 3. `no shutdown`, and after about 30 seconds R-S-MAIN is Active again.
+
+   ![The line is back](images/step-m6-noshut.png)
+
 4. Save on all routers: `copy running-config startup-config`. File → Save.
 
 ## 👀 See it happen — NAT changes the address

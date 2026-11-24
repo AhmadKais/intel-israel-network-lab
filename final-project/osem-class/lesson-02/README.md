@@ -128,7 +128,39 @@ goes to **err-disabled**.
 
 ---
 
+## 🔑 How to open a device (the same in every lesson)
+1. Click the device. Its window opens on **Physical**. Click **CLI** (1):
+
+   ![Click CLI](images/step-login-1.png)
+2. Click inside the text (2) and press **Enter**:
+
+   ![Click in the text and press Enter](images/step-login-2.png)
+3. Password `Osem#Con` + Enter, `enable` + Enter, `Osem#En1` + Enter. **Nothing appears while you type a password.** You must see `#`:
+
+   ![You're in: the prompt ends with #](images/step-login-3.png)
+4. To save at the end of every device: `copy running-config startup-config`, then Enter. You must see `[OK]`:
+
+   ![Saved](images/step-save.png)
+
+## How every mission is built
+🌐 the network now → ❗ the problem (and how to see it) → 💡 the solution → 📋 do it yourself in the project → 🖱 the full solution: what to click, what to write, and what you must see.
+
 ## Mission 1 — VLANs on the main switch
+**🌐 The network now.** Seven switches, all cabled. We work on the main one:
+
+![1 SW-S-MAIN](images/step-map-m1.png)
+
+**❗ The problem.** Everybody is in **one** network. On SW-S-MAIN write `show vlan brief`:
+
+![All 26 ports are in VLAN 1](images/step-m1-before.png)
+
+All the ports are in VLAN 1: a broadcast of the Salaries reaches management, IT and the servers. Slow, and not private.
+
+**💡 The solution.** Five VLANs, one per department plus the servers (theory 1.1). We create them **once**, on a VTP server, and not seven times.
+
+**📋 Do it in the project.** On SW-S-MAIN: VTP domain `SAKHNIN`, password `Osem#Vtp`, server mode, and VLANs 10, 20, 30, 40, 50 with the names of the table in 1.6.
+
+### 🖱 The solution: what to click and what to write
 Click **SW-S-MAIN** → **CLI** → log in → `enable`:
 ```
 configure terminal
@@ -158,6 +190,17 @@ show vlan brief
 | `vlan 20` + `name` | creates a VLAN and names it | the name is documentation; the number is what counts |
 
 ## Mission 2 — VTP client on the others
+**🌐 The network now.** SW-S-MAIN knows five VLANs. These five switches don't:
+
+![1 SW-S-BKP, 2 SW-S-MGMT, 3 SW-S-SAL, 4 SW-S-IT, 5 MLS-S-ASM](images/step-map-m2.png)
+
+**❗ The problem.** Creating 5 VLANs on 6 switches by hand = 30 times, with typing mistakes, and again for every new VLAN.
+
+**💡 The solution.** VTP client: the switch **receives** the list from the server. Same domain and same password, otherwise it refuses (theory 1.3).
+
+**📋 Do it in the project.** Make the five switches VTP clients. Guess: will the VLANs arrive right away?
+
+### 🖱 The solution: what to click and what to write
 On **SW-S-BKP, SW-S-MGMT, SW-S-SAL, SW-S-IT and MLS-S-ASM** (not MLS-S-SRV):
 ```
 configure terminal
@@ -166,6 +209,21 @@ vtp password Osem#Vtp
 vtp mode client
 end
 ```
+
+What you must see (the same on all five):
+
+![1 — SW-S-BKP](images/step-m2-bkp.png)
+
+![2 — SW-S-MGMT](images/step-m2-mgmt.png)
+
+![3 — SW-S-SAL](images/step-m2-sal.png)
+
+![4 — SW-S-IT](images/step-m2-it.png)
+
+![5 — MLS-S-ASM](images/step-m2-asm.png)
+
+💡 Messages such as `RECV_PVID_ERR` may appear while one side is already a trunk and the other isn't. They stop after Mission 4.
+
 ❓ Ask the class: run `show vlan brief` on SW-S-SAL. The VLANs did **not** arrive. Why?
 
 ![SW-S-SAL before the trunks](images/04-sal-before.png)
@@ -177,6 +235,21 @@ VTP travels only over **trunks**, and we haven't made any yet. That is the next 
 </details>
 
 ## Mission 3 — Trunk and access on the main and backup switch
+**🌐 The network now.** The VLAN list exists only on SW-S-MAIN. We open the roads from here:
+
+![1 SW-S-MAIN, 2 SW-S-BKP](images/step-map-m3.png)
+
+**❗ The problem.** Every link is an ordinary access link and carries **one** VLAN. SW-S-MAIN, `show interfaces trunk`:
+
+![Empty: there isn't a single trunk](images/step-m3-before.png)
+
+Nothing came back. So VLAN 20 cannot cross to another switch, and neither can VTP.
+
+**💡 The solution.** A **trunk** on every link between switches: one cable, all the VLANs, with a tag on each frame (theory 1.2). Unused ports get `shutdown`, so nobody can plug in.
+
+**📋 Do it in the project.** On both switches: trunk on the links of the table in 1.6, on SW-S-MAIN Fa0/2 = access VLAN 50 with port security for 2 MACs, all the other ports off.
+
+### 🖱 The solution: what to click and what to write
 **SW-S-MAIN:**
 ```
 configure terminal
@@ -195,6 +268,13 @@ interface range fa0/9 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![The commands. The messages say that the links go down and up as trunks](images/step-m3-main-1.png)
+
+After `shutdown` a message appears for every port, then `end`:
+
+![The unused ports are off](images/step-m3-main-2.png)
+
 **SW-S-BKP:**
 ```
 configure terminal
@@ -205,6 +285,9 @@ interface range fa0/6 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![SW-S-BKP, just before the last shutdown](images/step-m3-bkp.png)
+
 | Command | What it does | Why |
 |---|---|---|
 | `interface range fa0/1 , fa0/3 - 8` | configures several ports together | note the **spaces** around the comma and the dash |
@@ -213,6 +296,21 @@ end
 | `shutdown` on unused ports | turns them off | nobody can connect to a free socket |
 
 ## Mission 4 — The department switches
+**🌐 The network now.** One side of every link is a trunk. The department switches are still as they were:
+
+![1 SW-S-MGMT, 2 SW-S-SAL, 3 MLS-S-ASM, 4 SW-S-IT, 5 MLS-S-SRV](images/step-map-m4.png)
+
+**❗ The problem.** SW-S-SAL, `show vlan brief`: the ports of the PCs are in VLAN 1, so the PCs are not in their department.
+
+![Still everybody in VLAN 1](images/step-m4-before.png)
+
+And a second problem: anybody can unplug a PC and connect a strange computer, or a switch.
+
+**💡 The solution.** Uplinks = trunk. PC ports = **access** in the VLAN of the department, with PortFast (green at once), BPDU Guard (no strange switch) and port security (no strange PC).
+
+**📋 Do it in the project.** Each group takes one switch. Write down: which ports are uplinks, which are for PCs, which VLAN, and then configure.
+
+### 🖱 The solution: what to click and what to write
 Give one switch to each group.
 
 **SW-S-MGMT:**
@@ -240,6 +338,9 @@ interface range fa0/4 , fa0/6 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![SW-S-MGMT, just before the last shutdown](images/step-m4-mgmt.png)
+
 Fa0/1 is reserved for the ASA firewall (lesson 5), without port security: several MACs will pass there.
 
 **SW-S-SAL:**
@@ -262,6 +363,9 @@ interface range fa0/6 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![SW-S-SAL](images/step-m4-sal.png)
+
 **MLS-S-ASM** (3560 — one extra command!):
 ```
 configure terminal
@@ -283,6 +387,9 @@ interface range fa0/5 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![MLS-S-ASM](images/step-m4-asm.png)
+
 **SW-S-IT:**
 ```
 configure terminal
@@ -303,6 +410,9 @@ interface range fa0/4 - 24 , g0/1 - 2
 shutdown
 end
 ```
+
+![SW-S-IT](images/step-m4-it.png)
+
 **MLS-S-SRV** (3560):
 ```
 configure terminal
@@ -326,6 +436,9 @@ switchport port-security mac-address sticky
 switchport port-security violation shutdown
 end
 ```
+
+![Beginning of MLS-S-SRV](images/step-m4-srv.png)
+
 ![End of MLS-S-SRV. The PortFast warning is normal](images/07-srv.png)
 
 🧠 The link SW-S-MAIN ↔ MLS-S-SRV is **access VLAN 50**: only the servers are there, so VTP does not
@@ -350,6 +463,23 @@ pass and VLAN 50 is created by hand in transparent mode.
 | `switchport trunk encapsulation dot1q` | chooses the tag kind (3560 only) | a 3560 also knows ISL; a 2960 knows only dot1q |
 
 ## Mission 5 — STP: we choose who is root
+**🌐 The network now.** VLANs, trunks and a backup switch. Two roads to every department = a loop, and STP blocks one of them:
+
+![1 SW-S-MAIN, 2 SW-S-BKP, 3 SW-S-SAL](images/step-map-m5.png)
+
+**❗ The problem.** We never chose a root bridge, so STP chose alone. SW-S-MAIN, `show spanning-tree vlan 20`:
+
+![SW-S-MAIN is not the root. The root is behind Fa0/8](images/step-m5-before-main.png)
+
+Port Fa0/8 leads to **SW-S-IT**: the switch of the IT department is the center of the whole branch! All the priorities are 32768, so the lowest MAC won, by accident. SW-S-SAL pays cost 38 to reach it:
+
+![The cost from SW-S-SAL is 38](images/step-m5-before-sal.png)
+
+**💡 The solution.** We decide: the main switch = `root primary`, the backup = `root secondary`, and **Root Guard** so no department switch takes the role (theory 1.4).
+
+**📋 Do it in the project.** Make SW-S-MAIN root of VLANs 1,10,20,30,40,50, SW-S-BKP second, and Root Guard on the ports to the departments. Which port of SW-S-MAIN should **not** get Root Guard?
+
+### 🖱 The solution: what to click and what to write
 **SW-S-MAIN:**
 ```
 configure terminal
@@ -359,12 +489,18 @@ interface range fa0/1 , fa0/3 , fa0/4 , fa0/8
 spanning-tree guard root
 end
 ```
+
+![SW-S-MAIN](images/step-m5-main.png)
+
 **SW-S-BKP:**
 ```
 configure terminal
 spanning-tree vlan 1,10,20,30,40,50 root secondary
 end
 ```
+
+![SW-S-BKP](images/step-m5-bkp.png)
+
 | Command | What it does | Why |
 |---|---|---|
 | `root primary` | priority 24576 | the main switch is the strongest, and the shortest path goes through it |
@@ -384,6 +520,17 @@ Priority 24596 = 24576 + 20 (the VLAN number).
 ![The blocked port](images/10-stp-blocked.png)
 
 ## Mission 6 — Test
+**🌐 The network now.** Five separate networks on the same cables. We test from PC-SAL-1 (1) to PC-SAL-2 (2) and PC-MGMT-1 (3):
+
+![1 PC-SAL-1, 2 PC-SAL-2, 3 PC-MGMT-1](images/step-map-m6.png)
+
+**❗ The problem.** How do we know that the VLANs really separate and not only appear in a table?
+
+**💡 The solution.** Two pings: one that **must** work (same VLAN) and one that **must** fail (another VLAN). A test that checks only success proves half.
+
+**📋 Do it in the project.** Before you press Enter, write your guess for each ping and why.
+
+### 🖱 The solution: what to click and what to write
 **PC-SAL-1** → Command Prompt:
 ```
 ping 192.168.20.22
@@ -394,10 +541,24 @@ ping 192.168.10.21
 🧠 The second ping **must** fail: between VLANs you need a router. That is lesson 3.
 
 ## Mission 7 — Attack: a stranger connects
+**🌐 The network now.** Protected ports. We play the attacker on PC-SAL-3 (2) and the administrator on SW-S-SAL (1):
+
+![1 SW-S-SAL, 2 PC-SAL-3](images/step-map-m7.png)
+
+**❗ The problem.** A stranger enters the office, unplugs PC-SAL-3 and connects a laptop to its cable. Without port security the laptop is in VLAN 20 at once.
+
+**💡 The solution.** The port remembers the MAC of the first PC (`sticky`) and shuts itself on any other one (`violation shutdown`).
+
+**📋 Do it in the project.** Change the MAC of PC-SAL-3, show that it is cut off, find the proof on the switch, and bring the port back.
+
+### 🖱 The solution: what to click and what to write
 1. On SW-S-SAL: `show port-security interface fa0/2`. Status **Secure-up**, one sticky MAC.
 
    ![Port security works](images/12-port-security.png)
 2. From **PC-SAL-3** ping 192.168.20.21, so the switch learns its MAC.
+
+   ![The real PC-SAL-3 works](images/step-m7-ping.png)
+
 3. PC-SAL-3 → **Config** (1) → **FastEthernet0** (2) → MAC Address (3): write down the address, then change the last four digits to `9999` and press Tab. Now it's a "stranger".
 
    ![Changing the MAC](images/13-mac-change.png)
