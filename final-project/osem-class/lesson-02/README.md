@@ -8,6 +8,25 @@ ports that shut down when a stranger connects.
 
 ![The finished branch](images/02-final.png)
 
+## 📖 The story — chapter 2: walls inside the switches
+**How we got here.** In lesson 1 we connected Salaries. The other departments saw it and wanted the same. We connected them all, with a **backup switch** so that one failure won't stop the building (that is the start file, or [Part A](../from-zero/) if you build it yourself).
+
+**Where we are now.** Seven switches, seven PCs, one server. Every lamp is green, and that is the problem: **everybody is in one network**. Assembly receives every broadcast of Salaries. And two roads to each department are a loop waiting to happen.
+
+**What we want today.** Five departments on the same cables that can't see each other, a backup road that doesn't become a loop, and sockets that don't accept a stranger.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 VLAN | which departments exist? | before we separate, we decide into what |
+| 2 VTP | how do all switches learn the list? | typing it on every switch is slow and full of mistakes |
+| 3 Trunk | how do five departments travel in one cable? | the list exists, but it can't move between switches yet |
+| 4 Access | which socket belongs to whom? | the roads are open, now we connect the houses |
+| 5 STP | which of the two roads is used? | only now there are enough roads to make a loop |
+| 6 Test | are they really separated? | a wall is only a wall if you can't walk through it |
+| 7 Attack | what if a stranger comes inside? | we protect the socket only after we know what is normal |
+
 ## Lesson plan (for the teacher)
 | Minutes | Part |
 |---|---|
@@ -146,6 +165,8 @@ goes to **err-disabled**.
 🌐 the network now → ❗ the problem (and how to see it) → 💡 the solution → 📋 do it yourself in the project → 🖱 the full solution: what to click, what to write, and what you must see.
 
 ## Mission 1 — VLANs on the main switch
+**📖 How we got here.** All the departments are connected, and all of them are in VLAN 1.
+
 **🌐 The network now.** Seven switches, all cabled. We work on the main one:
 
 ![1 SW-S-MAIN](images/step-map-m1.png)
@@ -155,6 +176,8 @@ goes to **err-disabled**.
 ![All 26 ports are in VLAN 1](images/step-m1-before.png)
 
 All the ports are in VLAN 1: a broadcast of the Salaries reaches management, IT and the servers. Slow, and not private.
+
+**🎯 What we want now.** Decide which departments exist: five VLANs, with numbers and names, on one switch.
 
 **💡 The solution.** Five VLANs, one per department plus the servers (theory 1.1). We create them **once**, on a VTP server, and not seven times.
 
@@ -189,12 +212,28 @@ show vlan brief
 | `vtp mode server` | this switch manages the list | one place to create VLANs |
 | `vlan 20` + `name` | creates a VLAN and names it | the name is documentation; the number is what counts |
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** One switch knows the list. Six others don't.
+
 ## Mission 2 — VTP client on the others
+**📖 How we got here.** SW-S-MAIN knows the five VLANs.
+
 **🌐 The network now.** SW-S-MAIN knows five VLANs. These five switches don't:
 
 ![1 SW-S-BKP, 2 SW-S-MGMT, 3 SW-S-SAL, 4 SW-S-IT, 5 MLS-S-ASM](images/step-map-m2.png)
 
 **❗ The problem.** Creating 5 VLANs on 6 switches by hand = 30 times, with typing mistakes, and again for every new VLAN.
+
+**🎯 What we want now.** Let the other switches **receive** the list instead of typing it, so there is one place to change.
 
 **💡 The solution.** VTP client: the switch **receives** the list from the server. Same domain and same password, otherwise it refuses (theory 1.3).
 
@@ -234,7 +273,24 @@ VTP travels only over **trunks**, and we haven't made any yet. That is the next 
 
 </details>
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `vtp domain SAKHNIN` | The name of the VTP group. Only switches with **exactly** the same name share the VLAN list (capital letters matter). |
+| `vtp password Osem#Vtp` | A shared secret, so a strange switch can't change our VLANs. It must be the same on all. |
+| `vtp mode client` | This switch only receives the list. `vlan 10` on it is refused. |
+| `end` | Straight out to `#`, from any depth. |
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+
+</details>
+
+**⏭ What comes next.** The clients are ready, but the list can't reach them: the links don't carry it yet.
+
 ## Mission 3 — Trunk and access on the main and backup switch
+**📖 How we got here.** The list is ready, and the links between the switches still carry one VLAN each.
+
 **🌐 The network now.** The VLAN list exists only on SW-S-MAIN. We open the roads from here:
 
 ![1 SW-S-MAIN, 2 SW-S-BKP](images/step-map-m3.png)
@@ -244,6 +300,8 @@ VTP travels only over **trunks**, and we haven't made any yet. That is the next 
 ![Empty: there isn't a single trunk](images/step-m3-before.png)
 
 Nothing came back. So VLAN 20 cannot cross to another switch, and neither can VTP.
+
+**🎯 What we want now.** Turn the links into trunks, which carry all the VLANs with a tag, and close the sockets nobody uses.
 
 **💡 The solution.** A **trunk** on every link between switches: one cable, all the VLANs, with a tag on each frame (theory 1.2). Unused ports get `shutdown`, so nobody can plug in.
 
@@ -295,7 +353,28 @@ end
 | `switchport port-security maximum 2` | two MACs on Fa0/2 | the server **and** the switch MLS-S-SRV itself |
 | `shutdown` on unused ports | turns them off | nobody can connect to a free socket |
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show interfaces trunk` | Which ports are trunks, and which VLANs pass. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `exit` | One level back, for example from a port to general configuration. The next line belongs to the upper level. |
+| `interface fa0/2` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport mode access` | The port belongs to one VLAN, for one end device. |
+| `switchport access vlan 50` | Which VLAN the port belongs to. |
+| `switchport port-security` | Turns port security **on**. Without this line the three others do nothing. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** One end of each trunk is ready. The other end is in the department switches.
+
 ## Mission 4 — The department switches
+**📖 How we got here.** The main and backup switches speak "trunk". The department switches don't answer yet.
+
 **🌐 The network now.** One side of every link is a trunk. The department switches are still as they were:
 
 ![1 SW-S-MGMT, 2 SW-S-SAL, 3 MLS-S-ASM, 4 SW-S-IT, 5 MLS-S-SRV](images/step-map-m4.png)
@@ -305,6 +384,8 @@ end
 ![Still everybody in VLAN 1](images/step-m4-before.png)
 
 And a second problem: anybody can unplug a PC and connect a strange computer, or a switch.
+
+**🎯 What we want now.** Finish the trunks, put every PC in the VLAN of its department, and guard its socket.
 
 **💡 The solution.** Uplinks = trunk. PC ports = **access** in the VLAN of the department, with PortFast (green at once), BPDU Guard (no strange switch) and port security (no strange PC).
 
@@ -462,7 +543,34 @@ pass and VLAN 50 is created by hand in transparent mode.
 | `maximum 1` + `sticky` | one MAC, learned by itself | no need to type MAC addresses |
 | `switchport trunk encapsulation dot1q` | chooses the tag kind (3560 only) | a 3560 also knows ISL; a 2960 knows only dot1q |
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `interface range fa0/3 , fa0/5` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `switchport mode trunk` | The port carries **all** the VLANs, with a tag. For switch ↔ switch and switch ↔ router. |
+| `exit` | One level back, for example from a port to general configuration. The next line belongs to the upper level. |
+| `interface fa0/1` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport port-security maximum 1` | How many MAC addresses may be on this port. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `shutdown` | Turns the port off. |
+| `end` | Straight out to `#`, from any depth. |
+| `vtp mode transparent` | This switch keeps its own list and doesn't learn from VTP. Good for a switch that needs one VLAN only. |
+| `vlan 50` | Creates the VLAN with this number. The number is what travels in the tag. |
+| `name SERVERS` | A name for the VLAN, for people only. The switch works with the number. |
+| `show vtp status` | Domain, mode and revision number. All must have the same domain. |
+| `show interfaces trunk` | Which ports are trunks, and which VLANs pass. |
+
+</details>
+
+**⏭ What comes next.** Now every department has two roads up. Two roads are a loop, so who decides which one works?
+
 ## Mission 5 — STP: we choose who is root
+**📖 How we got here.** Every department switch has a link to the main switch and one to the backup.
+
 **🌐 The network now.** VLANs, trunks and a backup switch. Two roads to every department = a loop, and STP blocks one of them:
 
 ![1 SW-S-MAIN, 2 SW-S-BKP, 3 SW-S-SAL](images/step-map-m5.png)
@@ -474,6 +582,8 @@ pass and VLAN 50 is created by hand in transparent mode.
 Port Fa0/8 leads to **SW-S-IT**: the switch of the IT department is the center of the whole branch! All the priorities are 32768, so the lowest MAC won, by accident. SW-S-SAL pays cost 38 to reach it:
 
 ![The cost from SW-S-SAL is 38](images/step-m5-before-sal.png)
+
+**🎯 What we want now.** Choose the boss (the root bridge) ourselves, and protect our choice.
 
 **💡 The solution.** We decide: the main switch = `root primary`, the backup = `root secondary`, and **Root Guard** so no department switch takes the role (theory 1.4).
 
@@ -519,12 +629,32 @@ Priority 24596 = 24576 + 20 (the VLAN number).
 
 ![The blocked port](images/10-stp-blocked.png)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show spanning-tree vlan 20` | Who the root is, and the state of each port: FWD works, BLK waits. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `spanning-tree mode pvst` | PVST: a separate tree for each VLAN. |
+| `spanning-tree vlan 1,10,20,30,40,50 root primary` | Makes this switch the root of these VLANs (priority 24576; lower wins). |
+| `interface range fa0/1 , fa0/3 , fa0/4 , fa0/8` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `end` | Straight out to `#`, from any depth. |
+| `spanning-tree vlan 1,10,20,30,40,50 root secondary` | The deputy (priority 28672): root only if the first falls. |
+
+</details>
+
+**⏭ What comes next.** Everything is configured. Time to prove that the walls stand.
+
 ## Mission 6 — Test
+**📖 How we got here.** VLANs, trunks, ports and STP are ready.
+
 **🌐 The network now.** Five separate networks on the same cables. We test from PC-SAL-1 (1) to PC-SAL-2 (2) and PC-MGMT-1 (3):
 
 ![1 PC-SAL-1, 2 PC-SAL-2, 3 PC-MGMT-1](images/step-map-m6.png)
 
 **❗ The problem.** How do we know that the VLANs really separate and not only appear in a table?
+
+**🎯 What we want now.** Proof in both directions: the same department **can**, another department **can't**.
 
 **💡 The solution.** Two pings: one that **must** work (same VLAN) and one that **must** fail (another VLAN). A test that checks only success proves half.
 
@@ -540,12 +670,26 @@ ping 192.168.10.21
 
 🧠 The second ping **must** fail: between VLANs you need a router. That is lesson 3.
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.20.22` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Our own people can't cross. What about somebody who enters the office with a laptop?
+
 ## Mission 7 — Attack: a stranger connects
+**📖 How we got here.** The network is separated, and each port remembers the MAC address of its PC.
+
 **🌐 The network now.** Protected ports. We play the attacker on PC-SAL-3 (2) and the administrator on SW-S-SAL (1):
 
 ![1 SW-S-SAL, 2 PC-SAL-3](images/step-map-m7.png)
 
 **❗ The problem.** A stranger enters the office, unplugs PC-SAL-3 and connects a laptop to its cable. Without port security the laptop is in VLAN 20 at once.
+
+**🎯 What we want now.** Attack ourselves: unplug a PC, connect a stranger, and see the port shut. Then repair it.
 
 **💡 The solution.** The port remembers the MAC of the first PC (`sticky`) and shuts itself on any other one (`violation shutdown`).
 
@@ -580,6 +724,22 @@ ping 192.168.10.21
 
    ![Ping works again](images/17-recover-ping.png)
 7. Save on all **seven** switches: `copy running-config startup-config`. Then File → Save.
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show port-security interface fa0/2` | State of the port, how many violations, and the last MAC. |
+| `show interfaces status` | Each port: connected or not, and its VLAN. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `interface fa0/5` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** The walls are strong, too strong: nobody can pass, even when it's allowed. That is lesson 3.
 
 ## 👀 See it happen — the VLAN border, the tag and STP
 Simulation was explained in [lesson 1](../lesson-01/). Filters: **ARP** and **ICMP**. PC-SAL-1:
@@ -702,6 +862,13 @@ Only on PC-SAL-1, where it dies. The address is in another network and the PC ha
 5. There is no router yet.
 
 </details>
+
+## ⏭ What we did, and what comes next
+**What we did.** One building became five separate networks. There is a backup road, and a stranger who plugs in shuts the port.
+
+**What is still missing.** We built the walls so well that **nobody can pass**. Salaries can't get a file from IT, nobody reaches the server, and every address is typed by hand.
+
+**What comes next.** In [lesson 3](../lesson-03/) we open **doors in the walls**: two routers, and a server that serves everybody.
 
 ## 🛠 Your own project
 - [ ] A VLAN table: number, name, network, switch. One VLAN per department + servers.

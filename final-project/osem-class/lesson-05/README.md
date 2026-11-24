@@ -8,6 +8,23 @@ Sakhnin ↔ Eilat, encrypted management with central users, correct time and log
 
 ![Start: the red firewall and PC-LAB were added on the left](images/01-start.png)
 
+## 📖 The story — chapter 5: closing the doors that should be closed
+**How we got here.** One department (1), five departments (2), a full branch (3), three branches on the internet (4). In four lessons we only **opened** things, because our goal was that everything would work.
+
+**Where we are now.** Everything works, **for everybody**: Accounting pings the manager, Eilat and Sakhnin talk in clear text, almost 30 devices share one password, each one shows a different time, and a new test lab sits without protection (the start file, or [Part D](../from-zero/)).
+
+**What we want today.** Each person reaches only what they need, nobody can read our traffic, every login has a name and a time, and the lab can go out while nobody comes in.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 Server | who are the users? | the devices will ask the server, so it must be ready first |
+| 2 ACL | who may reach what? | first the rules inside each branch |
+| 3 VPN | who can read what travels outside? | inside is ruled, now the road between the branches |
+| 4 SSH, AAA, NTP, Syslog | who logged in, from where, and when? | the last open door is the devices themselves |
+| 5 ASA | how do we protect a whole area? | everything above checks packets; a firewall remembers **conversations** |
+
 ## Lesson plan (for the teacher)
 | Minutes | Part |
 |---|---|
@@ -119,6 +136,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 **How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
 
 ## Mission 1 — The server
+**📖 How we got here.** Three branches on the internet, and almost 30 devices with one shared password.
+
 **🌐 The network now.** Three branches on the internet. We start from the server of Sakhnin:
 
 ![1 SRV-SAKHNIN](images/step-map-m1.png)
@@ -126,6 +145,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 **❗ The problem.** Almost 30 devices with the same password, written on a note. An employee leaves: you change them all. Something happened at night: each device shows a different time and keeps its own log. The AAA service is empty and off:
 
 ![AAA before: off, no clients, no users](images/step-aaa0.png)
+
+**🎯 What we want now.** One place with users (AAA), one correct clock (NTP) and one diary (Syslog). The devices will use them in Mission 4.
 
 **💡 The solution.** One server that checks users (**AAA**), gives the time (**NTP**) and collects the messages (**Syslog**). We prepare the server now and connect the routers in Mission 4.
 
@@ -164,12 +185,18 @@ Messages from the routers appear in this list only after Mission 4.
 | ServerType | the language: Tacacs / Radius | `group tacacs+` on the router |
 | Username | the person who logs in | only here, not on the router |
 
+**⏭ What comes next.** Before the devices, the departments: who may reach whom?
+
 ## Mission 2 — ACL in Ashdod and Eilat
+**📖 How we got here.** In lesson 3 we opened everything to everybody, because we wanted it to work.
+
 **🌐 The network now.** Ashdod: accounting is VLAN 62, management VLAN 60, the server 63. Eilat: assembly 81, management 80.
 
 ![1 R-A-MAIN, 2 R-A-BKP, 3 PC-A-ACC-1, 4 PC-A-MGMT-2, 5 R-E-MAIN, 6 R-E-BKP](images/step-map-m2.png)
 
 **❗ The problem.** In lesson 3 we opened everything to everybody. An accounting PC can ping the manager's PC and try to enter any service on the server. We'll see it in the first screenshot.
+
+**🎯 What we want now.** Rules: Accounting reaches only the services it needs, and Assembly in Eilat doesn't reach Management.
 
 **💡 The solution.** An **extended ACL**, close to the source: on the sub-interface of VLAN 62, on **both** routers (1.1).
 
@@ -274,7 +301,31 @@ copy running-config startup-config
 
 ![R-E-BKP](images/step-m2-ebkp.png)
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `access-list 110 permit udp any any eq bootps` | First of all allow DHCP, otherwise the PCs of this VLAN lose their address. |
+| `access-list 110 deny ip 192.168.62.0 0.0.0.255 192.168.60.0 0.0.0.255` | Blocks everything from the first network to the second one. |
+| `access-list 110 permit tcp 192.168.62.0 0.0.0.255 host 192.168.63.1 eq www` | Allow the website of the server (TCP 80), and only from this network. |
+| `access-list 110 permit udp 192.168.62.0 0.0.0.255 host 192.168.63.1 eq domain` | Allow DNS questions to the server (UDP 53). |
+| `access-list 110 permit tcp 192.168.62.0 0.0.0.255 host 192.168.63.1 eq ftp` | Allow the FTP **control** connection (TCP 21). The data connection needs another line. |
+| `access-list 110 permit ip 192.168.62.0 0.0.0.255 any` | Allows the rest. Without it the invisible `deny` at the end blocks everything. |
+| `interface g0/0.62` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `ip access-group 110 in` | Puts the list on the port; `in` = what enters the router from this network. A list that isn't on a port does nothing. |
+| `ipconfig /renew` | The PC asks DHCP for an address again. |
+| `show access-lists` | The lines of the list, and how many packets met each one. |
+| `ip access-list extended 110` | Opens a list by name or number, so lines can be added or inserted. |
+| `52 permit tcp 192.168.62.0 0.0.0.255 host 192.168.63.1 gt 1023` | Inserts a line **between** existing ones (52 is after 50): the FTP data ports, above 1023. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** Inside the branch there is order. Between the branches our data crosses the internet, readable.
+
 ## Mission 3 — VPN Sakhnin ↔ Eilat
+**📖 How we got here.** Sakhnin and Eilat are both on the internet, behind NAT, and can't reach each other's private networks.
+
 **🌐 The network now.** Sakhnin and Eilat, each behind NAT, with the internet in between:
 
 ![1 R-S-EXT, 2 R-E-EXT, 3 PC-E-MEET-1, 4 SRV-SAKHNIN](images/step-map-m3.png)
@@ -284,6 +335,8 @@ copy running-config startup-config
 ![The provider answers: unreachable](images/step-m3-before.png)
 
 The provider doesn't know private addresses. And even if we published the server with static NAT, everything would travel **unencrypted** and everybody could try to get in.
+
+**🎯 What we want now.** An encrypted tunnel through the internet, as if there were a private cable between them.
 
 **💡 The solution.** A site-to-site **IPsec VPN**: the private packet travels, encrypted, inside a public packet (1.2).
 
@@ -459,7 +512,43 @@ And on R-S-EXT:
 💡 Stuck? Restart the tunnel: on the outgoing port of **both** edge routers `no crypto map VPN-MAP` and then `crypto map VPN-MAP`,
 and ping from one side only. (Real routers also have `clear crypto isakmp`; Packet Tracer doesn't.)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.50.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `license boot module c1900 technology-package securityk9` | Turns on the security package of the 1941. Without it there are no `crypto` commands. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `reload` | Restarts the router. The licence starts to work only then. |
+| `show version \| include security` | Device details. The part after the bar shows only the lines with "security". |
+| `encryption aes 256` | The encryption of phase 1: AES with a 256-bit key. |
+| `hash sha` | SHA checks that nobody changed the message on the way. |
+| `authentication pre-share` | The routers identify themselves with a shared key (written below). |
+| `group 5` | The Diffie-Hellman group: how the routers agree on a secret over an open line. |
+| `lifetime 86400` | After how many seconds the keys are replaced (86400 = one day). |
+| `crypto ipsec transform-set VPN-SET esp-aes 256 esp-sha-hmac` | Phase 2: how the data itself is encrypted (AES 256) and checked (SHA). |
+| `ip access-list extended VPN-S-E` | Opens a list by name or number, so lines can be added or inserted. |
+| `permit ip 192.168.0.0 0.0.63.255 192.168.80.0 0.0.3.255` | The traffic that enters the tunnel: from our networks to theirs. The other side writes the mirror image. |
+| `crypto map VPN-MAP 10 ipsec-isakmp` | Creates the map that joins everything: who, how and what. |
+| `set peer 200.150.0.1` | Who: the public address of the other side. |
+| `set transform-set VPN-SET` | How: with which encryption. |
+| `interface s0/0/1` | Chooses the port. Everything below applies to it, until `exit`. |
+| `show ip access-lists` | The lines of the list, and how many packets met each one. |
+| `show crypto isakmp sa` | Phase 1. `QM_IDLE` = good. |
+| `show ip nat translations` | Who was translated to which address. |
+| `5 deny ip 192.168.0.0 0.0.63.255 192.168.80.0 0.0.3.255` | Inserts a line at the **beginning** (5 is before 10): traffic for the tunnel is not translated by NAT. |
+| `clear ip nat translation *` | Deletes old translations, so the new rule works immediately. |
+| `show crypto ipsec sa` | Phase 2. The `encaps` and `decaps` counters must grow. |
+| `no crypto map VPN-MAP` | Takes the map off the port: the tunnel is turned off. |
+| `clear crypto isakmp` | Deletes the old tunnel, so it will be built again. |
+
+</details>
+
+**⏭ What comes next.** The data is safe. The routers that carry it still can't be managed safely.
+
 ## Mission 4 — SSH, AAA, NTP and Syslog
+**📖 How we got here.** The server knows the users since Mission 1, and the devices don't ask it yet.
+
 **🌐 The network now.** The server is ready since Mission 1. Now the devices learn to use it:
 
 ![1 R-S-MAIN, 2 R-S-BKP, 3 PC-MGMT-1, 4 PC-SAL-1, 5 SW-S-MAIN](images/step-map-m4.png)
@@ -471,6 +560,8 @@ and ping from one side only. (Real routers also have `clear crypto isakmp`; Pack
 R-S-MAIN, `show clock`: the year is 1993, and NTP is off. Such a log proves nothing:
 
 ![1993, NTP is not enabled](images/step-m4-clock.png)
+
+**🎯 What we want now.** Encrypted management (SSH), a personal name for each login (AAA), one time (NTP), one diary (Syslog).
 
 **💡 The solution.** SSH (encrypted), AAA (the user is checked on the server, with a local user as backup), NTP with a key, Syslog, and an access-class so that only management enters (1.3, 1.4).
 
@@ -709,7 +800,50 @@ copy running-config startup-config
 
 ![SSH to the switch](images/24-ssh-switch.png)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `telnet 192.168.10.254` | Remote management **without** encryption. Here it must fail. |
+| `show clock` | The time of the device. A `*` at the start = not synchronized. |
+| `ip domain-name osem.com` | A domain name. SSH needs it to build the name of the key. |
+| `ip ssh version 2` | Allows only version 2, which is the secure one. |
+| `tacacs-server host 192.168.50.1 key Osem#Aaa` | The address of the TACACS+ server, and the key we share with it. |
+| `aaa authentication login default group tacacs+ local` | **Who are you?** First ask the server; if it doesn't answer, use the local user. |
+| `aaa authorization exec default group tacacs+ local` | **What may you do?** The server decides the rights after login. |
+| `aaa authentication login CONSOLE local` | Another list, only for the console: a local user, so you're never locked out. |
+| `line console 0` | Enters the settings of the console port (the blue cable / the CLI tab). |
+| `login authentication CONSOLE` | This line uses the list called CONSOLE. |
+| `access-list 10 permit 192.168.10.0 0.0.0.255` | A standard list (source only): VLAN 10, the managers. |
+| `line vty 0 4` | Enters the settings of the **remote** lines. `0 4` = five sessions together, `0 15` = sixteen. |
+| `transport input ssh` | Only SSH enters from remote. Telnet (readable) is closed. |
+| `login authentication default` | This line uses the default list: first the server, then the local user. |
+| `ntp authentication-key 1 md5 Osem#Ntp` | The key with which the time server signs (number and text). |
+| `ntp authenticate` | Demand a signature: don't believe just anybody about the time. |
+| `ntp server 192.168.50.1 key 1` | From whom to take the time, and with which key. |
+| `ntp update-calendar` | Also updates the hardware clock, so the time survives a restart. |
+| `logging host 192.168.50.1` | Sends the messages of the device to this Syslog server. |
+| `service timestamps log datetime msec` | Adds date, time and milliseconds to each message. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `ssh -l osemuser 192.168.10.254` | Encrypted remote management: `-l` and the user name, then the address of the device. |
+| `show users` | Who is logged in now, and from where. |
+| `show ntp status` | Is the clock synchronized with the server. |
+| `interface g0/1` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `shutdown` | Turns the port off. |
+| `radius-server host 192.168.63.1 key Osem#Aaa` | The address of the RADIUS server, and the key we share with it. |
+| `login local` | The line asks for a **user and password** from the list inside the device. |
+| `interface vlan 10` | A virtual interface of the VLAN: the address **of the device itself** in that VLAN (for management, or on the ASA for a side). |
+| `ip address 192.168.10.240 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `ip default-gateway 192.168.10.252` | The gateway **of the switch itself**, so its answers can leave the VLAN. |
+
+</details>
+
+**⏭ What comes next.** One corner is left: the test lab, which has no protection at all.
+
 ## Mission 5 — The ASA firewall
+**📖 How we got here.** ACLs check each packet alone. The lab needs something smarter.
+
 **🌐 The network now.** A test lab (PC-LAB-1, PC-LAB-2) behind a firewall that is still not configured:
 
 ![1 ASA-S, 2 PC-LAB-1, 3 PC-MGMT-1](images/step-map-m5.png)
@@ -719,6 +853,8 @@ copy running-config startup-config
 ![0.0.0.0, and the ping fails](images/step-m5-before.png)
 
 A router passes everything that isn't forbidden, so an ACL alone must list every danger.
+
+**🎯 What we want now.** A firewall that remembers conversations: the lab may go out and get answers, and nobody may come in.
 
 **💡 The solution.** A firewall works the other way: from outside **everything** is forbidden unless it's an answer to somebody inside (security levels + `inspect`, 1.4).
 
@@ -808,6 +944,37 @@ write memory
 | `object network` + `nat ... dynamic interface` | PAT through the outside port | the branch doesn't know 192.168.1.0 |
 | `dhcpd address ... inside` | the ASA is a DHCP server | for the lab PCs |
 | `inspect icmp` | remembers outgoing pings | otherwise the answers are blocked |
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ipconfig` | Shows the address, mask and gateway of the PC. |
+| `ping 192.168.50.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `hostname ASA-S` | Gives the device its name, the one you see in the prompt. It prevents typing on the wrong device. |
+| `interface Ethernet0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport access vlan 2` | Which VLAN the port belongs to. |
+| `interface Vlan1` | A virtual interface of the VLAN: the address **of the device itself** in that VLAN (for management, or on the ASA for a side). |
+| `ip address 192.168.1.1 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `no ip address` | Deletes the old address, so we can give a new one. |
+| `subnet 192.168.1.0 255.255.255.0` | Which network the object is. |
+| `nat (inside,outside) dynamic interface` | PAT: the lab goes out with the outside address of the ASA. |
+| `no dhcpd auto_config outside` | Cancels an automatic setting that comes from the factory and disturbs us. |
+| `dhcpd dns 192.168.50.1` | The DNS that the lab receives. |
+| `dhcpd enable inside` | Turns on the ASA's DHCP server, on the inside. |
+| `class-map inspection_default` | Chooses traffic: "what do we look at?" |
+| `match default-inspection-traffic` | The common protocols, by their default ports. |
+| `policy-map global_policy` | The policy: "what do we do with it?" |
+| `class inspection_default` | For the traffic chosen above: |
+| `service-policy global_policy global` | Turns the policy on, for all the ports. |
+| `write memory` | The same save, as it is written on the ASA. |
+| `show switch vlan` | On the ASA: which ports are in which VLAN. |
+| `show interface ip brief` | On the ASA: the ports, addresses and state. |
+| `show xlate` | On the ASA: the active translations. |
+
+</details>
+
+**⏭ What comes next.** The project is complete. Do the final tests, and then start your own.
 
 ## 👀 See it happen — the ACL and the tunnel
 Simulation was explained in [lesson 1](../lesson-01/).
@@ -980,6 +1147,13 @@ Finally: save on all devices, save the file, **close Packet Tracer, open again**
 5. So that the times of all the devices can be compared.
 
 </details>
+
+## ⏭ What we did, and what comes next
+**What we did.** The four wishes of the manager came true: organized (1–3), survives failures (2–4), connects the branches (4), doesn't let strangers in (2–5).
+
+**Look back.** Every step answered a problem that the step before it created. If somebody asks *"why did you do this?"*, the answer always begins with *"because before that…"*. This is exactly what an examiner wants to hear.
+
+**What comes next.** [**Your own project.**](#-your-own-project) Another company, other names and addresses, the same road. Write your own story first: what did the manager ask for?
 
 ## 🛠 Your own project
 - [ ] Two extended ACLs and one standard, on **every** router that can be Active.

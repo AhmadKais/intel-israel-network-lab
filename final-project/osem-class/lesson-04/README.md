@@ -8,6 +8,24 @@ to the provider, and three kinds of NAT.
 
 ![All WAN links are up](images/02-final.png)
 
+## 📖 The story — chapter 4: bridges between the islands
+**How we got here.** Lesson 1 connected a department, lesson 2 separated five, lesson 3 made them one working branch. Meanwhile our colleagues built **Ashdod** and **Eilat** in exactly the same way (the start file, or [Part C](../from-zero/) if you build them yourself: it is the best exam of lessons 2 and 3).
+
+**Where we are now.** Three branches that work perfectly, each one alone. Between them stand ten routers and an internet provider, with nine lines, **all red**.
+
+**What we want today.** Any branch can reach the internet, the world can reach Ashdod's server, and if the line of the main router breaks nobody notices.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 WAN | are the lines alive? | no protocol can run on a dead line |
+| 2 Track | does HSRP know that the line died? | now a router can be healthy and still useless |
+| 3 OSPF | which way inside the company? | the lines are up, but a router knows only its neighbors |
+| 4 BGP | how do we talk to another company? | the provider isn't ours, so it can't be in OSPF |
+| 5 NAT | why doesn't the answer come back? | the packet leaves with an address the internet doesn't know |
+| 6 Failure | does the second line work? | same as lesson 3: proof, not hope |
+
 ## Lesson plan (for the teacher)
 | Minutes | Part |
 |---|---|
@@ -125,6 +143,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 **How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
 
 ## Mission 1 — WAN addresses
+**📖 How we got here.** Three finished branches, and nine red lines between them.
+
 **🌐 The network now.** Three finished branches, three islands. Ten routers are waiting:
 
 ![1 R-S-MAIN, 2 R-S-BKP, 3 R-S-EXT, 4 ISP, 5 R-A-MAIN, 6 R-A-BKP, 7 R-A-EXT, 8 R-E-MAIN, 9 R-E-BKP, 10 R-E-EXT](images/step-map-m1.png)
@@ -134,6 +154,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 ![Serial0/0/0: no address, administratively down](images/step-m1-before.png)
 
 `Serial0/0/0` has no address and is turned off. A router port is born turned off.
+
+**🎯 What we want now.** Addresses and a clock on every serial line, so the lines turn green.
 
 **💡 The solution.** For each end: an address from the WAN plan (1.5), `no shutdown`, and on the **DCE** side also `clock rate` (1.1).
 
@@ -438,7 +460,42 @@ end
 
 ✅ All serial links are green.
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show ip interface brief` | All the ports, the addresses, and whether they are up. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface s0/0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `ip address 200.100.0.1 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `clock rate 2000000` | The DCE side sets the speed of the serial line (bits per second), and the other side follows. |
+| `interface g0/0.60` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `standby 60 track s0/0/0` | Watch this line: if it falls, lower my priority by 10 (110 → 100 < 105), and the backup takes over. |
+| `router eigrp 54` | Starts EIGRP. The number (AS) must be **the same** on all the routers of the branch. |
+| `network 192.168.60.0` | EIGRP works on the interface of this network, and announces it. |
+| `no auto-summary` | Announces the exact networks, and not one rounded big network. |
+| `passive-interface g0/0.60` | The network is announced, but no routing messages are sent to the PCs: nobody there can pretend to be a router. |
+| `ip route 0.0.0.0 0.0.0.0 200.110.0.1` | The default route: "everything I don't know, send there". |
+| `router bgp 411` | Starts BGP with **our** AS number. |
+| `neighbor 200.200.0.2 remote-as 311` | The address of the BGP neighbor and **its** AS number. Both sides must write it. |
+| `network 200.200.0.0 mask 255.255.255.0` | Announces our public network to the provider. The mask must be exactly as in the routing table. |
+| `ip nat inside source static 192.168.63.1 200.200.0.10` | Static NAT: one inside address ↔ one public address, forever. That's how the world reaches the server. |
+| `access-list 1 permit 192.168.60.0 0.0.3.255` | A standard list: the addresses that will be translated (`0.0.3.255` = four networks together). |
+| `ip nat inside source list 1 interface s0/0/0 overload` | PAT: everyone in the list goes out with the **one** address of this port; `overload` tells them apart by port numbers. |
+| `ip nat inside` | This port is on the **home** side. |
+| `ip nat outside` | This port is on the **internet** side. |
+| `ip nat pool EILAT-POOL 200.150.0.20 200.150.0.30 netmask 255.255.255.0` | The pool: from the first to the last public address. |
+| `ip access-list extended NAT-E` | Opens a list by name or number, so lines can be added or inserted. |
+| `permit ip 192.168.80.0 0.0.3.255 any` | Who is translated: from these networks to anywhere. |
+| `ip nat inside source list NAT-E pool EILAT-POOL` | Dynamic NAT: everyone in the list gets a free address from the pool. |
+
+</details>
+
+**⏭ What comes next.** The lines live. But now something new can break: a line, and not only a router.
+
 ## Mission 2 — HSRP watches the internet line
+**📖 How we got here.** Each main router has its own line to the edge. HSRP watches only the inside.
+
 **🌐 The network now.** R-S-MAIN (1) and R-S-BKP (2) each have their own line to R-S-EXT.
 
 ![1 R-S-MAIN, 2 R-S-BKP](images/step-map-m2.png)
@@ -448,6 +505,8 @@ end
 ![The line is down, and the main is still Active](images/step-m2-before.png)
 
 It is **still Active**! Its LAN side is fine, so HSRP sees no problem. All the PCs keep sending to a router that has no way out. (Bring it back: `no shutdown`.)
+
+**🎯 What we want now.** Make HSRP watch the line too, so a router without internet gives up its role.
 
 **💡 The solution.** `track`: HSRP watches the serial line. If it falls, the priority drops by 10.
 
@@ -488,7 +547,24 @@ end
 
 </details>
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `interface s0/0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface g0/0.10` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `standby 10 track s0/0/0` | Watch this line: if it falls, lower my priority by 10 (110 → 100 < 105), and the backup takes over. |
+
+</details>
+
+**⏭ What comes next.** The lines are up and watched, and still no one knows the road to anyone.
+
 ## Mission 3 — OSPF in Sakhnin
+**📖 How we got here.** Each router knows only the networks it touches.
+
 **🌐 The network now.** The lines are up. Each router knows only its neighbors:
 
 ![1 R-S-MAIN, 2 R-S-BKP, 3 R-S-EXT, 4 R-A-EXT](images/step-map-m3.png)
@@ -498,6 +574,8 @@ end
 ![Not a single 192.168 network, and no default route](images/step-m3-before.png)
 
 Not one 192.168 network. When an answer comes from the internet for a PC, R-S-EXT doesn't know where to send it and throws it away.
+
+**🎯 What we want now.** OSPF: the routers of Sakhnin tell each other about all their networks.
 
 **💡 The solution.** A routing protocol: the routers **tell** each other what they know. OSPF in Sakhnin, EIGRP in Ashdod and Eilat (1.2). Writing five static routes in three routers would work too, until a line falls: static routes don't react.
 
@@ -588,7 +666,22 @@ end
 
 ❓ Why is there `no auto-summary`? So that EIGRP announces the exact networks and not a whole class.
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show ip route` | The routing table. The letter shows who taught it: `C` connected, `O` OSPF, `D` EIGRP, `B` BGP, `S` static. |
+| `router ospf 52` | Starts OSPF. The number is local to this router. |
+| `show ip ospf neighbor` | The OSPF neighbors. FULL = they exchanged everything. |
+| `show ip eigrp neighbors` | The EIGRP neighbors. An empty list = a wrong AS number or network. |
+
+</details>
+
+**⏭ What comes next.** Inside the company everyone knows the way. Outside there is another company.
+
 ## Mission 4 — BGP to the provider
+**📖 How we got here.** Every branch knows itself. The provider knows none of us.
+
 **🌐 The network now.** Every branch knows itself. Between the branches stands the provider:
 
 ![1 R-S-EXT, 2 ISP, 3 R-E-EXT](images/step-map-m4.png)
@@ -598,6 +691,8 @@ end
 ![Empty: BGP isn't running](images/step-m4-before.png)
 
 🧠 To be honest: in our small model the three branches touch the **same** provider router, so the default route alone would already reach them. On the real internet there are thousands of providers, and only BGP tells them who is where.
+
+**🎯 What we want now.** BGP: tell the provider only about our public network, and hear from it about the others.
 
 **💡 The solution.** eBGP: each branch is an AS, and it announces **only** its public network to the provider (1.3).
 
@@ -648,7 +743,20 @@ end
 
 ![The provider's routes](images/06-isp-routes.png)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show ip bgp summary` | The list of BGP neighbors and the messages received (MsgRcvd). In Packet Tracer a neighbor can look fine even with a wrong AS, so check the routes too. |
+| `show ip route bgp` | The routing table. The letter shows who taught it: `C` connected, `O` OSPF, `D` EIGRP, `B` BGP, `S` static. |
+
+</details>
+
+**⏭ What comes next.** The roads exist, and a ping from a PC still fails. Why?
+
 ## Mission 5 — NAT
+**📖 How we got here.** Routes are ready, but the PCs have private addresses that the internet doesn't know.
+
 **🌐 The network now.** The routes exist. We go out to the internet from 2, and from 5 we enter Ashdod's server:
 
 ![1 R-S-EXT, 2 PC-SAL-1, 3 R-A-EXT, 4 R-E-EXT, 5 PC-E-MEET-1](images/step-map-m5.png)
@@ -658,6 +766,8 @@ end
 ![It has an address and a gateway, and still no internet](images/step-m5-before.png)
 
 The ping **does** arrive at the provider, but the answer is for 192.168.20.x, and no provider has a route to a private address. The answer dies there.
+
+**🎯 What we want now.** NAT: change the address at the exit, and publish Ashdod's server on a public one.
 
 **💡 The solution.** NAT on the edge router: on the way out replace the private address with a public one, and remember it for the answer (1.4).
 
@@ -711,12 +821,32 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 
 ![Dynamic NAT](images/11-nat-eilat.png)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 200.130.0.2` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `ip access-list extended NAT-S` | Opens a list by name or number, so lines can be added or inserted. |
+| `ip nat inside source list NAT-S interface s0/0/1 overload` | PAT: everyone in the list goes out with the **one** address of this port; `overload` tells them apart by port numbers. |
+| `interface s0/0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `ip nat outside` | This port is on the **internet** side. |
+| `ipconfig` | Shows the address, mask and gateway of the PC. |
+| `show ip nat translations` | Who was translated to which address. |
+
+</details>
+
+**⏭ What comes next.** Everything works, with two ways out. Let's see if it's true.
+
 ## Mission 6 — Cut the line
+**📖 How we got here.** Two lines, HSRP with track, OSPF and NAT all work together.
+
 **🌐 The network now.** Everything works, with two ways out:
 
 ![1 R-S-MAIN, 2 R-S-BKP, 3 PC-SAL-1](images/step-map-m6.png)
 
 **❗ The problem.** In Mission 2 we saw the main stay Active without internet. Did `track` really solve it? We have to prove it.
+
+**🎯 What we want now.** Cut the main line during a ping, and follow what each protocol does.
 
 **💡 The solution.** Cut the same line again and compare: this time the priority must drop to 100 and the backup must take over.
 
@@ -736,6 +866,20 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
    ![The line is back](images/step-m6-noshut.png)
 
 4. Save on all **ten** routers (also ISP, Ashdod and Eilat): `copy running-config startup-config`. Then File → Save.
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `tracert` | Shows every router on the way. |
+| `interface s0/0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+
+</details>
+
+**⏭ What comes next.** The company is connected, and open. Lesson 5 decides who may pass.
 
 ## 👀 See it happen — NAT changes the address
 Simulation was explained in [lesson 1](../lesson-01/). First in Realtime: `ping 200.130.0.2` from PC-SAL-1 works.
@@ -860,6 +1004,13 @@ No. That is also why the provider needs no route to your private networks.
 5. They don't become neighbors.
 
 </details>
+
+## ⏭ What we did, and what comes next
+**What we did.** Three islands are connected to the world. Routes are learned automatically, and each branch has two lines to its edge router.
+
+**What is still missing.** We opened the doors **to everybody**. Accounting can reach the manager's PC, traffic between branches crosses the internet unencrypted, the devices are managed with one shared password, and nobody knows what happened at night.
+
+**What comes next.** In [lesson 5](../lesson-05/) we don't add roads. We decide **who may use them**.
 
 ## 🛠 Your own project
 - [ ] An address plan for **all** branches, without duplicates.

@@ -8,6 +8,25 @@ server gives the whole branch addresses, names, a website, files and mail.
 
 ![The branch after this lesson. Orange = STP backup links](images/01-start.png)
 
+## 📖 The story — chapter 3: doors, and a building that runs by itself
+**How we got here.** In lesson 1 we connected one department, and in lesson 2 we separated five. The manager is happy for one day, and then the phones ring: *"IT can't send us a file", "Where is the website?", "I moved a desk and my computer lost its address".*
+
+**Where we are now.** Five departments that can't see each other, PCs with addresses typed by hand and no gateway, and an empty server. Two routers were delivered and connected (the start file, or [Part B](../from-zero/)).
+
+**What we want today.** A road between the departments that **stays up when a router dies**, and one server that gives addresses, names, a website, files and mail.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 Main router | how do VLANs talk? | it is the first thing everybody asks for |
+| 2 Backup router | and if it dies? | all five departments now depend on one box |
+| 3 Server | who gives the services? | the server is reachable only now, through the routers |
+| 4 DHCP clients | how does a PC get an address? | the server has addresses ready to give |
+| 5 Test | does every service work? | each one can fail in its own way |
+| 6 Snooping | and if somebody else gives addresses? | whoever controls the addresses controls the traffic |
+| 7 Failure | does the backup really work? | a backup that wasn't tested is a hope |
+
 ## Lesson plan (for the teacher)
 | Minutes | Part |
 |---|---|
@@ -116,6 +135,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 **How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
 
 ## Mission 1 — Sub-interfaces and HSRP on R-S-MAIN
+**📖 How we got here.** Lesson 2 built walls between the departments.
+
 **🌐 The network now.** Five VLANs that can't talk to each other. We configure the main router:
 
 ![1 R-S-MAIN](images/step-map-m1.png)
@@ -125,6 +146,8 @@ Click the device → **CLI** (1) → click in the text, Enter → `Osem#Con` →
 ![Another VLAN: nothing comes back](images/step-m1-before.png)
 
 A switch does not pass frames from VLAN to VLAN, and the PC has no gateway. And buying a router port for every VLAN is expensive: a 1941 has only two.
+
+**🎯 What we want now.** One router that stands in all five VLANs at once, through one cable, and passes between them.
 
 **💡 The solution.** Router-on-a-stick: **one** cable, five sub-interfaces (theory 1.1). In each one we already prepare HSRP (1.2) and a DHCP relay (1.3).
 
@@ -195,7 +218,21 @@ copy running-config startup-config
 | `standby 10 preempt` | takes Active back | otherwise the backup stays Active |
 | `ip helper-address` | forwards DHCP to the server | not needed in VLAN 50, where the server is |
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.40.21` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `ip address 192.168.10.254 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** Now five departments depend on one router. That is dangerous.
+
 ## Mission 2 — R-S-BKP
+**📖 How we got here.** R-S-MAIN routes for everybody, alone.
+
 **🌐 The network now.** R-S-MAIN (2) routes for everybody. We configure R-S-BKP (1):
 
 ![1 R-S-BKP, 2 R-S-MAIN](images/step-map-m2.png)
@@ -205,6 +242,8 @@ copy running-config startup-config
 ![The Standby column is unknown: nobody is behind R-S-MAIN](images/step-m2-before.png)
 
 `Standby: unknown` means that there is no backup. (`Speak` = still starting, `Active` after a few seconds.)
+
+**🎯 What we want now.** A second router that shares the **same gateway address**, so the PCs won't notice if the first one dies.
 
 **💡 The solution.** The second router joins the **same** groups with the **same** VIP and a lower priority (105). If the main goes silent, it takes over.
 
@@ -271,7 +310,29 @@ copy running-config startup-config
 
 ![R-S-BKP](images/04-hsrp-bkp.png)
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface g0/0.10` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `encapsulation dot1Q 10` | "This sub-interface is VLAN number…". Must come **before** the IP address. |
+| `ip address 192.168.10.253 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `standby 10 ip 192.168.10.252` | HSRP: the shared virtual address (VIP) that both routers answer for. This is the gateway of the PCs. |
+| `standby 10 priority 105` | The higher number is Active. Main 110, backup 105. |
+| `standby 10 preempt` | A router with a higher priority takes the role back when it returns. |
+| `ip helper-address 192.168.50.1` | The DHCP relay: turns the PC's broadcast into a direct message to this server. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** There is a road to the server. Time to put something on it.
+
 ## Mission 3 — The server
+**📖 How we got here.** The departments are connected, and the server is on and empty.
+
 **🌐 The network now.** The departments are connected. The server is on, but empty:
 
 ![1 SRV-SAKHNIN](images/step-map-m3.png)
@@ -281,6 +342,8 @@ copy running-config startup-config
 ![The page stays empty](images/step-m3-before.png)
 
 Nobody knows the name, there is no site, addresses are typed by hand on each PC, and there is no mail.
+
+**🎯 What we want now.** Five services on one server: addresses (DHCP), names (DNS), a website, files (FTP) and mail.
 
 **💡 The solution.** Five services on one server:
 
@@ -366,12 +429,35 @@ Then **Service: On** (1) and **Save** (2).
 
 ![Mail users](images/12-mail.png)
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **DHCP** → Pool Name | The name of the list, only for us. One pool for each network. |
+| Default Gateway | The gateway the PC will get: the **VIP** (.252), so a PC stays connected when a router dies. |
+| DNS Server | Who the PC will ask about names: this server. |
+| Start IP Address | The first address to give. We start from 20, so the lower ones stay free for fixed devices. |
+| Subnet Mask, Maximum Number of Users | The size of the network, and how many addresses to give. |
+| **Add**, then **Save** | Add creates a new row. Save keeps the service's settings. |
+| **DNS** → Name / Address | What people write, and the address the computer needs. |
+| **HTTP** → index.html | The first page of the site. Our own text proves that we reached **our** server. |
+| **FTP** → Username, Password, permissions | Who enters, and what they may do: Write, Read, Delete, Rename, List. |
+| **EMAIL** → Domain Name, User | The part after the `@`, and a mailbox for each employee. |
+
+</details>
+
+**⏭ What comes next.** The server has addresses to give. The PCs still use the ones we typed.
+
 ## Mission 4 — PCs get an address
+**📖 How we got here.** The DHCP service waits, and the PCs still have addresses typed by hand, without a gateway.
+
 **🌐 The network now.** The server gives addresses. The seven PCs still have the addresses typed by hand, **without a gateway**:
 
 ![The seven PCs](images/step-map-m4.png)
 
 **❗ The problem.** Without a gateway a PC can't leave its VLAN, and the server is in another VLAN. Worse: a PC that asks for DHCP sends a broadcast, and a broadcast stops at the router.
+
+**🎯 What we want now.** Every PC asks for its address, and the routers carry the request to the server.
 
 **💡 The solution.** DHCP on the PC + the relay (`ip helper-address`) that we wrote in Missions 1 and 2. DORA is explained in theory 1.3.
 
@@ -384,12 +470,34 @@ Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and 
 
 ⚠️ The first request sometimes fails while STP and HSRP are still starting. Click Static and DHCP again, or `ipconfig /renew`.
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **DHCP** (instead of Static) | The PC asks by itself. The gateway and DNS arrive together with the address. |
+
+</details>
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ipconfig /renew` | The PC asks DHCP for an address again. |
+
+</details>
+
+**⏭ What comes next.** Everything seems to work. We check each service separately.
+
 ## Mission 5 — Test everything
+**📖 How we got here.** Addresses arrive by themselves and all the services are on.
+
 **🌐 The network now.** Five services, two routers, seven PCs with addresses.
 
 ![1 PC-IT-1, 2 PC-SAL-2, 3 PC-SAL-1, 4 SRV-SAKHNIN](images/step-map-m5.png)
 
 **❗ The problem.** One page that opens doesn't prove that DNS, FTP and mail work. When something fails we must know **which** link of the chain broke.
+
+**🎯 What we want now.** Test each link of the chain alone, so that when something breaks we know which one.
 
 **💡 The solution.** One test per service, from different VLANs, in this order: DNS → web → ping and FTP → path → mail.
 
@@ -420,7 +528,21 @@ Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and 
 
    ![The mail arrived](images/19-mail-received.png)
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.50.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `tracert 192.168.40.21` | Shows every router on the way. |
+| `ipconfig` | Shows the address, mask and gateway of the PC. |
+
+</details>
+
+**⏭ What comes next.** A PC believes whoever answers first. What if it isn't our server?
+
 ## Mission 6 — DHCP snooping
+**📖 How we got here.** DHCP works, and nobody checks who answers.
+
 **🌐 The network now.** Everyone gets an address automatically. Whoever answers **first** wins:
 
 ![1 SW-S-MAIN, 2 R-S-BKP (plays the attacker), 3 PC-SAL-2](images/step-map-m6.png)
@@ -428,6 +550,8 @@ Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .252 and 
 **❗ The problem.** A PC believes **any** DHCP server. A home router connected by mistake, or an attacker, can give a false gateway and read all the traffic. The switch does not check. SW-S-MAIN, `show ip dhcp snooping`:
 
 ![DHCP snooping is disabled](images/step-m6-before.png)
+
+**🎯 What we want now.** Let the switches accept DHCP answers only from the roads to our server.
 
 **💡 The solution.** DHCP snooping: answers of a server are accepted only from **trusted** ports (theory 1.5).
 
@@ -511,12 +635,44 @@ And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
 🧠 Snooping protects only the switch that runs it. A rogue server on SW-S-SAL can still cheat its neighbors on the
 **same** switch, so a full protection puts it on every department switch (exercise 4).
 
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show ip dhcp snooping` | Is snooping on, in which VLANs, and which ports are trusted. |
+| `ip dhcp snooping` | Turns DHCP snooping on in the whole switch. |
+| `ip dhcp snooping vlan 10,20,30,40` | In which VLANs to check DHCP. |
+| `no ip dhcp snooping information option` | Doesn't add "option 82" to requests; without this line the relay drops them. |
+| `interface range fa0/2 , fa0/5 - 7` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `ip dhcp snooping trust` | DHCP **answers** are accepted from this port: it leads to our server. All the rest are not trusted. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `show ip dhcp snooping binding` | The table of who received which address, on which port. |
+| `ipconfig /release` | The PC gives its address back. |
+| `ipconfig /renew` | The PC asks DHCP for an address again. |
+| `ip dhcp excluded-address 192.168.20.1 192.168.20.199` | Addresses that this server will not give. |
+| `ip dhcp pool ROGUE` | Creates a list of addresses to give. Here: the **attacker's** list. |
+| `network 192.168.20.0 255.255.255.0` | The network from which this DHCP pool gives addresses (with its mask). |
+| `default-router 192.168.20.99` | The gateway that the clients receive (here a false one). |
+| `dns-server 6.6.6.6` | The DNS that the clients receive (here a false one). |
+| `interface fa0/5` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no ip dhcp snooping trust` | Takes the trust back: DHCP answers from here are dropped again. |
+| `no ip dhcp pool ROGUE` | Deletes the attacker's pool (cleaning up). |
+| `no ip dhcp excluded-address 192.168.20.1 192.168.20.199` | Removes the excluded addresses (cleaning up after the attack). |
+
+</details>
+
+**⏭ What comes next.** We protected the addresses. Last question of the day: does the backup router really take over?
+
 ## Mission 7 — Kill the main router
+**📖 How we got here.** Two routers, one shared address, all services running.
+
 **🌐 The network now.** Two routers with HSRP. We break one on purpose:
 
 ![1 R-S-MAIN, 2 R-S-BKP, 3 PC-SAL-1](images/step-map-m7.png)
 
 **❗ The problem.** A backup that was never tested is not a backup. In the real project we started from, part of the backup never worked, and nobody knew.
+
+**🎯 What we want now.** Kill the main router on purpose while a ping is running, and watch the backup take over.
 
 **💡 The solution.** A planned failure: turn off the main, check that work continues, bring it back.
 
@@ -541,6 +697,21 @@ And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
 5. `copy running-config startup-config` on the routers and on SW-S-MAIN, File → Save.
 
    ![Saved](images/step-m7-save.png)
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `tracert` | Shows every router on the way. |
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `ping 192.168.50.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+
+</details>
+
+**⏭ What comes next.** The branch survives a failure. But the branch is alone in the world, and that is lesson 4.
 
 ## 👀 See it happen — the relay and the virtual MAC
 Simulation was explained in [lesson 1](../lesson-01/).
@@ -694,6 +865,13 @@ end
 5. On the sub-interface that the PCs' request arrives at.
 
 </details>
+
+## ⏭ What we did, and what comes next
+**What we did.** Sakhnin is a complete branch. Departments talk through two routers that replace each other, and the server does the daily work.
+
+**What is still missing.** Sakhnin is an **island**. Ashdod and Eilat were built in the same way, and they are islands too. No one can reach the internet or another branch.
+
+**What comes next.** In [lesson 4](../lesson-04/) we build the **bridges**: lines to a provider, routing protocols, and NAT.
 
 ## 🛠 Your own project
 - [ ] A table: VLAN, main .254, backup .253, VIP .252.

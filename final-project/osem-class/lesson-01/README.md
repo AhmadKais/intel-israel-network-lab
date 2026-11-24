@@ -9,6 +9,24 @@ PCs can ping each other.
 
 ![Finished: all links green](images/10-all-green.png)
 
+## 📖 The story — chapter 1: one department
+**How we got here.** Today is our first day. The manager takes us to the **Salaries** department: three people, three computers, no network. A file moves between them on a USB stick.
+
+**Where we are now.** We have an empty file. Nothing exists: no device, no cable, no address.
+
+**What we want today.** Three PCs that can talk to each other, through a switch that has a name and a password. It is small on purpose: **every network in the world is this, repeated**.
+
+**The road of today.** Each mission needs the one before it:
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 Switches | what connects them? | without a meeting point there is nowhere to plug in |
+| 2 PCs | who uses the network? | a switch with no users does nothing |
+| 3 Cables | how do the signals travel? | we can only connect devices that exist |
+| 4 Configuration | who is allowed to change it? | a device that works must be locked **before** it is used |
+| 5 Addresses | how do the PCs find each other? | a cable carries a signal, but not a name of a receiver |
+| 6 Test | does it really work? | only a ping uses everything together |
+
 ## Lesson plan (for the teacher)
 | Minutes | Part |
 |---|---|
@@ -108,9 +126,13 @@ about 30 seconds: 15 listening + 15 learning. Orange = checking, green = forward
 ---
 
 ## Mission 1 — Place and name the switches
+**📖 How we got here.** We were given an empty file and one department.
+
 **🌐 The network now.** An empty workspace. In this mission two devices appear: the main switch of the branch and the switch of the Salaries department.
 
 **❗ The problem.** People in one department want to share files and a printer, but a PC has only **one** network port. You can connect two PCs with a cable, not three. And a device called `Switch0` tells nobody what it does: imagine 30 of them.
+
+**🎯 What we want now.** A meeting point: a device that all the PCs can plug into, with a name that says what it is.
 
 **💡 The solution.** A **switch** has 24 ports and passes each frame to the right one (theory 1.1). A naming rule, `type-branch-job`, tells who each device is.
 
@@ -131,10 +153,25 @@ about 30 seconds: 15 listening + 15 learning. Orange = checking, green = forward
 🧠 **Why these names?** `SW` = switch, `S` = Sakhnin, `MAIN`/`SAL` = its job. Anyone who reads the
 name knows what and where the device is.
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **Network Devices → Switches → 2960** | A 24-port layer-2 switch. It is enough for one department, and all the port numbers in the project are its numbers. |
+| **Config → Display Name** | The label on the screen, for people. The name inside the device (`hostname`) comes in Mission 4. |
+
+</details>
+
+**⏭ What comes next.** A switch without users is useless, so next we bring the users.
+
 ## Mission 2 — Place and name the PCs
+**📖 How we got here.** The two switches stand on the desk, named and empty.
+
 **🌐 The network now.** Two named switches, nobody uses them yet.
 
 **❗ The problem.** A network with no users does nothing. And if all the PCs are called `PC0`, `PC1`..., in lesson 2 you won't know which department a PC belongs to.
+
+**🎯 What we want now.** Three PCs of Salaries, with names that tell us **who** and **where**.
 
 **💡 The solution.** Three PCs, named by department and number. `PC-SAL-2` = the second PC of Salaries.
 
@@ -148,12 +185,27 @@ name knows what and where the device is.
    ![All five devices](images/05-all-devices.png)
 2. Click each PC → **Config** → **Display Name**. From left to right: `PC-SAL-1`, `PC-SAL-2`, `PC-SAL-3`.
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **End Devices → PC** | The user's computer. It has one network port, **FastEthernet0**. |
+| **PC-SAL-1** | What it is (PC), which department (SAL = salaries), which one (1). Reading the name is enough to find it. |
+
+</details>
+
+**⏭ What comes next.** They stand next to each other but nothing joins them, so next come the cables.
+
 ## Mission 3 — Cables
+**📖 How we got here.** Five devices exist, and none of them knows about the others.
+
 **🌐 The network now.** Five devices, no connection between them. At the end of the mission it looks like this (numbers = the devices we connect):
 
 ![The five devices we connect](images/step-map-m3.png)
 
 **❗ The problem.** Without a cable no signal passes. With the **wrong** cable or the **wrong port**, the drawing looks right but the configuration of the next lessons (VLAN on Fa0/2, trunk on Fa0/4) falls on the wrong device.
+
+**🎯 What we want now.** The right cable, in the right port. The port numbers are our agreement for all the next lessons.
 
 **💡 The solution.** Cross-over between switches, straight-through to PCs (theory 1.4), and a **port table** that everybody follows.
 
@@ -182,7 +234,22 @@ click the second device → choose its port.
 
 ![Orange: STP is checking](images/09-amber.png)
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **Connections** | The cables. We choose the cable ourselves and not the automatic one, because the port matters. |
+| **Copper Straight-Through** | Between different kinds of devices: PC ↔ switch, switch ↔ router. |
+| **Copper Cross-Over** | Between two of the same kind: switch ↔ switch. |
+| The port in the list | The agreement for all the next lessons: the VLAN of Fa0/2 is written for Fa0/2. |
+
+</details>
+
+**⏭ What comes next.** Once everything is green it is tempting to start working, but the switch is open to anyone. First we lock it.
+
 ## Mission 4 — Configure the switches
+**📖 How we got here.** The signals pass, but anyone with a console cable can change everything.
+
 **🌐 The network now.** Everything is connected and green. We configure two devices:
 
 ![1 SW-S-MAIN, 2 SW-S-SAL](images/step-map-m4.png)
@@ -192,6 +259,8 @@ click the second device → choose its port.
 ![enable, and you are the manager. Nobody asked who you are](images/step-nopass.png)
 
 The prompt became `#`: whoever reaches the switch can erase everything. It is also still called `Switch`.
+
+**🎯 What we want now.** A name on every switch, a password at every door, and a saved configuration.
 
 **💡 The solution.** Three things: a name (`hostname`), two passwords (console and `enable secret`, theory 1.6) and a warning (`banner`). Then save, otherwise it all disappears when the power goes off.
 
@@ -247,12 +316,28 @@ Repeat on **SW-S-SAL** with `hostname SW-S-SAL`.
 
 ![Port status](images/13-ports-status.png)
 
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `end` | Straight out to `#`, from any depth. |
+| `show run` | All the configuration that works now. |
+| `show interfaces status` | Each port: connected or not, and its VLAN. |
+
+</details>
+
+**⏭ What comes next.** The road is ready and locked. The PCs still have no address on it.
+
 ## Mission 5 — PC addresses
+**📖 How we got here.** The road exists: switches, cables, passwords.
+
 **🌐 The network now.** The switches are ready. The PCs have cables but no addresses:
 
 ![The three PCs](images/step-map-m5.png)
 
 **❗ The problem.** A PC without an IP address can't send a ping, and nobody can ask for it. Two PCs with the **same** address are just as bad.
+
+**🎯 What we want now.** An IP address for every PC, all in the same network, so that they can find each other.
 
 **💡 The solution.** A plan: all the department in the network 192.168.20.0/24, each PC with a different last number (theory 1.3).
 
@@ -280,12 +365,30 @@ PC-SAL-2 and PC-SAL-3 the same way. When finished they look like this:
 
 ![PC-SAL-3](images/step-pc3.png)
 
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **Static** | We type the address ourselves, because there is no DHCP server yet (lesson 3). |
+| **IPv4 Address** | The personal address of this PC. Two PCs can't have the same one. |
+| **Subnet Mask** | Which part is the network: 255.255.255.0 = the first three numbers must be the same for everybody in the department. |
+| **Default Gateway** | The exit from the network. Empty for now: there is no router. |
+| **DNS Server** | Who translates names. Empty until lesson 3. |
+
+</details>
+
+**⏭ What comes next.** We think it works. An engineer doesn't think, an engineer tests.
+
 ## Mission 6 — Test
+**📖 How we got here.** Everything is built: names, cables, passwords, addresses.
+
 **🌐 The network now.** Complete: names, cables, passwords and addresses.
 
 ![1 PC-SAL-1, 2 SW-S-SAL](images/step-map-m6.png)
 
 **❗ The problem.** "Everything is green" does not prove that it works. Green means only that the cable is fine; the address, the mask or the password may still be wrong.
+
+**🎯 What we want now.** Proof. One ping uses the cable, the switch, the MAC table, ARP and the addresses together.
 
 **💡 The solution.** Test every layer: `ping` (IP), `arp -a` (IP → MAC), `show mac address-table` (what the switch learned), and a login test (the passwords).
 
@@ -314,6 +417,18 @@ PC-SAL-2 and PC-SAL-3 the same way. When finished they look like this:
 4. Save: **File** → **Save As** → `lesson01.pkt`.
 
    ![Save As](images/19-save-as.png)
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `arp -a` | The PC's list: which IP belongs to which MAC. |
+| `show mac address-table` | What the switch learned: which MAC is on which port. |
+| `ping 192.168.20.22` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Salaries works, and that raises the next question: what happens when the other departments join the same switch?
 
 ## 👀 See it happen — the ping, step by step
 Until now everything was invisible. **Simulation** mode stops time, and you see every packet.
@@ -454,6 +569,13 @@ wrong and how to fix it** before opening the answer.
 5. `login` is missing, so nobody is asked.
 
 </details>
+
+## ⏭ What we did, and what comes next
+**What we did.** We turned three lonely computers into a network: a switch, cables, a password and addresses. Salaries works.
+
+**What is still missing.** The company has more departments: Management, Assembly, IT, and a server. If we connect all of them to the same switch, everybody is in **one** network: Assembly hears every broadcast of Salaries, and can try to open its files.
+
+**What comes next.** In [lesson 2](../lesson-02/) we connect the whole building and build **walls inside the switches**: VLANs.
 
 ## 🛠 Your own project
 In **your** company's file, with **your** names, addresses and passwords:

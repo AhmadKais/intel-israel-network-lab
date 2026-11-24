@@ -30,6 +30,18 @@ The whole project, when it's finished:
 
 ![All the devices of the project](images/map-full.png)
 
+## 📖 The story — the parts you don't see in class
+**How we got here.** In class each lesson begins with a file where somebody already connected new devices. That saves time, but in the real world **nobody does it for you**. This page tells the missing part of the story.
+
+**What we want.** Your own file, from empty to finished, without a single step that appears by magic.
+
+| Part | What happened in the story | What you build | So that |
+|---|---|---|---|
+| A | the other departments asked to join | five switches, a server, four PCs | lesson 2 has departments to separate |
+| B | departments can't talk, so routers were bought | two routers with serial cards | lesson 3 has a road to build |
+| C | the company opened Ashdod and Eilat | two complete branches, a provider, nine lines | lesson 4 has islands to connect |
+| D | a test lab was added, and the security plan began | a firewall, two PCs, users on two servers | lesson 5 has something to protect |
+
 ---
 
 # Part A — the rest of Sakhnin
@@ -37,9 +49,13 @@ The whole project, when it's finished:
 *After lesson 1, before lesson 2. Continue in the file you saved in lesson 1.*
 
 ## A1 — Place the devices
+**📖 How we got here.** Salaries works (lesson 1), and the other departments want the same.
+
 **🌐 The network now.** SW-S-MAIN, SW-S-SAL and three PCs, from lesson 1.
 
 **❗ The problem.** The branch has five networks (four kinds of departments and the servers), and you have one department.
+
+**🎯 What we want now.** All the devices of the branch on the table, with the names of our plan.
 
 **💡 The solution.** A switch for each department, a backup switch, a switch for the server, and the server itself. Assembly and the servers get a **3560**: a multilayer switch.
 
@@ -71,10 +87,16 @@ Arrange them like this. The label at each end of a cable is the port (for the ne
 
 ![Sakhnin, with the port at each end of the cables](images/ports-s.png)
 
+**⏭ What comes next.** Devices alone are furniture. Next we connect them.
+
 ## A2 — The cables
+**📖 How we got here.** Fifteen devices stand in Sakhnin, and only Salaries is connected.
+
 **🌐 The network now.** Devices without cables.
 
 **❗ The problem.** In lesson 2 every command names a port. A cable in another port = a VLAN on the wrong device.
+
+**🎯 What we want now.** Two roads up from each department, in exactly the ports of the plan.
 
 **💡 The solution.** A port table. Every department switch has **two** uplinks: one to the main switch and one to the backup.
 
@@ -104,10 +126,16 @@ Arrange them like this. The label at each end of a cable is the port (for the ne
 
 ✅ After about a minute: green, and some links orange on one side. That is STP blocking a loop, and it's correct.
 
+**⏭ What comes next.** Everything is connected, and five switches are open to anyone.
+
 ## A3 — Base configuration of five switches
+**📖 How we got here.** In lesson 1 we locked two switches. Five new ones are still open.
+
 **🌐 The network now.** SW-S-MAIN and SW-S-SAL were configured in lesson 1. Five new switches are still called `Switch` and have no password.
 
 **❗ The problem.** Anyone with a console cable enters, and you can't see which switch you're on.
+
+**🎯 What we want now.** The same name, password and banner on every switch. Nothing new, and that is the point: a standard.
 
 **💡 The solution.** The block of lesson 1, with one line changed: `hostname`.
 
@@ -148,10 +176,35 @@ For the other four, the same block. Only one line changes:
 
 ![MLS-S-ASM](images/base-mls.png)
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `enable` | From looking (`>`) to managing (`#`). This is where the enable password is asked for. |
+| `hostname SW-S-BKP` | Gives the device its name, the one you see in the prompt. It prevents typing on the wrong device. |
+| `no ip domain-lookup` | A typing mistake is not looked up as a name in DNS, so you don't wait after every typo. |
+| `enable secret Osem#En1` | The password for `#`, stored as a hash (not readable). |
+| `service password-encryption` | Hides the other passwords in `show run`. Weak, but better than plain text. |
+| `banner motd # Osem - Authorized access only #` | A warning shown before login. The `#` signs mark where the text starts and ends. |
+| `line console 0` | Enters the settings of the console port (the blue cable / the CLI tab). |
+| `password Osem#Con` | The password of this line. |
+| `login` | "Ask for the password". Without it the password exists and nobody is asked. |
+| `logging synchronous` | System messages don't cut the line you are writing. |
+| `exec-timeout 10 0` | Logs out after this many minutes and seconds without typing (10 minutes, 0 seconds). |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** The switches are ready. Four PCs still have no address.
+
 ## A4 — Addresses of the PCs
+**📖 How we got here.** The switches are locked, and only Salaries has addresses.
+
 **🌐 The network now.** Only the Salaries PCs have addresses (lesson 1).
 
 **❗ The problem.** In lesson 2 we show which PCs can talk and which can't. A PC without an address proves nothing.
+
+**🎯 What we want now.** A temporary address for each PC, in the network of its future VLAN.
 
 **💡 The solution.** A fixed address for every PC, in the network of its future VLAN. In lesson 3 they change to DHCP.
 
@@ -173,6 +226,24 @@ PC → **Desktop** → **IP Configuration** → **Static**, like in lesson 1. Th
 
 ![The same network works, another network does not](images/a-ping.png)
 
+<details><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **Static**, IPv4 Address, Subnet Mask | As in lesson 1, Mission 5. Each PC already gets the network of its **future** VLAN, so in lesson 2 we'll see the separation. |
+
+</details>
+
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.30.22` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Everyone is connected to everyone. Lesson 2 separates them.
+
 ➡ Now do **[lesson 2](../lesson-02/)** in your file.
 
 ---
@@ -182,9 +253,13 @@ PC → **Desktop** → **IP Configuration** → **Static**, like in lesson 1. Th
 *After lesson 2, before lesson 3.*
 
 ## B1 — Place two routers and add a serial card
+**📖 How we got here.** Lesson 2 built walls, and now no department can talk to another.
+
 **🌐 The network now.** Five VLANs, switched and protected. Nothing routes between them.
 
 **❗ The problem.** We need two routers, and later a serial line to the internet. A new 1941 has two Ethernet ports and **no serial port**.
+
+**🎯 What we want now.** Two routers (one is for backup), with a card for the internet line that comes in lesson 4.
 
 **💡 The solution.** Two **1941** routers, each with an **HWIC-2T** card: two serial ports. A card goes in only when the power is **off**.
 
@@ -203,10 +278,16 @@ PC → **Desktop** → **IP Configuration** → **Static**, like in lesson 1. Th
 ⚠️ The **right** slot is slot 0: its ports are `S0/0/0` and `S0/0/1`. The left slot is slot 1: `S0/1/0` and `S0/1/1`. A card in the
 wrong slot = the serial commands of lesson 4 are rejected.
 
+**⏭ What comes next.** The routers stand on the table. We connect them to the main switch.
+
 ## B2 — Cables and base configuration
+**📖 How we got here.** Two routers with cards, connected to nothing.
+
 **🌐 The network now.** Two routers that are connected to nothing.
 
 **❗ The problem.** A new router doesn't start with `Router>` but with a **question**. Answer `yes` and you're in a long questionnaire.
+
+**🎯 What we want now.** A cable from each one to the main switch, and the same locks as on the switches.
 
 **💡 The solution.** Answer `no`, and write the base block.
 
@@ -247,6 +328,28 @@ copy running-config startup-config
 
 **R-S-BKP**: first `no`, and then the same block. Only one line changes: `hostname R-S-BKP`.
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `enable` | From looking (`>`) to managing (`#`). This is where the enable password is asked for. |
+| `hostname R-S-MAIN` | Gives the device its name, the one you see in the prompt. It prevents typing on the wrong device. |
+| `no ip domain-lookup` | A typing mistake is not looked up as a name in DNS, so you don't wait after every typo. |
+| `enable secret Osem#En1` | The password for `#`, stored as a hash (not readable). |
+| `service password-encryption` | Hides the other passwords in `show run`. Weak, but better than plain text. |
+| `banner motd # Osem - Authorized access only #` | A warning shown before login. The `#` signs mark where the text starts and ends. |
+| `line console 0` | Enters the settings of the console port (the blue cable / the CLI tab). |
+| `password Osem#Con` | The password of this line. |
+| `login` | "Ask for the password". Without it the password exists and nobody is asked. |
+| `logging synchronous` | System messages don't cut the line you are writing. |
+| `exec-timeout 10 0` | Logs out after this many minutes and seconds without typing (10 minutes, 0 seconds). |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** The road is laid but closed. Lesson 3 opens it.
+
 ➡ Now do **[lesson 3](../lesson-03/)**.
 
 ---
@@ -256,9 +359,13 @@ copy running-config startup-config
 *After lesson 3, before lesson 4. The longest part.*
 
 ## C1 — The edge routers, the provider and the serial lines
+**📖 How we got here.** Sakhnin is complete (lesson 3), and it is an island.
+
 **🌐 The network now.** Sakhnin works, but it's an island.
 
 **❗ The problem.** There is no router towards the internet, no provider, and no other branch.
+
+**🎯 What we want now.** The skeleton of the world: an edge router per branch, the provider, and nine serial lines.
 
 **💡 The solution.** In each branch one **edge router** (EXT), and one **ISP** router for all. These routers are connected by **serial** cables.
 
@@ -305,10 +412,24 @@ copy running-config startup-config
 
 All the serial lines stay **red** until lesson 4. That's correct.
 
+<details><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **Serial DCE** | The serial cable. The **first** device you click is the DCE side, the one that sets the clock. |
+
+</details>
+
+**⏭ What comes next.** The lines lead to places that don't exist yet. We build them: first Ashdod.
+
 ## C2 — Ashdod: devices, cables, base
+**📖 How we got here.** The routers of Ashdod stand alone.
+
 **🌐 The network now.** The routers of Ashdod stand alone.
 
 **❗ The problem.** A whole branch is missing: management, assembly, accounting and servers.
+
+**🎯 What we want now.** A whole branch, from the same plan as Sakhnin: the same devices, other names and ports.
 
 **💡 The solution.** Exactly the same design as Sakhnin. **This is the test of what you learned**: nothing here is new.
 
@@ -370,10 +491,16 @@ The base block of A3 on every switch, with its own name (on the MLS: first answe
 | SW-A-ACC | `hostname SW-A-ACC` |
 | MLS-A-SRV | `hostname MLS-A-SRV` |
 
+**⏭ What comes next.** It's connected, and everyone is in one network, exactly like the beginning of lesson 2.
+
 ## C3 — Ashdod: switching
+**📖 How we got here.** Ashdod is connected and unseparated.
+
 **🌐 The network now.** Everything connected, everything in VLAN 1.
 
 **❗ The problem.** The same as in lesson 2: one big network, loops, and open ports.
+
+**🎯 What we want now.** The whole of lesson 2 and the snooping of lesson 3, in one block for each switch.
 
 **💡 The solution.** Everything of lesson 2 and the DHCP snooping of lesson 3, in one block per switch.
 
@@ -557,10 +684,52 @@ copy running-config startup-config
 
 ![The VLANs arrived](images/c-vlan-a.png)
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `vtp domain ASHDOD` | The name of the VTP group. Only switches with **exactly** the same name share the VLAN list (capital letters matter). |
+| `vtp password Osem#Vtp` | A shared secret, so a strange switch can't change our VLANs. It must be the same on all. |
+| `vtp mode server` | This switch may create VLANs and teach the others. |
+| `vlan 60` | Creates the VLAN with this number. The number is what travels in the tag. |
+| `name MANAGEMENT` | A name for the VLAN, for people only. The switch works with the number. |
+| `spanning-tree vlan 1,60,61,62,63 root primary` | Makes this switch the root of these VLANs (priority 24576; lower wins). |
+| `ip dhcp snooping` | Turns DHCP snooping on in the whole switch. |
+| `ip dhcp snooping vlan 60,61,62` | In which VLANs to check DHCP. |
+| `no ip dhcp snooping information option` | Doesn't add "option 82" to requests; without this line the relay drops them. |
+| `interface range fa0/1 - 3 , fa0/5 - 7` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `switchport mode trunk` | The port carries **all** the VLANs, with a tag. For switch ↔ switch and switch ↔ router. |
+| `spanning-tree guard root` | Root Guard: a switch connected here is **not** allowed to become root. |
+| `interface fa0/4` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport mode access` | The port belongs to one VLAN, for one end device. |
+| `switchport access vlan 63` | Which VLAN the port belongs to. |
+| `switchport port-security` | Turns port security **on**. Without this line the three others do nothing. |
+| `switchport port-security maximum 2` | How many MAC addresses may be on this port. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `ip dhcp snooping trust` | DHCP **answers** are accepted from this port: it leads to our server. All the rest are not trusted. |
+| `shutdown` | Turns the port off. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `vtp mode client` | This switch only receives the list. `vlan 10` on it is refused. |
+| `spanning-tree vlan 1,60,61,62,63 root secondary` | The deputy (priority 28672): root only if the first falls. |
+| `spanning-tree portfast` | The port becomes green at once. Only for end devices: a PC can't create a loop. |
+| `spanning-tree bpduguard enable` | If a switch is connected to this port, shut it. Protects PortFast. |
+| `vtp mode transparent` | This switch keeps its own list and doesn't learn from VTP. Good for a switch that needs one VLAN only. |
+| `show vtp status` | Domain, mode and revision number. All must have the same domain. |
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+
+</details>
+
+**⏭ What comes next.** The departments are separated. Now the road between them.
+
 ## C4 — Ashdod: routers
+**📖 How we got here.** Four VLANs in Ashdod, with no gateway.
+
 **🌐 The network now.** Four VLANs, and no gateway.
 
 **❗ The problem.** No way between the departments, and no way to the DHCP server.
+
+**🎯 What we want now.** The missions 1–2 of lesson 3: sub-interfaces, HSRP, and the helper towards the server.
 
 **💡 The solution.** Sub-interfaces, HSRP and helper, like in lesson 3.
 
@@ -655,10 +824,34 @@ copy running-config startup-config
 
 ![HSRP in Ashdod](images/c-hsrp-a.png)
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface g0/0.60` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `encapsulation dot1Q 60` | "This sub-interface is VLAN number…". Must come **before** the IP address. |
+| `ip address 192.168.60.254 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `standby 60 ip 192.168.60.252` | HSRP: the shared virtual address (VIP) that both routers answer for. This is the gateway of the PCs. |
+| `standby 60 priority 110` | The higher number is Active. Main 110, backup 105. |
+| `standby 60 preempt` | A router with a higher priority takes the role back when it returns. |
+| `ip helper-address 192.168.63.1` | The DHCP relay: turns the PC's broadcast into a direct message to this server. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+
+</details>
+
+**⏭ What comes next.** The road is ready, and the server is empty.
+
 ## C5 — Ashdod: server and PCs
+**📖 How we got here.** Routers and switches work, and nobody has an address.
+
 **🌐 The network now.** Routers and switches work, and nobody has an address.
 
 **❗ The problem.** An empty server.
+
+**🎯 What we want now.** The services of lesson 3 with the values of Ashdod, and then DHCP on every PC.
 
 **💡 The solution.** The same services as in lesson 3, with Ashdod's values. (The website stays the default page: in lesson 4 that is how you recognise Ashdod's server.)
 
@@ -695,10 +888,32 @@ Then **every PC** of Ashdod: Desktop → IP Configuration → **DHCP**.
 
 ![PC-A-ACC-1](images/c-pc-a.png)
 
+<details><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| Every field | Explained in lesson 3, Mission 3. Only the values change, and **why** they change: Ashdod's networks are 60–63, and its server is in 63. |
+
+</details>
+
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.63.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Ashdod is a finished branch. One more is left.
+
 ## C6 — Eilat: devices, cables, base
+**📖 How we got here.** Two branches are finished.
+
 **🌐 The network now.** Sakhnin and Ashdod are ready.
 
 **❗ The problem.** The third branch. The names, the numbers and **the ports** are not the same as in Ashdod.
+
+**🎯 What we want now.** The third one, in which names, numbers **and ports** are different. That checks if you understand or copy.
 
 **💡 The solution.** The same design for the third time.
 
@@ -760,10 +975,16 @@ The base block of A3 on every switch, with its own name (on the MLS: first answe
 | SW-E-MEET | `hostname SW-E-MEET` |
 | MLS-E-SRV | `hostname MLS-E-SRV` |
 
+**⏭ What comes next.** Connected, and again in one network.
+
 ## C7 — Eilat: switching
+**📖 How we got here.** Eilat is connected and unseparated.
+
 **🌐 The network now.** Connected, and everything in VLAN 1.
 
 **❗ The problem.** The same as C3. In Eilat the server switch is on **Fa0/2** of the main switch and R-E-MAIN on **Fa0/4**. Copying from Ashdod without thinking cuts the branch.
+
+**🎯 What we want now.** The same blocks as C3, with the plan of Eilat. The server's switch is on another port.
 
 **💡 The solution.** The same blocks, by Eilat's plan.
 
@@ -945,10 +1166,52 @@ copy running-config startup-config
 
 ![The VLANs arrived](images/c-vlan-e.png)
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `vtp domain EILAT` | The name of the VTP group. Only switches with **exactly** the same name share the VLAN list (capital letters matter). |
+| `vtp password Osem#Vtp` | A shared secret, so a strange switch can't change our VLANs. It must be the same on all. |
+| `vtp mode server` | This switch may create VLANs and teach the others. |
+| `vlan 80` | Creates the VLAN with this number. The number is what travels in the tag. |
+| `name MANAGEMENT` | A name for the VLAN, for people only. The switch works with the number. |
+| `spanning-tree vlan 1,80,81,82,83 root primary` | Makes this switch the root of these VLANs (priority 24576; lower wins). |
+| `ip dhcp snooping` | Turns DHCP snooping on in the whole switch. |
+| `ip dhcp snooping vlan 80,81,82` | In which VLANs to check DHCP. |
+| `no ip dhcp snooping information option` | Doesn't add "option 82" to requests; without this line the relay drops them. |
+| `interface range fa0/1 , fa0/3 - 7` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `switchport mode trunk` | The port carries **all** the VLANs, with a tag. For switch ↔ switch and switch ↔ router. |
+| `spanning-tree guard root` | Root Guard: a switch connected here is **not** allowed to become root. |
+| `interface fa0/2` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport mode access` | The port belongs to one VLAN, for one end device. |
+| `switchport access vlan 83` | Which VLAN the port belongs to. |
+| `switchport port-security` | Turns port security **on**. Without this line the three others do nothing. |
+| `switchport port-security maximum 2` | How many MAC addresses may be on this port. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `ip dhcp snooping trust` | DHCP **answers** are accepted from this port: it leads to our server. All the rest are not trusted. |
+| `shutdown` | Turns the port off. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `vtp mode client` | This switch only receives the list. `vlan 10` on it is refused. |
+| `spanning-tree vlan 1,80,81,82,83 root secondary` | The deputy (priority 28672): root only if the first falls. |
+| `spanning-tree portfast` | The port becomes green at once. Only for end devices: a PC can't create a loop. |
+| `spanning-tree bpduguard enable` | If a switch is connected to this port, shut it. Protects PortFast. |
+| `vtp mode transparent` | This switch keeps its own list and doesn't learn from VTP. Good for a switch that needs one VLAN only. |
+| `show vtp status` | Domain, mode and revision number. All must have the same domain. |
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+
+</details>
+
+**⏭ What comes next.** The departments are separated, and again without a gateway.
+
 ## C8 — Eilat: routers
+**📖 How we got here.** Four VLANs in Eilat, with no gateway.
+
 **🌐 The network now.** Four VLANs without a gateway.
 
 **❗ The problem.** The same as C4.
+
+**🎯 What we want now.** Sub-interfaces and HSRP for the last time. Write them from memory.
 
 **💡 The solution.** Sub-interfaces 80–83, HSRP, and helper 192.168.83.1.
 
@@ -1043,10 +1306,34 @@ copy running-config startup-config
 
 ![HSRP in Eilat](images/c-hsrp-e.png)
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface g0/0.80` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `encapsulation dot1Q 80` | "This sub-interface is VLAN number…". Must come **before** the IP address. |
+| `ip address 192.168.80.254 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `standby 80 ip 192.168.80.252` | HSRP: the shared virtual address (VIP) that both routers answer for. This is the gateway of the PCs. |
+| `standby 80 priority 110` | The higher number is Active. Main 110, backup 105. |
+| `standby 80 preempt` | A router with a higher priority takes the role back when it returns. |
+| `ip helper-address 192.168.83.1` | The DHCP relay: turns the PC's broadcast into a direct message to this server. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+
+</details>
+
+**⏭ What comes next.** Only the server and the PCs are left.
+
 ## C9 — Eilat: server and PCs
+**📖 How we got here.** The roads of Eilat are ready.
+
 **🌐 The network now.** An empty server, and PCs without addresses.
 
 **❗ The problem.** The same as C5.
+
+**🎯 What we want now.** The services, and DHCP on every PC.
 
 **💡 The solution.** The same services, with Eilat's values.
 
@@ -1081,6 +1368,24 @@ Then **every PC** of Eilat: Desktop → IP Configuration → **DHCP**.
 
 ![PC-E-MEET-1](images/c-pc-e.png)
 
+<details><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| Every field | Explained in lesson 3, Mission 3. Eilat's networks are 80–83, and its server is in 83. |
+
+</details>
+
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.83.1` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Three branches, three islands, nine red lines. That is exactly the beginning of lesson 4.
+
 ➡ Save everything, and do **[lesson 4](../lesson-04/)**.
 
 ---
@@ -1090,9 +1395,13 @@ Then **every PC** of Eilat: Desktop → IP Configuration → **DHCP**.
 *After lesson 4, before lesson 5.*
 
 ## D1 — The lab and the firewall
+**📖 How we got here.** Three branches are on the internet (lesson 4).
+
 **🌐 The network now.** Three branches on the internet.
 
 **❗ The problem.** Lesson 5 builds a test lab behind a firewall. There is no firewall and no lab.
+
+**🎯 What we want now.** A corner for experiments: two PCs behind a firewall that isn't configured yet.
 
 **💡 The solution.** An **ASA 5505** and two PCs. No configuration: lesson 5 does it.
 
@@ -1119,10 +1428,26 @@ end
 copy running-config startup-config
 ```
 
+<details><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `interface fa0/1` | Chooses the port. Everything below applies to it, until `exit`. |
+| `description to ASA-S` | A note on the port. It changes nothing, but it helps people. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** Lesson 5 needs users on **every** branch's server. Sakhnin's is done in class, the others here.
+
 ## D2 — AAA, NTP and Syslog on the servers of Ashdod and Eilat
+**📖 How we got here.** In lesson 5 each branch asks its own server who may log in.
+
 **🌐 The network now.** In lesson 5, Mission 1, you configure this on the server of Sakhnin.
 
 **❗ The problem.** The routers of Ashdod and Eilat will ask **their own** servers, and there is nobody to answer.
+
+**🎯 What we want now.** Users, keys and time on the servers of Ashdod (RADIUS) and Eilat (TACACS).
 
 **💡 The solution.** The same forms with other values. Ashdod = **Radius**, Eilat = **Tacacs**.
 
@@ -1147,6 +1472,20 @@ On both servers, below: Username `osemuser`, Password `Osem#User` → **Add**.
 ![NTP in Ashdod: key 2](images/d-ntp.png)
 
 **SYSLOG** → check that it's On.
+
+<details><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| Client Name, Client IP | The router that will ask, and its address **towards the server**. |
+| Secret | The key between the router and the server. The same text is written on the router. |
+| ServerType | The language: Radius in Ashdod, Tacacs in Eilat. Must match the router. |
+| Username, Password | The person who logs in. Written only here, not on the routers. |
+| NTP Key | The number of the key. Each branch has its own: 1, 2, 3. |
+
+</details>
+
+**⏭ What comes next.** Everything is ready for the last chapter: lesson 5.
 
 ➡ Now do **[lesson 5](../lesson-05/)**.
 
