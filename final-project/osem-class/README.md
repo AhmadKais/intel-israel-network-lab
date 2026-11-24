@@ -15,6 +15,8 @@ Each lesson ends with **"Your own project"**: do the same in your company's netw
 | [04](lesson-04/) | Connecting the branches: WAN, OSPF, EIGRP, BGP, NAT | [lesson04-start.pkt](lesson-04/lesson04-start.pkt) |
 | [05](lesson-05/) | Security: ACL, VPN, SSH, AAA, NTP, Syslog, ASA | [lesson05-start.pkt](lesson-05/lesson05-start.pkt) |
 
+🧱 **Want to build everything alone, without start files?** [From an empty file to the whole project](from-zero/): every device, cable and command that the start files do for you, and 14 tests at the end.
+
 The start file of each lesson is the result of the previous one, so a student who missed a lesson or
 got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version we tested with.
 

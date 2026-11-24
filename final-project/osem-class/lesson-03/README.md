@@ -1,6 +1,6 @@
 # Lesson 03 — Sakhnin routing and services: HSRP, DHCP, DNS, Web, FTP, Mail
 
-> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson03-start.pkt`](lesson03-start.pkt) · 💾 save as `lesson03.pkt`
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson03-start.pkt`](lesson03-start.pkt) or your own file after [Part B](../from-zero/README.md#part-b--two-routers-for-sakhnin) · 💾 save as `lesson03.pkt`
 
 ## What you will have at the end
 The departments can talk to each other through **two routers that back each other up**, and one
@@ -343,8 +343,10 @@ Then **Service: On** (1) and **Save** (2).
 
 ![1 HTTP, 2 (edit) next to index.html](images/step-http.png)
 
-**HTTP** → next to `index.html` click **(edit)** → change the line after `<hr>` to
-`Welcome to Osem - Sakhnin branch` → **Save** (confirm if asked).
+**HTTP** → next to `index.html` click **(edit)**. In the third line, keep `<hr>` and replace the text after it
+(`Welcome to Cisco Packet Tracer. … Mind Wide Open.`) with `Welcome to Osem - Sakhnin branch` → **Save** (1) → **Yes** to overwrite.
+
+![The third line after the change; 1 Save](images/step-http-edit.png)
 
 ![Editing the page](images/09-http-edit.png)
 

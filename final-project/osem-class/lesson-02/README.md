@@ -1,6 +1,6 @@
 # Lesson 02 — Sakhnin switching: VLAN, VTP, trunks, STP and port security
 
-> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson02-start.pkt`](lesson02-start.pkt) · 💾 save as `lesson02.pkt`
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson02-start.pkt`](lesson02-start.pkt) or your own file after [Part A](../from-zero/README.md#part-a--the-rest-of-sakhnin) · 💾 save as `lesson02.pkt`
 
 ## What you will have at the end
 The whole Sakhnin branch: every department in its own VLAN, a backup switch with no loops, and
@@ -579,7 +579,7 @@ ping 192.168.10.21
    ![Recovering the port](images/16-recover.png)
 
    ![Ping works again](images/17-recover-ping.png)
-7. Save on every switch: `copy running-config startup-config`. Then File → Save.
+7. Save on all **seven** switches: `copy running-config startup-config`. Then File → Save.
 
 ## 👀 See it happen — the VLAN border, the tag and STP
 Simulation was explained in [lesson 1](../lesson-01/). Filters: **ARP** and **ICMP**. PC-SAL-1:

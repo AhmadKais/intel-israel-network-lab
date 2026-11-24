@@ -462,3 +462,5 @@ In **your** company's file, with **your** names, addresses and passwords:
 - [ ] Cable them and write a port table like the one in Mission 3.
 - [ ] Configure name, banner with **your** company, and passwords on both switches.
 - [ ] Take screenshots: green links, ping, `show mac address-table`, login with banner.
+
+➡ The next lesson opens `lesson02-start.pkt`. Want to build everything alone, in your own file? [From an empty file to the whole project](../from-zero/README.md).

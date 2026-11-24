@@ -1,6 +1,6 @@
 # Lesson 04 — Connecting the branches: WAN, OSPF, EIGRP, BGP and NAT
 
-> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson04-start.pkt`](lesson04-start.pkt) · 💾 save as `lesson04.pkt`
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson04-start.pkt`](lesson04-start.pkt) or your own file after [Part C](../from-zero/README.md#part-c--the-provider-ashdod-and-eilat) · 💾 save as `lesson04.pkt`
 
 ## What you will have at the end
 Three branches connected to an internet provider: OSPF in Sakhnin, EIGRP in Ashdod and Eilat, BGP
@@ -735,7 +735,7 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 
    ![The line is back](images/step-m6-noshut.png)
 
-4. Save on all routers: `copy running-config startup-config`. File → Save.
+4. Save on all **ten** routers (also ISP, Ashdod and Eilat): `copy running-config startup-config`. Then File → Save.
 
 ## 👀 See it happen — NAT changes the address
 Simulation was explained in [lesson 1](../lesson-01/). First in Realtime: `ping 200.130.0.2` from PC-SAL-1 works.

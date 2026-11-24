@@ -1,6 +1,6 @@
 # Lesson 05 — Security and management: ACL, VPN, SSH, AAA, NTP, Syslog and ASA
 
-> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson05-start.pkt`](lesson05-start.pkt) · 💾 save as `lesson05.pkt`
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson05-start.pkt`](lesson05-start.pkt) or your own file after [Part D](../from-zero/README.md#part-d--the-firewall-and-the-servers-of-ashdod-and-eilat) · 💾 save as `lesson05.pkt`
 
 ## What you will have at the end
 A protected company: departments that can't reach what they shouldn't, an encrypted tunnel
@@ -267,6 +267,7 @@ access-list 120 permit ip 192.168.81.0 0.0.0.255 any
 interface g0/0.81
 ip access-group 120 in
 end
+copy running-config startup-config
 ```
 
 ![R-E-MAIN](images/step-m2-emain.png)
@@ -302,7 +303,12 @@ On **R-S-EXT and R-E-EXT**:
 configure terminal
 license boot module c1900 technology-package securityk9
 ```
-Answer `yes`, then:
+⚠️ **Nothing was printed?** That happens in Packet Tracer when the router was restarted before. Write **the same command again**,
+and now the agreement appears:
+
+![1 the first time: nothing. 2 the same command again: the agreement (shown on R-A-EXT, it looks the same on every 1941)](images/step-lic-twice.png)
+
+At `ACCEPT? [yes/no]:` answer `yes`. You must see `Next reboot level = securityk9`. Then:
 ```
 end
 copy running-config startup-config
@@ -571,6 +577,7 @@ ntp update-calendar
 logging host 192.168.63.1
 service timestamps log datetime msec
 end
+copy running-config startup-config
 ```
 
 ![R-A-MAIN](images/step-ssh-amain.png)
@@ -607,6 +614,7 @@ ntp update-calendar
 logging host 192.168.83.1
 service timestamps log datetime msec
 end
+copy running-config startup-config
 ```
 
 ![R-E-MAIN](images/step-ssh-emain.png)
@@ -619,7 +627,30 @@ end
 
 ❗ A layer 2 switch has no IP address, so nobody can manage it from far away. 💡 An address on a VLAN interface, a gateway, and SSH with the local user.
 
-On ISP and the EXT routers use `line vty 0 4`, and on the switches `line vty 0 15`:
+The devices:
+
+| Kind | Devices | The vty line |
+|---|---|---|
+| routers | ISP, R-S-EXT, R-A-EXT, R-E-EXT | `line vty 0 4` |
+| switches, Sakhnin | SW-S-MAIN, SW-S-BKP, SW-S-MGMT, SW-S-SAL, SW-S-IT, MLS-S-ASM, MLS-S-SRV | `line vty 0 15` |
+| switches, Ashdod | SW-A-MAIN, SW-A-BKP, SW-A-MGMT, SW-A-ASM, SW-A-ACC, MLS-A-SRV | `line vty 0 15` |
+| switches, Eilat | SW-E-MAIN, SW-E-BKP, SW-E-MGMT, SW-E-ASM, SW-E-MEET, MLS-E-SRV | `line vty 0 15` |
+
+**Each of the four routers:**
+```
+configure terminal
+ip domain-name osem.com
+username admin privilege 15 secret Osem#Adm1
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+line vty 0 4
+transport input ssh
+login local
+end
+copy running-config startup-config
+```
+
+**Each of the 19 switches:**
 ```
 configure terminal
 ip domain-name osem.com
@@ -630,11 +661,14 @@ line vty 0 15
 transport input ssh
 login local
 end
+copy running-config startup-config
 ```
 
 ![SW-S-MAIN](images/step-ssh-sw.png)
 
-A management address for the main switches, for example **SW-S-MAIN** (Ashdod: VLAN 60, Eilat: VLAN 80):
+A management address for the three main switches:
+
+**SW-S-MAIN:**
 ```
 configure terminal
 interface vlan 10
@@ -643,8 +677,32 @@ no shutdown
 exit
 ip default-gateway 192.168.10.252
 end
+copy running-config startup-config
 ```
 
+**SW-A-MAIN:**
+```
+configure terminal
+interface vlan 60
+ip address 192.168.60.240 255.255.255.0
+no shutdown
+exit
+ip default-gateway 192.168.60.252
+end
+copy running-config startup-config
+```
+
+**SW-E-MAIN:**
+```
+configure terminal
+interface vlan 80
+ip address 192.168.80.240 255.255.255.0
+no shutdown
+exit
+ip default-gateway 192.168.80.252
+end
+copy running-config startup-config
+```
 ![The management address](images/step-sw-ip.png)
 
 ✅ `ssh -l admin 192.168.10.240`
@@ -929,3 +987,5 @@ Finally: save on all devices, save the file, **close Packet Tracer, open again**
 - [ ] SSH 2, AAA from the server, local backup user, NTP with a key, Syslog.
 - [ ] ASA with inside/outside, NAT and DHCP.
 - [ ] The final test table with a screenshot for every row, for the project book.
+
+➡ Finished? Do the [final check](../from-zero/README.md#final-check): 14 tests that prove the project is complete.
