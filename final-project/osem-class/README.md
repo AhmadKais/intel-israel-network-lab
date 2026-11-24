@@ -1,28 +1,40 @@
 # Osem — build a full 3-branch project together in class
 
-A complete final project (Osem: Sakhnin, Ashdod, Eilat), built **click by click** with the theory
-behind each step. It is based on a real project from a previous year, with its mistakes fixed.
-Each lesson takes 90 minutes and ends with **"Your own project"**: do the same in your company's network.
+A complete final project (Osem: Sakhnin, Ashdod, Eilat), built **click by click** in **5 lessons of
+90 minutes**, with the theory behind each step. It is based on a real project from a previous year,
+with its mistakes fixed, and every mistake became a "find the bug" moment.
+Each lesson ends with **"Your own project"**: do the same in your company's network.
 
 **Osem is only an example.** Don't copy its names, addresses or passwords into your project.
 
-| Lesson | Topic | Status |
+| Lesson | Topic | File to open |
 |---|---|---|
-| [01](lesson-01/) | First department: devices, cables, names, passwords | pilot |
-| 02 | All of Sakhnin: departments, backup switch, port plan | planned |
-| 03 | VLAN and VTP | planned |
-| 04 | Trunks and access ports | planned |
-| 05 | STP, PortFast, BPDU Guard, Root Guard | planned |
-| 06 | Routers: sub-interfaces and HSRP | planned |
-| 07 | Server: DHCP, DNS, HTTP | planned |
-| 08 | Server: FTP, mail, NTP, Syslog, AAA | planned |
-| 09 | DHCP Snooping and Port Security | planned |
-| 10 | Ashdod and Eilat (students build, teacher guides) | planned |
-| 11 | WAN links, OSPF and EIGRP | planned |
-| 12 | ISP and BGP | planned |
-| 13 | NAT: PAT, static, dynamic | planned |
-| 14 | IPsec VPN | planned |
-| 15 | ACLs | planned |
-| 16 | SSH, AAA, NTP, Syslog on the devices | planned |
-| 17 | ASA firewall | planned |
-| 18 | Final tests and project book | planned |
+| [01](lesson-01/) | First department: devices, cables, names, passwords | a new file |
+| [02](lesson-02/) | Sakhnin switching: VLAN, VTP, trunks, STP, port security | [lesson02-start.pkt](lesson-02/lesson02-start.pkt) |
+| [03](lesson-03/) | Sakhnin routing and services: HSRP, DHCP, DNS, web, FTP, mail | [lesson03-start.pkt](lesson-03/lesson03-start.pkt) |
+| [04](lesson-04/) | Connecting the branches: WAN, OSPF, EIGRP, BGP, NAT | [lesson04-start.pkt](lesson-04/lesson04-start.pkt) |
+| [05](lesson-05/) | Security: ACL, VPN, SSH, AAA, NTP, Syslog, ASA | [lesson05-start.pkt](lesson-05/lesson05-start.pkt) |
+
+The start file of each lesson is the result of the previous one, so a student who missed a lesson or
+got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version we tested with.
+
+## The address plan
+| Branch | VLAN | Name | Network | Gateway (VIP) |
+|---|---|---|---|---|
+| Sakhnin | 10 | MANAGEMENT | 192.168.10.0/24 | .252 |
+| Sakhnin | 20 | DISPLAY-SALARIES | 192.168.20.0/24 | .252 |
+| Sakhnin | 30 | ASSEMBLY-MEETING | 192.168.30.0/24 | .252 |
+| Sakhnin | 40 | IT | 192.168.40.0/24 | .252 |
+| Sakhnin | 50 | SERVERS | 192.168.50.0/24 | .252 |
+| Ashdod | 60–63 | 63 = servers | 192.168.60–63.0/24 | .252 |
+| Eilat | 80–83 | 83 = servers | 192.168.80–83.0/24 | .252 |
+
+In every network .254 is the main router and .253 the backup. The WAN table is in lesson 4.
+
+## Classroom passwords
+| Where | Value |
+|---|---|
+| Console / enable | `Osem#Con` / `Osem#En1` |
+| After lesson 5, console of the main and backup routers | `admin` / `Osem#Adm1` |
+
+For class only. In your project choose passwords of your own.
