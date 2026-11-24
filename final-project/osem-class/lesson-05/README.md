@@ -584,7 +584,80 @@ write memory
 | `dhcpd address ... inside` | the ASA is a DHCP server | for the lab PCs |
 | `inspect icmp` | remembers outgoing pings | otherwise the answers are blocked |
 
-### 🧯 It doesn't work?
+## 👀 See it happen — the ACL and the tunnel
+Simulation was explained in [lesson 1](../lesson-01/).
+
+### A. The ACL drops a packet
+In Realtime check the address of PC-A-MGMT-2 (here 192.168.60.20). **Simulation** → only **ICMP** → ping it from
+PC-A-ACC-1, and step until a red packet appears:
+
+![The answer of R-A-MAIN, in red](images/sim-acl-map.png)
+
+The red packet is the answer of R-A-MAIN. Now open the packet that **entered** R-A-MAIN → **Next Layer** twice, to layer 3:
+
+![The packet is denied and dropped](images/sim-acl.png)
+
+Packet Tracer shows **the exact line** that blocked it. This is the best way to debug an ACL.
+
+❓ All the Out Layers are empty. What does that mean?
+
+<details><summary>Answer</summary>
+
+The packet stopped here. It has no way out.
+
+</details>
+
+### B. The VPN hides the addresses
+In Realtime: `ping 192.168.50.1` from PC-E-MEET-1 until it answers, so the tunnel is up. **Simulation** → **ICMP** and also
+**IPSec** (tab Misc) → ping again, and open the packet in three places:
+
+**R-E-EXT, the entrance to the tunnel:**
+
+![The private packet goes in, the tunnel packet comes out](images/sim-vpn-in.png)
+
+**ISP, in the middle of the internet:**
+
+![The provider sees only the public addresses](images/sim-vpn-isp.png)
+
+**R-S-EXT, the exit of the tunnel:**
+
+![The original packet is back](images/sim-vpn-out.png)
+
+| Where | Source | Destination | Do we see that it's ICMP? |
+|---|---|---|---|
+| Eilat | 192.168.82.25 | 192.168.50.1 | yes |
+| the internet | **200.150.0.1** | **200.130.0.1** | **no** |
+| Sakhnin | 192.168.82.25 | 192.168.50.1 | yes |
+
+```mermaid
+sequenceDiagram
+    participant E as R-E-EXT
+    participant I as ISP
+    participant S as R-S-EXT
+    Note over E: wraps 192.168.82.25 to 192.168.50.1
+    E->>I: 200.150.0.1 to 200.130.0.1
+    I->>S: 200.150.0.1 to 200.130.0.1
+    Note over S: unwraps the original packet
+```
+
+❓ Compare with lesson 4. What is the difference between this and NAT?
+
+<details><summary>Answer</summary>
+
+NAT **replaces** an address, and the rest of the packet can be read. The VPN puts the **whole** packet, encrypted, inside a new
+packet, and the other side gets it back exactly as it was.
+
+</details>
+
+✏️ **Try:** ping 200.130.0.2 from PC-E-MEET-1. Does it go through the tunnel?
+
+<details><summary>Answer</summary>
+
+No. The destination isn't in the list of the tunnel, so it goes out with NAT as usual, and on the ISP we see ICMP.
+
+</details>
+
+## 🧯 It doesn't work?
 | What you see | Probably | What to do |
 |---|---|---|
 | `renew` fails after an ACL | no bootps line, or only on one router | `show access-lists` on both |

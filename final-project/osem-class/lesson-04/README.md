@@ -566,7 +566,54 @@ In R-A-EXT the `---` line is permanent: that is the static translation.
 3. `no shutdown`, and after about 30 seconds R-S-MAIN is Active again.
 4. Save on all routers: `copy running-config startup-config`. File → Save.
 
-### 🧯 It doesn't work?
+## 👀 See it happen — NAT changes the address
+Simulation was explained in [lesson 1](../lesson-01/). First in Realtime: `ping 200.130.0.2` from PC-SAL-1 works.
+**Simulation** → only **ICMP** → `ping 200.130.0.2` again, and step until the packet comes back.
+
+**On the way out**, open the packet on **R-S-EXT**:
+
+![192.168.20.22 became 200.130.0.1](images/sim-nat-out.png)
+
+**On the way back**, on the same router:
+
+![200.130.0.1 became 192.168.20.22](images/sim-nat-back.png)
+
+| | In | Out |
+|---|---|---|
+| On the way out: the source | 192.168.20.22 | **200.130.0.1** |
+| On the way back: the destination | 200.130.0.1 | **192.168.20.22** |
+
+```mermaid
+sequenceDiagram
+    participant P as PC 192.168.20.22
+    participant R as R-S-EXT (NAT)
+    participant I as ISP 200.130.0.2
+    P->>R: from 192.168.20.22
+    R->>I: from 200.130.0.1
+    I->>R: to 200.130.0.1
+    R->>P: to 192.168.20.22
+```
+
+❓ The provider sees only 200.130.0.1. How does R-S-EXT know who gets the answer?
+
+<details><summary>Answer</summary>
+
+It wrote a line in the translation table (`show ip nat translations`) when the packet went out, and reads it in the opposite
+direction.
+
+</details>
+
+💡 Layer 2 is now **HDLC** and not Ethernet: a serial line has only two sides, so no MACs are needed.
+
+✏️ **Try:** open the packet on **ISP**, layer 3. Is there a 192.168 address there?
+
+<details><summary>Answer</summary>
+
+No. That is also why the provider needs no route to your private networks.
+
+</details>
+
+## 🧯 It doesn't work?
 | What you see | Probably | What to do |
 |---|---|---|
 | a serial link is red on one side | `no shutdown` is missing on one end | `show ip interface brief` on both ends |

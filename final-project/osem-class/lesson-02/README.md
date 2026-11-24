@@ -420,7 +420,52 @@ ping 192.168.10.21
    ![Ping works again](images/17-recover-ping.png)
 7. Save on every switch: `copy running-config startup-config`. Then File → Save.
 
-### 🧯 It doesn't work?
+## 👀 See it happen — the VLAN border, the tag and STP
+Simulation was explained in [lesson 1](../lesson-01/). Filters: **ARP** and **ICMP**. PC-SAL-1:
+```
+arp -d
+ping 192.168.20.22
+```
+**1. Where does the broadcast stop?** Three steps forward:
+
+![The broadcast is on the switches, not on the PCs of other VLANs](images/sim-vlan.png)
+
+❓ The envelope reached SW-S-MGMT and SW-S-IT. Why didn't it continue to PC-MGMT-1 and PC-IT-1? And why didn't it reach MLS-S-SRV?
+
+<details><summary>Answer</summary>
+
+The trunk carries VLAN 20 to every switch, but PC-MGMT-1 is on an access port of VLAN 10 and PC-IT-1 on one of VLAN 40, so the
+frame doesn't go out there. The link to MLS-S-SRV is access VLAN 50, so VLAN 20 never enters it.
+
+</details>
+
+**2. The tag.** Open the envelope on SW-S-MGMT → **Inbound PDU Details**:
+
+![TPID 0x8100, TCI 0x0014](images/sim-tag.png)
+
+| Field | Value | Meaning |
+|---|---|---|
+| TPID | 0x8100 | "I have a VLAN tag" (802.1Q) |
+| TCI | 0x0014 | hex 14 = 1 × 16 + 4 = **20**, so VLAN 20 |
+
+Now open the first frame on SW-S-SAL, the one that came from PC-SAL-1: no tag. The PC knows nothing about VLANs.
+
+**3. STP at work.** One more step: copies arrive from SW-S-BKP too. Open the envelope that came to MLS-S-ASM from SW-S-BKP
+→ **Next Layer**:
+
+![Fa0/4 is blocked by STP. The device drops the frame](images/sim-stp.png)
+
+Packet Tracer says it: **blocked by STP, the device drops the frame**. Without the block the frame would go around forever.
+
+✏️ **Try:** `ping 192.168.10.21`. On which PCs does an envelope appear?
+
+<details><summary>Answer</summary>
+
+Only on PC-SAL-1, where it dies. The address is in another network and the PC has no gateway yet, so nothing goes out.
+
+</details>
+
+## 🧯 It doesn't work?
 | What you see | Probably | What to do |
 |---|---|---|
 | no VLANs on a client | no trunk, or a different domain/password | `show interfaces trunk`, `show vtp status`, `show vtp password` |

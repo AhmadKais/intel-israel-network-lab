@@ -377,7 +377,73 @@ And on SW-S-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
    ![Back to normal](images/23-back.png)
 5. `copy running-config startup-config` on the routers and on SW-S-MAIN, File → Save.
 
-### 🧯 It doesn't work?
+## 👀 See it happen — the relay and the virtual MAC
+Simulation was explained in [lesson 1](../lesson-01/).
+
+### A. DHCP through the relay
+1. PC-SAL-1 → Desktop → **IP Configuration** → **Static**.
+2. **Simulation** → filters: only **DHCP**.
+3. In IP Configuration click **DHCP** and close the window.
+4. Step until **R-S-MAIN** appears in the *At Device* column, and open that packet.
+
+![Broadcast in, unicast out](images/sim-relay.png)
+
+| | In | Out |
+|---|---|---|
+| Source IP | 0.0.0.0 (no address yet) | **192.168.20.254** |
+| Destination IP | 255.255.255.255 (everybody) | **192.168.50.1** (the server) |
+
+This is the whole meaning of `ip helper-address`. The request comes from the network 192.168.20.0, so the server knows which pool to use.
+
+```mermaid
+sequenceDiagram
+    participant P as PC-SAL-1
+    participant R as Router (relay)
+    participant S as SRV-SAKHNIN
+    P->>R: Discover (broadcast)
+    R->>S: Discover (unicast to 192.168.50.1)
+    S->>R: Offer
+    R->>P: Offer
+    P->>R: Request (broadcast)
+    R->>S: Request
+    S->>R: ACK
+    R->>P: ACK
+```
+
+❓ R-S-BKP sends a copy to the server too. Is that a problem?
+
+<details><summary>Answer</summary>
+
+No. Both routers have a helper, so the server gets the request twice and the PC uses one offer. That is also why DHCP works
+when one router is down.
+
+</details>
+
+### B. The ping and the virtual MAC
+**Realtime**, wait until PC-SAL-1 has an address. **Simulation** → only **ICMP** → `ping 192.168.50.1`. Open the packet on
+**R-S-MAIN** → **Next Layer**:
+
+![The destination MAC is the HSRP virtual MAC](images/sim-hsrp.png)
+
+| Look at | Meaning |
+|---|---|
+| in: `0000.0C07.AC14` | the **HSRP virtual MAC**: hex 14 = 20 = the group number |
+| *The subinterface GigabitEthernet0/0.20 accepts frames* | router-on-a-stick: the tag chose the sub-interface |
+| the IPs are the same on both sides | a router doesn't change the IP (without NAT) |
+| the MACs are different on both sides | the router writes a **new** layer 2 header |
+
+💡 You may also see copies on other switches and PCs. A switch that hasn't learned the virtual MAC floods, and whoever the
+packet isn't meant for drops it.
+
+✏️ **Try:** ping a PC in VLAN 30. What is the destination MAC when the packet leaves PC-SAL-1?
+
+<details><summary>Answer</summary>
+
+Again `0000.0C07.AC14`: everything that leaves the network goes to the gateway.
+
+</details>
+
+## 🧯 It doesn't work?
 | What you see | Probably | What to do |
 |---|---|---|
 | `% Configuring IP routing on a LAN subinterface is only allowed if...` | the IP came before `encapsulation dot1Q` | write encapsulation first |

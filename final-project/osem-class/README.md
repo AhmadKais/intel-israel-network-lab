@@ -25,6 +25,7 @@ got stuck can join. **Packet Tracer 9.0.1** is recommended: that is the version 
 | **Example** | a worked example with our addresses | solve it on the board, one row at a time |
 | ❓ | a question for the class | wait for answers before you open the answer |
 | ✅ | a check | nobody continues before it is true on their screen |
+| 👀 | see the packets move, in Simulation mode | 5–10 minutes on the projector: students guess, then you click |
 | 🧯 | "It doesn't work?" | the student looks here first, then calls you |
 | 🔎 | find the bug | in pairs, 3 minutes |
 | 🏋 | exercises, with answers | for those who finish early, or homework |

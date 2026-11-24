@@ -241,7 +241,74 @@ empty: there is no router yet.
 
    ![Save As](images/19-save-as.png)
 
-### 🧯 It doesn't work?
+## 👀 See it happen — the ping, step by step
+Until now everything was invisible. **Simulation** mode stops time, and you see every packet.
+
+**How to use it (the same in every lesson):**
+
+![1 Simulation, 2 Show All/None, 3 Edit Filters, 4 next step](images/sim-panel.png)
+
+1. Bottom right: **Simulation** (1). Time stops.
+2. **Show All/None** (2) until it says *None*. Then **Edit Filters** (3) → tick only what you need.
+3. Do the action (a ping, for example) and close the PC window.
+4. Click the **next step** button (4), one click at a time.
+5. Click an **envelope**, or the colored square in the **Type** column, to open the packet.
+   *In Layers* = how it came in, *Out Layers* = how it goes out. **Next Layer** explains every decision.
+6. **Finished? Click Realtime.** Otherwise nothing in the network moves.
+
+💡 A *Buffer Full* window? Click **View Previous Events**. Don't see the Type column? Drag the left edge of the panel.
+
+**Now in our network.** Filters: **ARP** and **ICMP** (tab IPv4). PC-SAL-1 → Command Prompt:
+```
+arp -d
+ping 192.168.20.22
+```
+`arp -d` erases what the PC learned, so it has to ask again.
+
+```mermaid
+sequenceDiagram
+    participant A as PC-SAL-1
+    participant S as SW-S-SAL
+    participant B as PC-SAL-2
+    participant C as PC-SAL-3
+    A->>S: ARP: who has 192.168.20.22?
+    S->>B: flood
+    S->>C: flood
+    B->>S: ARP reply: this is my MAC
+    S->>A: only to Fa0/2
+    A->>S: ping
+    S->>B: only to Fa0/3
+```
+
+**Frame 1: the question goes to everybody.** ❓ Guess before you click: how many envelopes will there be?
+
+![The ARP request reached everybody](images/sim-flood.png)
+
+The envelope is on PC-SAL-2, PC-SAL-3 **and** SW-S-MAIN. That is a **flood**.
+
+**Frame 3: the ping goes to one port.** Open the ping on SW-S-SAL:
+
+![In on Fa0/2, out on Fa0/3](images/sim-switch.png)
+
+| Look at | What it proves |
+|---|---|
+| layers 3 to 7 are gray | the switch doesn't look at the IP at all |
+| the MACs are the same on both sides | a switch does not change the frame |
+| in Fa0/2, out **only** Fa0/3 | it has learned, no more flood |
+
+Tab **Inbound PDU Details**: the whole packet. Find both MACs and both IPs, and compare with `arp -a`:
+
+![Inside the ping](images/sim-inside.png)
+
+✏️ **Try:** ping again **without** `arp -d`. Is there an ARP? Why?
+
+<details><summary>Answer</summary>
+
+No. The PC kept the MAC in its ARP table, so the ping goes out at once.
+
+</details>
+
+## 🧯 It doesn't work?
 | What you see | Probably | What to do |
 |---|---|---|
 | orange dot for more than a minute | the link is still in STP, or the window was paused | wait, check that Realtime is selected at the bottom right |
