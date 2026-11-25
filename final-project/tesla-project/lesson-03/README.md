@@ -1,0 +1,880 @@
+# Lesson 03 — Herzliya routing and services: HSRP, DHCP, DNS, Web, FTP, Mail
+
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson03-start.pkt`](lesson03-start.pkt) or your own file after [Part B](../from-zero/README.md#part-b--two-routers-for-herzliya) · 💾 save as `lesson03.pkt`
+
+## What you will have at the end
+The departments can talk to each other through **two routers that back each other up**, and one
+server gives the whole branch addresses, names, a website, files and mail.
+
+![The branch after this lesson. Orange = STP backup links](images/01-start.png)
+
+## 📖 The story — chapter 3: doors, and a building that runs by itself
+**How we got here.** In lesson 1 we connected one department, and in lesson 2 we separated five. The manager is happy for one day, and then the phones ring: *"IT can't send us a file", "Where is the website?", "I moved a desk and my computer lost its address".*
+
+**Where we are now.** Five departments that can't see each other, PCs with addresses typed by hand and no gateway, and an empty server. Two routers were delivered and connected (the start file, or [Part B](../from-zero/)).
+
+**What we want today.** A road between the departments that **stays up when a router dies**, and one server that gives addresses, names, a website, files and mail.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 Main router | how do VLANs talk? | it is the first thing everybody asks for |
+| 2 Backup router | and if it dies? | all five departments now depend on one box |
+| 3 Server | who gives the services? | the server is reachable only now, through the routers |
+| 4 DHCP clients | how does a PC get an address? | the server has addresses ready to give |
+| 5 Test | does every service work? | each one can fail in its own way |
+| 6 Snooping | and if somebody else gives addresses? | whoever controls the addresses controls the traffic |
+| 7 Failure | does the backup really work? | a backup that wasn't tested is a hope |
+
+## Plan your time (90 minutes, take breaks)
+| Minutes | Part |
+|---|---|
+| 0–20 | Part 1 — read the theory, answer every ❓ before you open the answer |
+| 20–40 | Missions 1–2 — sub-interfaces and HSRP |
+| 40–60 | Mission 3 — the server |
+| 60–72 | Missions 4–5 — clients, tests and mail |
+| 72–82 | Missions 6–7 — DHCP snooping and the failure test |
+| 82–90 | Find the bug, questions, your project book |
+
+The start file is the end of lesson 2, plus the routers R-HZ-MAIN and R-HZ-BKP, cabled and with base configuration.
+
+---
+
+## Part 1 — Theory: understand it first
+
+### 1.1 Router-on-a-stick
+One cable (trunk) from the switch to the router carries all the VLANs. We cut the physical port
+into **sub-interfaces**: g0/0.12 for VLAN 12, g0/0.22 for VLAN 22... Each has an IP and is the
+**gateway** of its VLAN. The physical port itself has **no IP**.
+
+💬 **In simple words:** the router is a corridor between the classes (VLANs). One physical door (g0/0), with
+several signs on it: .12, .22, .32...
+
+**Example — PC-SALES-1 (VLAN 22) pings PC-IT-1 (VLAN 42):**
+
+| # | Where | VLAN tag | What happens |
+|---|---|---|---|
+| 1 | PC-SALES-1 | — | 192.168.42.x is not my network → I send it to my gateway .1 |
+| 2 | trunk up to the router | 22 | arrives at g0/0.22 |
+| 3 | inside the router | — | routing table: 192.168.42.0 is on g0/0.42 |
+| 4 | trunk down to the switch | **42** | the same cable, a different tag |
+| 5 | PC-IT-1 | — | arrived |
+
+### 1.2 HSRP — two routers, one gateway
+A PC can have only **one** default gateway. If that router dies, the department is cut off.
+**HSRP**: two routers share a **virtual IP** (VIP). The PCs use the VIP and don't know which router answers.
+
+| Address | Device |
+|---|---|
+| .2 | R-HZ-MAIN, priority 110 → **Active** |
+| .3 | R-HZ-BKP, priority 105 → **Standby** |
+| **.1** | the **VIP**: the gateway of all PCs and of the server |
+
+`preempt` = when the main router returns, it takes the Active role back.
+
+💬 **In simple words:** a store has one phone number. Two employees can answer it. The customers dial the same
+number and don't notice that the employee changed.
+
+**Example — what each router "says":**
+
+| Situation | R-HZ-MAIN | R-HZ-BKP | Active |
+|---|---|---|---|
+| normal | 110 | 105 | R-HZ-MAIN |
+| g0/0 of the main falls | silent | 105 | R-HZ-BKP (after about 10 seconds without hello) |
+| the main returns, with `preempt` | 110 | 105 | R-HZ-MAIN again |
+| the main returns, **without** `preempt` | 110 | 105 | R-HZ-BKP stays |
+
+### 1.3 DHCP and relay
+DHCP gives a PC its address in four steps, **DORA**: **D**iscover → **O**ffer → **R**equest → **A**ck.
+Discover is a **broadcast**, and a router does not forward broadcasts. `ip helper-address` on the
+router turns it into a direct message to the server: this is the **relay**.
+
+**Example — PC-SALES-1 asks for an address:**
+
+| Step | From → to | Content |
+|---|---|---|
+| Discover | 0.0.0.0 → 255.255.255.255 | "is there a DHCP server?" |
+| relay | 192.168.22.2 → 192.168.52.10 | the router passes it on and notes "I received it on **192.168.22.2**" |
+| Offer | server → PC, through the router | "take 192.168.22.20" |
+| Request | PC → everybody | "I accept" |
+| Ack | server → PC | "it's yours" + gateway .1 + DNS |
+
+❓ **Ask yourself:** the server has four pools. How does it know to give an address from 192.168.22?
+
+<details><summary>Answer</summary>
+
+From the router's note (the field is called *giaddr*): the request came through 192.168.22.2, so the pool of 192.168.22.0.
+
+</details>
+
+### 1.4 The services
+| Service | Port | What for |
+|---|---|---|
+| DNS | UDP 53 | name → IP (`www.tesla.lab` → 192.168.52.10) |
+| HTTP | TCP 80 | website |
+| FTP | TCP 20/21 | files |
+| SMTP | TCP 25 | **sending** mail |
+| POP3 | TCP 110 | **reading** mail |
+
+**Example — what happens when you open `http://www.tesla.lab`:** the PC asks DNS (UDP 53) "what is the IP?" →
+192.168.52.10 → the browser opens a connection to TCP port 80 at that IP → the page arrives. If the site opens by IP
+but not by name, the problem is DNS.
+
+### 1.5 DHCP snooping
+An employee plugs in a home router, and it gives everyone a wrong gateway. With **DHCP
+snooping**, the switch accepts DHCP answers only from **trusted** ports.
+
+---
+
+## 🔑 Opening a device
+Click the device → **CLI** (1) → click in the text, Enter → `Tesla#Con` → `enable` → `Tesla#En1`. With pictures: [lesson 2](../lesson-02/).
+
+![Click CLI](images/step-login-1.png)
+
+**How every mission is built:** 🌐 the network now → ❗ the problem → 💡 the solution → 📋 do it yourself → 🖱 the full solution, with what to click, what to write and what you must see.
+
+## Mission 1 — Sub-interfaces and HSRP on R-HZ-MAIN
+**📖 How we got here.** Lesson 2 built walls between the departments.
+
+**🌐 The network now.** Five VLANs that can't talk to each other. We configure the main router:
+
+![1 R-HZ-MAIN](images/step-map-m1.png)
+
+**❗ The problem.** Sales needs a file from IT. PC-SALES-1 → Command Prompt → `ping 192.168.42.21`:
+
+![Another VLAN: nothing comes back](images/step-m1-before.png)
+
+A switch does not pass frames from VLAN to VLAN, and the PC has no gateway. And buying a router port for every VLAN is expensive: a 1941 has only two.
+
+**🎯 What we want now.** One router that stands in all five VLANs at once, through one cable, and passes between them.
+
+**💡 The solution.** Router-on-a-stick: **one** cable, five sub-interfaces (theory 1.1). In each one we already prepare HSRP (1.2) and a DHCP relay (1.3).
+
+**📋 Do it in the project.** On R-HZ-MAIN: turn on g0/0 without an IP, and for each VLAN a sub-interface with .2, VIP .1, priority 110, preempt, helper 192.168.52.10 (not in VLAN 52).
+
+### 🖱 The solution: what to click and what to write
+**R-HZ-MAIN** → CLI → log in → `enable`:
+```
+configure terminal
+interface g0/0
+no shutdown
+exit
+interface g0/0.12
+encapsulation dot1Q 12
+ip address 192.168.12.2 255.255.255.0
+standby 12 ip 192.168.12.1
+standby 12 priority 110
+standby 12 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.22
+encapsulation dot1Q 22
+ip address 192.168.22.2 255.255.255.0
+standby 22 ip 192.168.22.1
+standby 22 priority 110
+standby 22 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.32
+encapsulation dot1Q 32
+ip address 192.168.32.2 255.255.255.0
+standby 32 ip 192.168.32.1
+standby 32 priority 110
+standby 32 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.42
+encapsulation dot1Q 42
+ip address 192.168.42.2 255.255.255.0
+standby 42 ip 192.168.42.1
+standby 42 priority 110
+standby 42 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.52
+encapsulation dot1Q 52
+ip address 192.168.52.2 255.255.255.0
+standby 52 ip 192.168.52.1
+standby 52 priority 110
+standby 52 preempt
+end
+copy running-config startup-config
+```
+
+![Part 1: the port and the first VLAN](images/step-m1-1.png)
+
+![Part 2: VLANs 22 and 32](images/step-m1-2.png)
+
+![Part 3: VLANs 42 and 52, and saving](images/step-m1-3.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `interface g0/0` + `no shutdown` | turns on the physical port | router ports are off by default |
+| `interface g0/0.12` | creates a sub-interface | one per VLAN |
+| `encapsulation dot1Q 12` | "this is VLAN 12" | **before** the IP, otherwise the router refuses |
+| `standby 12 ip` | the VIP of group 12 | the gateway for the PCs |
+| `standby 12 priority 110` | higher wins | main = 110, backup = 105 |
+| `standby 12 preempt` | takes Active back | otherwise the backup stays Active |
+| `ip helper-address` | forwards DHCP to the server | not needed in VLAN 52, where the server is |
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.42.21` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `ip address 192.168.12.2 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** Now five departments depend on one router. That is dangerous.
+
+## Mission 2 — R-HZ-BKP
+**📖 How we got here.** R-HZ-MAIN routes for everybody, alone.
+
+**🌐 The network now.** R-HZ-MAIN (2) routes for everybody. We configure R-HZ-BKP (1):
+
+![1 R-HZ-BKP, 2 R-HZ-MAIN](images/step-map-m2.png)
+
+**❗ The problem.** One router = one failure stops five departments. R-HZ-MAIN, `show standby brief`:
+
+![The Standby column is unknown: nobody is behind R-HZ-MAIN](images/step-m2-before.png)
+
+`Standby: unknown` means that there is no backup. (`Speak` = still starting, `Active` after a few seconds.)
+
+**🎯 What we want now.** A second router that shares the **same gateway address**, so the PCs won't notice if the first one dies.
+
+**💡 The solution.** The second router joins the **same** groups with the **same** VIP and a lower priority (105). If the main goes silent, it takes over.
+
+**📋 Do it in the project.** Copy the block of Mission 1 and change only two things. Which two?
+
+### 🖱 The solution: what to click and what to write
+The same, with **.3** and **priority 105**:
+```
+configure terminal
+interface g0/0
+no shutdown
+exit
+interface g0/0.12
+encapsulation dot1Q 12
+ip address 192.168.12.3 255.255.255.0
+standby 12 ip 192.168.12.1
+standby 12 priority 105
+standby 12 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.22
+encapsulation dot1Q 22
+ip address 192.168.22.3 255.255.255.0
+standby 22 ip 192.168.22.1
+standby 22 priority 105
+standby 22 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.32
+encapsulation dot1Q 32
+ip address 192.168.32.3 255.255.255.0
+standby 32 ip 192.168.32.1
+standby 32 priority 105
+standby 32 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.42
+encapsulation dot1Q 42
+ip address 192.168.42.3 255.255.255.0
+standby 42 ip 192.168.42.1
+standby 42 priority 105
+standby 42 preempt
+ip helper-address 192.168.52.10
+exit
+interface g0/0.52
+encapsulation dot1Q 52
+ip address 192.168.52.3 255.255.255.0
+standby 52 ip 192.168.52.1
+standby 52 priority 105
+standby 52 preempt
+end
+copy running-config startup-config
+```
+
+![Part 1](images/step-m2-1.png)
+
+![Part 2](images/step-m2-2.png)
+
+![Part 3. For a moment the backup says Active, until it hears the main](images/step-m2-3.png)
+
+✅ Wait about 20 seconds. `show standby brief` on both: main **Active**, backup **Standby**.
+
+![R-HZ-MAIN](images/03-hsrp-main.png)
+
+![R-HZ-BKP](images/04-hsrp-bkp.png)
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `interface g0/0.12` | A **sub-interface**: a virtual door on the same physical port, one for each VLAN. |
+| `encapsulation dot1Q 12` | "This sub-interface is VLAN number…". Must come **before** the IP address. |
+| `ip address 192.168.12.3 255.255.255.0` | The address and the mask of this interface. In a LAN it is the address of the gateway. |
+| `standby 12 ip 192.168.12.1` | HSRP: the shared virtual address (VIP) that both routers answer for. This is the gateway of the PCs. |
+| `standby 12 priority 105` | The higher number is Active. Main 110, backup 105. |
+| `standby 12 preempt` | A router with a higher priority takes the role back when it returns. |
+| `ip helper-address 192.168.52.10` | The DHCP relay: turns the PC's broadcast into a direct message to this server. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+
+</details>
+
+**⏭ What comes next.** There is a road to the server. Time to put something on it.
+
+## Mission 3 — The server
+**📖 How we got here.** The departments are connected, and the server is on and empty.
+
+**🌐 The network now.** The departments are connected. The server is on, but empty:
+
+![1 SRV-HERZLIYA](images/step-map-m3.png)
+
+**❗ The problem.** PC-SALES-1 → Desktop → **Web Browser** → `http://www.tesla.lab` → Go. Nothing appears:
+
+![The page stays empty](images/step-m3-before.png)
+
+Nobody knows the name, there is no site, addresses are typed by hand on each PC, and there is no mail.
+
+**🎯 What we want now.** Five services on one server: addresses (DHCP), names (DNS), a website, files (FTP) and mail.
+
+**💡 The solution.** Five services on one server:
+
+| Service | The problem without it | What it does |
+|---|---|---|
+| DHCP | typing an address on every PC, with mistakes | gives the address, gateway and DNS automatically |
+| DNS | remembering 192.168.52.10 | translates www.tesla.lab to an IP |
+| HTTP | no company site | shows the page |
+| FTP | files walk on a disk-on-key | a shared folder with a user and password |
+| EMAIL | no mail between employees | SMTP sends, POP3 reads |
+
+**📋 Do it in the project.** One service after the other, with the values of the tables below. Fixed address first!
+
+### 🖱 The solution: what to click and what to write
+Click **SRV-HERZLIYA** → **Services** (1). The list is on the left, for example DHCP (2) and DNS (3):
+
+![1 Services, 2 DHCP, 3 DNS](images/step-srv.png)
+
+### 3.1 Fixed address
+
+❗ If the server's address changes, every PC, DNS record and helper points to the wrong place. 💡 A static address, with the **VIP** as gateway.
+
+**SRV-HERZLIYA** → **Desktop** → **IP Configuration** → Static: address `192.168.52.10` (1), mask
+`255.255.255.0` (2), gateway **`192.168.52.1`** — the VIP (3), DNS `192.168.52.10` (4).
+
+![Server address](images/05-server-ip.png)
+
+🧠 A server must have a **fixed** address, because everyone looks for it there.
+
+### 3.2 DHCP
+
+❗ PCs in four different networks ask one server. 💡 A **pool** per network, each with its own gateway.
+
+**Services** (1) → **DHCP** (2). For each row fill the form (3) and click **Add** (4):
+
+| Pool Name | Default Gateway | DNS Server | Start IP | Mask | Max users |
+|---|---|---|---|---|---|
+| MANAGEMENT | 192.168.12.1 | 192.168.52.10 | 192.168.12.20 | 255.255.255.0 | 50 |
+| SALES | 192.168.22.1 | 192.168.52.10 | 192.168.22.20 | 255.255.255.0 | 50 |
+| SERVICE | 192.168.32.1 | 192.168.52.10 | 192.168.32.20 | 255.255.255.0 | 50 |
+| IT | 192.168.42.1 | 192.168.52.10 | 192.168.42.20 | 255.255.255.0 | 50 |
+
+![The first pool](images/06-dhcp-form.png)
+
+Then **Service: On** (1) and **Save** (2).
+
+![Four pools and the service is on](images/07-dhcp-done.png)
+
+### 3.3 DNS
+
+❗ People remember names, computers need an IP. 💡 An **A record**: name → IP.
+
+**DNS** → On (1). Name (2) `www.tesla.lab`, Address (3) `192.168.52.10` → **Add** (4). Again for `mail.tesla.lab`.
+
+![DNS records](images/08-dns.png)
+
+### 3.4 Website
+
+❗ Opening the default Cisco page proves nothing. 💡 Our own text: if you see it, you reached **our** server.
+
+![1 HTTP, 2 (edit) next to index.html](images/step-http.png)
+
+**HTTP** → next to `index.html` click **(edit)**. In the third line, keep `<hr>` and replace the text after it
+(`Welcome to Cisco Packet Tracer. … Mind Wide Open.`) with `Welcome to Tesla - Herzliya branch` → **Save** (1) → **Yes** to overwrite.
+
+![The third line after the change; 1 Save](images/step-http-edit.png)
+
+![Editing the page](images/09-http-edit.png)
+
+### 3.5 FTP
+
+❗ Anyone could take the company's files. 💡 A user, a password and permissions.
+
+**FTP** → Username (1) `herzliya`, Password (2) `Tesla#Ftp`, tick all five permissions → **Add** (3).
+
+![FTP user](images/11-ftp.png)
+
+### 3.6 Mail
+
+❗ The server has no mailboxes and doesn't know which domain it serves. 💡 A domain and a user for every employee.
+
+**EMAIL** → Domain Name (1) `tesla.lab` → **Set** (2). User (3) `herzliya1`, Password (4) `Tesla#Mail` → **+** (5). Again for `herzliya2`.
+
+![Mail users](images/12-mail.png)
+
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **DHCP** → Pool Name | The name of the list, only for us. One pool for each network. |
+| Default Gateway | The gateway the PC will get: the **VIP** (.1), so a PC stays connected when a router dies. |
+| DNS Server | Who the PC will ask about names: this server. |
+| Start IP Address | The first address to give. We start from 20, so the lower ones stay free for fixed devices. |
+| Subnet Mask, Maximum Number of Users | The size of the network, and how many addresses to give. |
+| **Add**, then **Save** | Add creates a new row. Save keeps the service's settings. |
+| **DNS** → Name / Address | What people write, and the address the computer needs. |
+| **HTTP** → index.html | The first page of the site. Our own text proves that we reached **our** server. |
+| **FTP** → Username, Password, permissions | Who enters, and what they may do: Write, Read, Delete, Rename, List. |
+| **EMAIL** → Domain Name, User | The part after the `@`, and a mailbox for each employee. |
+
+</details>
+
+**⏭ What comes next.** The server has addresses to give. The PCs still use the ones we typed.
+
+## Mission 4 — PCs get an address
+**📖 How we got here.** The DHCP service waits, and the PCs still have addresses typed by hand, without a gateway.
+
+**🌐 The network now.** The server gives addresses. The seven PCs still have the addresses typed by hand, **without a gateway**:
+
+![The seven PCs](images/step-map-m4.png)
+
+**❗ The problem.** Without a gateway a PC can't leave its VLAN, and the server is in another VLAN. Worse: a PC that asks for DHCP sends a broadcast, and a broadcast stops at the router.
+
+**🎯 What we want now.** Every PC asks for its address, and the routers carry the request to the server.
+
+**💡 The solution.** DHCP on the PC + the relay (`ip helper-address`) that we wrote in Missions 1 and 2. DORA is explained in theory 1.3.
+
+**📋 Do it in the project.** Move all the PCs to DHCP and write down for each one: address, gateway, DNS. Is the gateway .2 or .1? Why?
+
+### 🖱 The solution: what to click and what to write
+Each PC → Desktop → **IP Configuration** → **DHCP** (1). Gateway .1 and the DNS arrive by themselves:
+
+![DHCP successful](images/13-pc-dhcp.png)
+
+⚠️ The first request sometimes fails while STP and HSRP are still starting. Click Static and DHCP again, or `ipconfig /renew`.
+
+<details open><summary><b>📘 The form, field by field</b></summary>
+
+| Field or click | What it is, and why |
+|---|---|
+| **DHCP** (instead of Static) | The PC asks by itself. The gateway and DNS arrive together with the address. |
+
+</details>
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ipconfig /renew` | The PC asks DHCP for an address again. |
+
+</details>
+
+**⏭ What comes next.** Everything seems to work. We check each service separately.
+
+## Mission 5 — Test everything
+**📖 How we got here.** Addresses arrive by themselves and all the services are on.
+
+**🌐 The network now.** Five services, two routers, seven PCs with addresses.
+
+![1 PC-IT-1, 2 PC-SALES-2, 3 PC-SALES-1, 4 SRV-HERZLIYA](images/step-map-m5.png)
+
+**❗ The problem.** One page that opens doesn't prove that DNS, FTP and mail work. When something fails we must know **which** link of the chain broke.
+
+**🎯 What we want now.** Test each link of the chain alone, so that when something breaks we know which one.
+
+**💡 The solution.** One test per service, from different VLANs, in this order: DNS → web → ping and FTP → path → mail.
+
+**📋 Do it in the project.** Do the five tests. For each one say which service and which port it checks.
+
+### 🖱 The solution: what to click and what to write
+1. **PC-IT-1**: `nslookup www.tesla.lab`
+
+   ![DNS](images/14-nslookup.png)
+2. **PC-SALES-2** → Desktop → **Web Browser** → `http://www.tesla.lab` → **Go**
+
+   ![The site by name](images/10-web.png)
+3. **PC-SALES-1**: `ping 192.168.52.10`, then `ftp 192.168.52.10` (user `herzliya`, password `Tesla#Ftp`), `quit`.
+
+   ![Ping and FTP](images/15-ftp-login.png)
+4. **PC-SALES-1**: `tracert 192.168.42.21` (the address of PC-IT-1, check yours with `ipconfig`). The first hop is **.2**, the main router. Remember it for Mission 7!
+
+   ![tracert through R-HZ-MAIN](images/16-tracert.png)
+5. **Mail.** PC-SALES-1 → Desktop → **Email** → fill in and **Save**:
+
+   ![Mail settings](images/17-mail-config.png)
+
+   On PC-SALES-2 the same with `herzliya2`. Then on PC-SALES-1 → **Compose**: To (1) `herzliya2@tesla.lab`, Subject (2) → **Send** (3).
+
+   ![Writing a mail](images/18-mail-compose.png)
+
+   On PC-SALES-2 → **Receive** (1):
+
+   ![The mail arrived](images/19-mail-received.png)
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.52.10` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `tracert 192.168.42.21` | Shows every router on the way. |
+| `ipconfig` | Shows the address, mask and gateway of the PC. |
+
+</details>
+
+**⏭ What comes next.** A PC believes whoever answers first. What if it isn't our server?
+
+## Mission 6 — DHCP snooping
+**📖 How we got here.** DHCP works, and nobody checks who answers.
+
+**🌐 The network now.** Everyone gets an address automatically. Whoever answers **first** wins:
+
+![1 SW-HZ-MAIN, 2 R-HZ-BKP (plays the attacker), 3 PC-SALES-2](images/step-map-m6.png)
+
+**❗ The problem.** A PC believes **any** DHCP server. A home router connected by mistake, or an attacker, can give a false gateway and read all the traffic. The switch does not check. SW-HZ-MAIN, `show ip dhcp snooping`:
+
+![DHCP snooping is disabled](images/step-m6-before.png)
+
+**🎯 What we want now.** Let the switches accept DHCP answers only from the roads to our server.
+
+**💡 The solution.** DHCP snooping: answers of a server are accepted only from **trusted** ports (theory 1.5).
+
+**📋 Do it in the project.** Turn it on for VLANs 12–42 and decide which ports of SW-HZ-MAIN are trusted. Then attack, in 6.1.
+
+### 🖱 The solution: what to click and what to write
+**SW-HZ-MAIN:**
+```
+configure terminal
+ip dhcp snooping
+ip dhcp snooping vlan 12,22,32,42
+no ip dhcp snooping information option
+interface range fa0/2 , fa0/5 - 7
+ip dhcp snooping trust
+end
+copy running-config startup-config
+show ip dhcp snooping
+```
+
+![The commands and the result](images/step-m6-cfg.png)
+
+| Port | Connected to | Why trusted |
+|---|---|---|
+| Fa0/2 | server switch | the real DHCP server is there |
+| Fa0/5, Fa0/6 | routers | the relay answers come from them |
+| Fa0/7 | backup switch | another path to the same network |
+
+![DHCP snooping](images/20-snooping.png)
+
+💡 In Packet Tracer the table `show ip dhcp snooping binding` stayed empty in our tests, so check with `show ip dhcp snooping`.
+
+✅ On a PC: `ipconfig /release` and `ipconfig /renew` still work.
+
+### 6.1 See the attack
+A "stranger" gives addresses. For the demonstration **R-HZ-BKP** plays the attacker:
+```
+configure terminal
+ip dhcp excluded-address 192.168.22.1 192.168.22.199
+ip dhcp pool ROGUE
+network 192.168.22.0 255.255.255.0
+default-router 192.168.22.99
+dns-server 6.6.6.6
+end
+```
+
+![The attacker is ready](images/step-m6-rogue.png)
+
+On **PC-SALES-2**: `ipconfig /release`, `ipconfig /renew`. The gateway is **192.168.22.99** and the DNS **6.6.6.6**: all
+the PC's traffic now goes to the attacker!
+
+![The fake server answered first](images/24-rogue.png)
+
+Why did snooping not stop it? Because the port to R-HZ-BKP is **trusted**. On **SW-HZ-MAIN** take the trust away:
+```
+configure terminal
+interface fa0/5
+no ip dhcp snooping trust
+end
+```
+
+![No more trust in Fa0/5](images/step-m6-untrust.png)
+
+Release and renew again on PC-SALES-2: gateway **.1** and DNS **192.168.52.10**. The switch dropped the fake offer.
+
+![Top: the fake address. Then, twice: the real one](images/25-rogue-blocked.png)
+
+**Clean up** on R-HZ-BKP:
+```
+configure terminal
+no ip dhcp pool ROGUE
+no ip dhcp excluded-address 192.168.22.1 192.168.22.199
+end
+```
+
+![The attacker is gone](images/step-m6-clean.png)
+
+And on SW-HZ-MAIN, `interface fa0/5`: `ip dhcp snooping trust`.
+
+![Fa0/5 is trusted again](images/step-m6-retrust.png)
+
+🧠 Snooping protects only the switch that runs it. A rogue server on SW-HZ-SALES can still cheat its neighbors on the
+**same** switch, so a full protection puts it on every department switch (exercise 4).
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show ip dhcp snooping` | Is snooping on, in which VLANs, and which ports are trusted. |
+| `ip dhcp snooping` | Turns DHCP snooping on in the whole switch. |
+| `ip dhcp snooping vlan 12,22,32,42` | In which VLANs to check DHCP. |
+| `no ip dhcp snooping information option` | Doesn't add "option 82" to requests; without this line the relay drops them. |
+| `interface range fa0/2 , fa0/5 - 7` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `ip dhcp snooping trust` | DHCP **answers** are accepted from this port: it leads to our server. All the rest are not trusted. |
+| `copy running-config startup-config` | Saves what is in memory to the startup file. Without it a power failure erases the work. |
+| `show ip dhcp snooping binding` | The table of who received which address, on which port. |
+| `ipconfig /release` | The PC gives its address back. |
+| `ipconfig /renew` | The PC asks DHCP for an address again. |
+| `ip dhcp excluded-address 192.168.22.1 192.168.22.199` | Addresses that this server will not give. |
+| `ip dhcp pool ROGUE` | Creates a list of addresses to give. Here: the **attacker's** list. |
+| `network 192.168.22.0 255.255.255.0` | The network from which this DHCP pool gives addresses (with its mask). |
+| `default-router 192.168.22.99` | The gateway that the clients receive (here a false one). |
+| `dns-server 6.6.6.6` | The DNS that the clients receive (here a false one). |
+| `interface fa0/5` | Chooses the port. Everything below applies to it, until `exit`. |
+| `no ip dhcp snooping trust` | Takes the trust back: DHCP answers from here are dropped again. |
+| `no ip dhcp pool ROGUE` | Deletes the attacker's pool (cleaning up). |
+| `no ip dhcp excluded-address 192.168.22.1 192.168.22.199` | Removes the excluded addresses (cleaning up after the attack). |
+
+</details>
+
+**⏭ What comes next.** We protected the addresses. Last question of the day: does the backup router really take over?
+
+## Mission 7 — Kill the main router
+**📖 How we got here.** Two routers, one shared address, all services running.
+
+**🌐 The network now.** Two routers with HSRP. We break one on purpose:
+
+![1 R-HZ-MAIN, 2 R-HZ-BKP, 3 PC-SALES-1](images/step-map-m7.png)
+
+**❗ The problem.** A backup that was never tested is not a backup. In one real project part of the backup never worked, and nobody knew.
+
+**🎯 What we want now.** Kill the main router on purpose while a ping is running, and watch the backup take over.
+
+**💡 The solution.** A planned failure: turn off the main, check that work continues, bring it back.
+
+**📋 Do it in the project.** Before: which hop does `tracert` show? Guess what it will show during the failure and after it.
+
+### 🖱 The solution: what to click and what to write
+1. **R-HZ-MAIN**: `configure terminal` → `interface g0/0` → `shutdown`.
+
+   ![The main router goes down](images/step-m7-shut.png)
+
+2. After about 10 seconds on **R-HZ-BKP**: `show standby brief` → **Active**.
+
+   ![The backup took over](images/21-fail-bkp.png)
+3. **PC-SALES-1**: `ping 192.168.52.10` works, and `tracert 192.168.42.21` now goes through **.3**. The PC changed **nothing**.
+
+   ![Through the backup router](images/22-fail-pc.png)
+4. Return it: `no shutdown`, wait 30 seconds. R-HZ-MAIN is Active again, thanks to `preempt`.
+
+   ![The main router comes back](images/step-m7-noshut.png)
+
+   ![Back to normal](images/23-back.png)
+5. `copy running-config startup-config` on the routers and on SW-HZ-MAIN, File → Save.
+
+   ![Saved](images/step-m7-save.png)
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `tracert` | Shows every router on the way. |
+| `interface g0/0` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `show standby brief` | Who is Active and who is Standby in each group, and the priority. |
+| `ping 192.168.52.10` | Sends 4 test messages. Replies = the road works in **both** directions. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+
+</details>
+
+**⏭ What comes next.** The branch survives a failure. But the branch is alone in the world, and that is lesson 4.
+
+## 👀 See it happen — the relay and the virtual MAC
+Simulation was explained in [lesson 1](../lesson-01/).
+
+### A. DHCP through the relay
+1. PC-SALES-1 → Desktop → **IP Configuration** → **Static**.
+2. **Simulation** → filters: only **DHCP**.
+3. In IP Configuration click **DHCP** and close the window.
+4. Step until **R-HZ-MAIN** appears in the *At Device* column, and open that packet.
+
+![Broadcast in, unicast out](images/sim-relay.png)
+
+| | In | Out |
+|---|---|---|
+| Source IP | 0.0.0.0 (no address yet) | **192.168.22.2** |
+| Destination IP | 255.255.255.255 (everybody) | **192.168.52.10** (the server) |
+
+This is the whole meaning of `ip helper-address`. The request comes from the network 192.168.22.0, so the server knows which pool to use.
+
+```mermaid
+sequenceDiagram
+    participant P as PC-SALES-1
+    participant R as Router (relay)
+    participant S as SRV-HERZLIYA
+    P->>R: Discover (broadcast)
+    R->>S: Discover (unicast to 192.168.52.10)
+    S->>R: Offer
+    R->>P: Offer
+    P->>R: Request (broadcast)
+    R->>S: Request
+    S->>R: ACK
+    R->>P: ACK
+```
+
+❓ R-HZ-BKP sends a copy to the server too. Is that a problem?
+
+<details><summary>Answer</summary>
+
+No. Both routers have a helper, so the server gets the request twice and the PC uses one offer. That is also why DHCP works
+when one router is down.
+
+</details>
+
+### B. The ping and the virtual MAC
+**Realtime**, wait until PC-SALES-1 has an address. **Simulation** → only **ICMP** → `ping 192.168.52.10`. Open the packet on
+**R-HZ-MAIN** → **Next Layer**:
+
+![The destination MAC is the HSRP virtual MAC](images/sim-hsrp.png)
+
+| Look at | Meaning |
+|---|---|
+| in: `0000.0C07.AC16` | the **HSRP virtual MAC**: hex 16 = 22 = the group number |
+| *The subinterface GigabitEthernet0/0.22 accepts frames* | router-on-a-stick: the tag chose the sub-interface |
+| the IPs are the same on both sides | a router doesn't change the IP (without NAT) |
+| the MACs are different on both sides | the router writes a **new** layer 2 header |
+
+💡 You may also see copies on other switches and PCs. A switch that hasn't learned the virtual MAC floods, and whoever the
+packet isn't meant for drops it.
+
+✏️ **Try:** ping a PC in VLAN 32. What is the destination MAC when the packet leaves PC-SALES-1?
+
+<details><summary>Answer</summary>
+
+Again `0000.0C07.AC16`: everything that leaves the network goes to the gateway.
+
+</details>
+
+## 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| `% Configuring IP routing on a LAN subinterface is only allowed if...` | the IP came before `encapsulation dot1Q` | write encapsulation first |
+| both routers are Active | they don't see each other | trunk on Fa0/5 and Fa0/6, the same VLAN number |
+| `DHCP request failed` | helper missing, the service is Off, or STP isn't ready | `show run`, server → DHCP → On, wait and `/renew` |
+| an address 169.254.x.x | nobody answered the request | same as above |
+| ping by IP works, by name doesn't | DNS | `nslookup`, check the record and the PC's DNS |
+| mail is not sent | domain not set, or wrong user | EMAIL → Set, check `herzliya1` / `Tesla#Mail` |
+
+---
+
+## 🔎 Find the bug — from real projects
+1. `standby 12 track` was set on the **LAN** port itself.
+2. The physical port `g0/0` had an IP address.
+3. The server's gateway was **.2**.
+4. The server's default pool (`serverPool`) gave out 192.168.52.0–53.255, the servers' own network.
+
+<details><summary>Answer</summary>
+
+1. If the LAN port falls, HSRP knows anyway. Tracking helps for the port to the **internet** (lesson 4).
+2. With sub-interfaces each VLAN has its IP on its sub-interface. An IP on the physical port belongs to the native VLAN and confuses.
+3. .2 is the main router itself. When it fails the server is cut off. Fix: the VIP **.1**.
+4. Servers get fixed addresses. A pool in their network can give a PC an address that is already taken.
+
+</details>
+
+## 🏋 Exercises
+1. Without `ip helper-address` on g0/0.22 (on **both** routers), do `ipconfig /renew` on PC-SALES-1. What happens? Why only in VLAN 22? Put it back.
+2. Make R-HZ-BKP Active only for VLAN 42 (hint: priority). Why would we do that?
+3. Add `ftp.tesla.lab` to DNS and connect with `ftp ftp.tesla.lab`.
+
+4. Put DHCP snooping on **SW-HZ-SALES** too: VLAN 22, trust only on the trunks Fa0/1 and Fa0/4. Check that PC-SALES-2 still gets an address.
+
+<details><summary>Answers (we tested them)</summary>
+
+1. `DHCP request failed.` PC-IT-1 in VLAN 42 still gets an address: the helper is set on each sub-interface separately. After you put it back, the address arrives.
+2. On R-HZ-BKP, `interface g0/0.42`: `standby 42 priority 120`. `show standby brief` shows it Active in group 42 and Standby in the others. Reason: share the load between the two routers. Put 105 back.
+3. `Connected to ftp.tesla.lab`, user `herzliya`. DNS only translates the name: FTP itself does not change.
+4. These commands, and the PC still gets an address:
+
+```
+configure terminal
+ip dhcp snooping
+ip dhcp snooping vlan 22
+no ip dhcp snooping information option
+interface range fa0/1 , fa0/4
+ip dhcp snooping trust
+end
+```
+
+</details>
+
+## 🎓 Explain it to the examiner
+- What is a sub-interface and why do we need `encapsulation dot1Q`?
+- What is the VIP? What happens, step by step, when R-HZ-MAIN falls?
+- Explain DORA. Why is a relay needed?
+- What is the difference between SMTP and POP3?
+- What attack does DHCP snooping prevent, and which ports are trusted?
+
+<details><summary>Model answers</summary>
+
+1. A logical part of a physical port, one for each VLAN. `encapsulation dot1Q 22` says that frames tagged 22 belong to it.
+2. The virtual IP that the PCs use as a gateway. The main stops sending hello → after about 10 seconds the backup becomes Active, takes the VIP and its virtual MAC → the PCs continue.
+3. Discover, Offer, Request, Ack. Discover is a broadcast and a router stops broadcasts, so the router passes it on as a direct message.
+4. SMTP (25) sends and passes mail between servers. POP3 (110) downloads mail from the mailbox.
+5. A fake DHCP server that gives a wrong gateway (man in the middle). Trusted: the port of the real server, the routers and the link to the backup switch.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. Which address do we write as the gateway of a PC in VLAN 32?
+2. Priority 110 and 105: who is Active?
+3. What is written on the physical port g0/0?
+4. Which port does DNS use?
+5. Where is `ip helper-address` written?
+
+<details><summary>Answers</summary>
+
+1. 192.168.32.1.
+2. 110.
+3. Only `no shutdown`, no IP.
+4. UDP 53.
+5. On the sub-interface that the PCs' request arrives at.
+
+</details>
+
+## ⏭ What we did, and what comes next
+**What we did.** Herzliya is a complete branch. Departments talk through two routers that replace each other, and the server does the daily work.
+
+**What is still missing.** Herzliya is an **island**. Be'er Sheva and Haifa were built in the same way, and they are islands too. No one can reach the internet or another branch.
+
+**What comes next.** In [lesson 4](../lesson-04/) we build the **bridges**: lines to a provider, routing protocols, and NAT.
+
+## 🛠 Your project book
+- [ ] A table: VLAN, main .2, backup .3, VIP .1.
+- [ ] One paragraph each: router-on-a-stick, HSRP, DHCP + relay, DNS, web, FTP, mail, DHCP snooping.
+- [ ] A table of the server: service, port, what we configured.
+- [ ] Screenshots: `show standby brief` on both routers, DHCP on a PC, the website by name, mail received, the failure test with two tracerts.

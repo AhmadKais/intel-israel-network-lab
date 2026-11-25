@@ -120,6 +120,7 @@ start, because P1–P4 come before step 02 and part C comes between steps 15 and
 
 - [final-project/README.md](final-project/README.md) — **the real project, from your proposal to exam day**
 - [final-project/osem-class/README.md](final-project/osem-class/README.md) — **Osem: a full 3-branch project built together in class, in 5 lessons**
+- [final-project/tesla-project/README.md](final-project/tesla-project/README.md) — **Tesla: a full 3-branch project for self-study, step by step, with the finished file and an exam booklet**
 - [docs/basic-moves.md](docs/basic-moves.md) — **the basic moves M1–M28, click by click** (open/save, place, rename, cable, CLI, IP settings, DHCP, Simulation…). Every step links to them as "(how? → Mn)"
 - [docs/sites-and-views.md](docs/sites-and-views.md) — **how to divide the network between cities and buildings**, the Logical vs Physical view, moving devices to a new city or network
 - [docs/exam-guide.md](docs/exam-guide.md) — **how the project exam works and how to prepare**

@@ -1,0 +1,878 @@
+# Lesson 02 — Herzliya switching: VLAN, VTP, trunks, STP and port security
+
+> ⏱ 90 minutes · 🧰 Packet Tracer 9.x · 📂 start: [`lesson02-start.pkt`](lesson02-start.pkt) or your own file after [Part A](../from-zero/README.md#part-a--the-rest-of-herzliya) · 💾 save as `lesson02.pkt`
+
+## What you will have at the end
+The whole Herzliya branch: every department in its own VLAN, a backup switch with no loops, and
+ports that shut down when a stranger connects.
+
+![The finished branch](images/02-final.png)
+
+## 📖 The story — chapter 2: walls inside the switches
+**How we got here.** In lesson 1 we connected Sales. The other departments saw it and wanted the same. We connected them all, with a **backup switch** so that one failure won't stop the building (that is the start file, or [Part A](../from-zero/) if you build it yourself).
+
+**Where we are now.** Seven switches, seven PCs, one server. Every lamp is green, and that is the problem: **everybody is in one network**. Service receives every broadcast of Sales. And two roads to each department are a loop waiting to happen.
+
+**What we want today.** Five departments on the same cables that can't see each other, a backup road that doesn't become a loop, and sockets that don't accept a stranger.
+
+**The road of today:**
+
+| Mission | The question it answers | Why exactly now |
+|---|---|---|
+| 1 VLAN | which departments exist? | before we separate, we decide into what |
+| 2 VTP | how do all switches learn the list? | typing it on every switch is slow and full of mistakes |
+| 3 Trunk | how do five departments travel in one cable? | the list exists, but it can't move between switches yet |
+| 4 Access | which socket belongs to whom? | the roads are open, now we connect the houses |
+| 5 STP | which of the two roads is used? | only now there are enough roads to make a loop |
+| 6 Test | are they really separated? | a wall is only a wall if you can't walk through it |
+| 7 Attack | what if a stranger comes inside? | we protect the socket only after we know what is normal |
+
+## Plan your time (90 minutes, take breaks)
+| Minutes | Part |
+|---|---|
+| 0–20 | Part 1 — read the theory, answer every ❓ before you open the answer |
+| 20–32 | Missions 1–2 — VLAN and VTP |
+| 32–52 | Missions 3–4 — trunk and access ports |
+| 52–62 | Mission 5 — STP |
+| 62–78 | Missions 6–7 — tests and the port security attack |
+| 78–90 | Find the bug, questions, your project book |
+
+In the start file all switches are already cabled and have the base configuration of lesson 1
+(console `Tesla#Con`, enable `Tesla#En1`). The PCs already have addresses.
+
+![Start: every link is in VLAN 1](images/01-start.png)
+
+---
+
+## Part 1 — Theory: understand it first
+
+### 1.1 VLAN
+A VLAN cuts one physical switch into several separate networks. A broadcast from the sales
+department does not reach IT. Fewer broadcasts, more security, and a person can move desks and
+stay in the same network.
+
+💬 **In simple words:** one school building with several classes. Everybody is under the same roof, but a
+teacher who speaks in class 20 is not heard in class 40. A VLAN is a class with closed doors.
+
+**Example.** SW-HZ-SALES has 3 PCs in VLAN 22. If one PC is moved to VLAN 42 (same cable, same switch), it can
+no longer ping the two others.
+
+### 1.2 Access and trunk
+| | Access | Trunk |
+|---|---|---|
+| Carries | one VLAN | many VLANs |
+| Connects | PC, server, printer | switch ↔ switch, switch ↔ router |
+| 802.1Q tag | no | yes: 4 bytes that say "this frame is VLAN 22" |
+
+**Example — a frame from PC-SALES-1 to the backup switch:**
+
+| Place | Tag | Why |
+|---|---|---|
+| PC-SALES-1 → SW-HZ-SALES (access) | none | a PC doesn't know what a VLAN is |
+| SW-HZ-SALES → SW-HZ-MAIN (trunk) | **VLAN 22** | many VLANs share this cable |
+| SW-HZ-MAIN → server switch (access 52) | not sent | this link carries only VLAN 52 |
+
+The VLAN number has 12 bits in the tag, so there are VLANs 1–4094. A frame of the **native VLAN** (1 by
+default) travels on the trunk without a tag.
+
+### 1.3 VTP
+VTP copies the VLAN list between switches over trunks, so we create each VLAN once.
+
+| Mode | Creates VLANs? | Learns from others? |
+|---|---|---|
+| Server | yes | yes |
+| Client | no | yes |
+| Transparent | yes, only for itself | no |
+
+Domain and password must be **identical** on all switches. ⚠️ A switch with a higher **revision**
+number overwrites everybody's list, so connect a used switch to the network carefully.
+
+### 1.4 STP — why a backup switch is dangerous
+Two paths = a **loop**: a broadcast goes round forever and the network collapses in seconds.
+**Spanning Tree** elects one **root bridge** (the lowest priority) and blocks the extra ports. When a
+link falls, the blocked port wakes up.
+
+| Addition | Where | What it does |
+|---|---|---|
+| PortFast | PC ports | skips the 30-second wait |
+| BPDU Guard | PC ports | shuts the port if somebody connects a **switch** |
+| Root Guard | main switch, towards the departments | no department switch can become root |
+
+💬 **In simple words:** a loop is like a rumor in a group chat in which everybody forwards every message to
+everybody, forever. STP is the rule "this person doesn't forward, unless somebody else is missing".
+
+**Example — who is root in VLAN 22?** (the lowest number wins)
+
+| Switch | Priority | + VLAN | Total |
+|---|---|---|---|
+| SW-HZ-MAIN | 24576 | 22 | **24598 → root** |
+| SW-HZ-BKP | 28672 | 22 | 28694 |
+| SW-HZ-SALES | 32768 (default) | 22 | 32790 |
+
+**And which way does SW-HZ-SALES choose?** A 100 Mb/s link costs 19. Directly to the root: 19. Through the backup
+switch: 19 + 19 = **38**. The cheaper way forwards, the other one is blocked. Equal priorities → the lowest MAC wins.
+
+### 1.5 Port security
+The port learns the MAC of the first PC (`sticky`) and allows only it. A different MAC → the port
+goes to **err-disabled**.
+
+| Violation mode | Stranger's frames | Counts and logs | Port |
+|---|---|---|---|
+| `protect` | dropped | no | stays up |
+| `restrict` | dropped | yes | stays up |
+| `shutdown` (default) | dropped | yes | **err-disabled** |
+
+### 1.6 The plan
+| VLAN | Name | Network | Department switch |
+|---|---|---|---|
+| 12 | MANAGEMENT | 192.168.12.0/24 | SW-HZ-MGMT |
+| 22 | SALES | 192.168.22.0/24 | SW-HZ-SALES |
+| 32 | SERVICE | 192.168.32.0/24 | MLS-HZ-SVC |
+| 42 | IT | 192.168.42.0/24 | SW-HZ-IT |
+| 52 | SERVERS | 192.168.52.0/24 | MLS-HZ-SRV |
+
+| From | Port | To | Port |
+|---|---|---|---|
+| SW-HZ-MAIN | Fa0/1 | SW-HZ-MGMT | Fa0/5 |
+| SW-HZ-MAIN | Fa0/2 | MLS-HZ-SRV | Fa0/1 |
+| SW-HZ-MAIN | Fa0/3 | SW-HZ-SALES | Fa0/4 |
+| SW-HZ-MAIN | Fa0/4 | MLS-HZ-SVC | Fa0/1 |
+| SW-HZ-MAIN | Fa0/5, Fa0/6 | R-HZ-BKP, R-HZ-MAIN | lesson 3 |
+| SW-HZ-MAIN | Fa0/7 | SW-HZ-BKP | Fa0/3 |
+| SW-HZ-MAIN | Fa0/8 | SW-HZ-IT | Fa0/2 |
+| SW-HZ-BKP | Fa0/1 | SW-HZ-MGMT | Fa0/3 |
+| SW-HZ-BKP | Fa0/2 | SW-HZ-SALES | Fa0/1 |
+| SW-HZ-BKP | Fa0/4 | MLS-HZ-SVC | Fa0/4 |
+| SW-HZ-BKP | Fa0/5 | SW-HZ-IT | Fa0/3 |
+
+---
+
+## 🔑 How to open a device (the same in every lesson)
+1. Click the device. Its window opens on **Physical**. Click **CLI** (1):
+
+   ![Click CLI](images/step-login-1.png)
+2. Click inside the text (2) and press **Enter**:
+
+   ![Click in the text and press Enter](images/step-login-2.png)
+3. Password `Tesla#Con` + Enter, `enable` + Enter, `Tesla#En1` + Enter. **Nothing appears while you type a password.** You must see `#`:
+
+   ![You're in: the prompt ends with #](images/step-login-3.png)
+4. To save at the end of every device: `copy running-config startup-config`, then Enter. You must see `[OK]`:
+
+   ![Saved](images/step-save.png)
+
+## How every mission is built
+🌐 the network now → ❗ the problem (and how to see it) → 💡 the solution → 📋 do it yourself in the project → 🖱 the full solution: what to click, what to write, and what you must see.
+
+## Mission 1 — VLANs on the main switch
+**📖 How we got here.** All the departments are connected, and all of them are in VLAN 1.
+
+**🌐 The network now.** Seven switches, all cabled. We work on the main one:
+
+![1 SW-HZ-MAIN](images/step-map-m1.png)
+
+**❗ The problem.** Everybody is in **one** network. On SW-HZ-MAIN write `show vlan brief`:
+
+![All 26 ports are in VLAN 1](images/step-m1-before.png)
+
+All the ports are in VLAN 1: a broadcast of the Sales reaches management, IT and the servers. Slow, and not private.
+
+**🎯 What we want now.** Decide which departments exist: five VLANs, with numbers and names, on one switch.
+
+**💡 The solution.** Five VLANs, one per department plus the servers (theory 1.1). We create them **once**, on a VTP server, and not seven times.
+
+**📋 Do it in the project.** On SW-HZ-MAIN: VTP domain `HERZLIYA`, password `Tesla#Vtp`, server mode, and VLANs 12, 22, 32, 42, 52 with the names of the table in 1.6.
+
+### 🖱 The solution: what to click and what to write
+Click **SW-HZ-MAIN** → **CLI** → log in → `enable`:
+```
+configure terminal
+vtp domain HERZLIYA
+vtp password Tesla#Vtp
+vtp mode server
+vlan 12
+name MANAGEMENT
+vlan 22
+name SALES
+vlan 32
+name SERVICE
+vlan 42
+name IT
+vlan 52
+name SERVERS
+end
+show vlan brief
+```
+![Five new VLANs, still without ports](images/03-vlan.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `vtp domain HERZLIYA` | the name of the VTP group | only switches with the same name talk |
+| `vtp password` | a shared secret | a strange switch cannot change our VLANs |
+| `vtp mode server` | this switch manages the list | one place to create VLANs |
+| `vlan 22` + `name` | creates a VLAN and names it | the name is documentation; the number is what counts |
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** One switch knows the list. Six others don't.
+
+## Mission 2 — VTP client on the others
+**📖 How we got here.** SW-HZ-MAIN knows the five VLANs.
+
+**🌐 The network now.** SW-HZ-MAIN knows five VLANs. These five switches don't:
+
+![1 SW-HZ-BKP, 2 SW-HZ-MGMT, 3 SW-HZ-SALES, 4 SW-HZ-IT, 5 MLS-HZ-SVC](images/step-map-m2.png)
+
+**❗ The problem.** Creating 5 VLANs on 6 switches by hand = 30 times, with typing mistakes, and again for every new VLAN.
+
+**🎯 What we want now.** Let the other switches **receive** the list instead of typing it, so there is one place to change.
+
+**💡 The solution.** VTP client: the switch **receives** the list from the server. Same domain and same password, otherwise it refuses (theory 1.3).
+
+**📋 Do it in the project.** Make the five switches VTP clients. Guess: will the VLANs arrive right away?
+
+### 🖱 The solution: what to click and what to write
+On **SW-HZ-BKP, SW-HZ-MGMT, SW-HZ-SALES, SW-HZ-IT and MLS-HZ-SVC** (not MLS-HZ-SRV):
+```
+configure terminal
+vtp domain HERZLIYA
+vtp password Tesla#Vtp
+vtp mode client
+end
+```
+
+What you must see (the same on all five):
+
+![1 — SW-HZ-BKP](images/step-m2-bkp.png)
+
+![2 — SW-HZ-MGMT](images/step-m2-mgmt.png)
+
+![3 — SW-HZ-SALES](images/step-m2-sales.png)
+
+![4 — SW-HZ-IT](images/step-m2-it.png)
+
+![5 — MLS-HZ-SVC](images/step-m2-svc.png)
+
+💡 Messages such as `RECV_PVID_ERR` may appear while one side is already a trunk and the other isn't. They stop after Mission 4.
+
+❓ Ask yourself: run `show vlan brief` on SW-HZ-SALES. The VLANs did **not** arrive. Why?
+
+![SW-HZ-SALES before the trunks](images/04-sales-before.png)
+
+<details><summary>Answer</summary>
+
+VTP travels only over **trunks**, and we haven't made any yet. That is the next mission.
+
+</details>
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `vtp domain HERZLIYA` | The name of the VTP group. Only switches with **exactly** the same name share the VLAN list (capital letters matter). |
+| `vtp password Tesla#Vtp` | A shared secret, so a strange switch can't change our VLANs. It must be the same on all. |
+| `vtp mode client` | This switch only receives the list. `vlan 12` on it is refused. |
+| `end` | Straight out to `#`, from any depth. |
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+
+</details>
+
+**⏭ What comes next.** The clients are ready, but the list can't reach them: the links don't carry it yet.
+
+## Mission 3 — Trunk and access on the main and backup switch
+**📖 How we got here.** The list is ready, and the links between the switches still carry one VLAN each.
+
+**🌐 The network now.** The VLAN list exists only on SW-HZ-MAIN. We open the roads from here:
+
+![1 SW-HZ-MAIN, 2 SW-HZ-BKP](images/step-map-m3.png)
+
+**❗ The problem.** Every link is an ordinary access link and carries **one** VLAN. SW-HZ-MAIN, `show interfaces trunk`:
+
+![Empty: there isn't a single trunk](images/step-m3-before.png)
+
+Nothing came back. So VLAN 22 cannot cross to another switch, and neither can VTP.
+
+**🎯 What we want now.** Turn the links into trunks, which carry all the VLANs with a tag, and close the sockets nobody uses.
+
+**💡 The solution.** A **trunk** on every link between switches: one cable, all the VLANs, with a tag on each frame (theory 1.2). Unused ports get `shutdown`, so nobody can plug in.
+
+**📋 Do it in the project.** On both switches: trunk on the links of the table in 1.6, on SW-HZ-MAIN Fa0/2 = access VLAN 52 with port security for 2 MACs, all the other ports off.
+
+### 🖱 The solution: what to click and what to write
+**SW-HZ-MAIN:**
+```
+configure terminal
+interface range fa0/1 , fa0/3 - 8
+switchport mode trunk
+exit
+interface fa0/2
+switchport mode access
+switchport access vlan 52
+switchport port-security
+switchport port-security maximum 2
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+interface range fa0/9 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![The commands. The messages say that the links go down and up as trunks](images/step-m3-main-1.png)
+
+After `shutdown` a message appears for every port, then `end`:
+
+![The unused ports are off](images/step-m3-main-2.png)
+
+**SW-HZ-BKP:**
+```
+configure terminal
+interface range fa0/1 - 5
+switchport mode trunk
+exit
+interface range fa0/6 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![SW-HZ-BKP, just before the last shutdown](images/step-m3-bkp.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `interface range fa0/1 , fa0/3 - 8` | configures several ports together | note the **spaces** around the comma and the dash |
+| `switchport mode trunk` | carries all VLANs | between switches and to routers |
+| `switchport port-security maximum 2` | two MACs on Fa0/2 | the server **and** the switch MLS-HZ-SRV itself |
+| `shutdown` on unused ports | turns them off | nobody can connect to a free socket |
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show interfaces trunk` | Which ports are trunks, and which VLANs pass. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `exit` | One level back, for example from a port to general configuration. The next line belongs to the upper level. |
+| `interface fa0/2` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport mode access` | The port belongs to one VLAN, for one end device. |
+| `switchport access vlan 52` | Which VLAN the port belongs to. |
+| `switchport port-security` | Turns port security **on**. Without this line the three others do nothing. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** One end of each trunk is ready. The other end is in the department switches.
+
+## Mission 4 — The department switches
+**📖 How we got here.** The main and backup switches speak "trunk". The department switches don't answer yet.
+
+**🌐 The network now.** One side of every link is a trunk. The department switches are still as they were:
+
+![1 SW-HZ-MGMT, 2 SW-HZ-SALES, 3 MLS-HZ-SVC, 4 SW-HZ-IT, 5 MLS-HZ-SRV](images/step-map-m4.png)
+
+**❗ The problem.** SW-HZ-SALES, `show vlan brief`: the ports of the PCs are in VLAN 1, so the PCs are not in their department.
+
+![Still everybody in VLAN 1](images/step-m4-before.png)
+
+And a second problem: anybody can unplug a PC and connect a strange computer, or a switch.
+
+**🎯 What we want now.** Finish the trunks, put every PC in the VLAN of its department, and guard its socket.
+
+**💡 The solution.** Uplinks = trunk. PC ports = **access** in the VLAN of the department, with PortFast (green at once), BPDU Guard (no strange switch) and port security (no strange PC).
+
+**📋 Do it in the project.** Each group takes one switch. Write down: which ports are uplinks, which are for PCs, which VLAN, and then configure.
+
+### 🖱 The solution: what to click and what to write
+Give one switch to each group.
+
+**SW-HZ-MGMT:**
+```
+configure terminal
+interface range fa0/3 , fa0/5
+switchport mode trunk
+exit
+interface fa0/1
+switchport mode access
+switchport access vlan 12
+spanning-tree portfast
+exit
+interface fa0/2
+switchport mode access
+switchport access vlan 12
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+interface range fa0/4 , fa0/6 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![SW-HZ-MGMT, just before the last shutdown](images/step-m4-mgmt.png)
+
+Fa0/1 is reserved for the ASA firewall (lesson 5), without port security: several MACs will pass there.
+
+**SW-HZ-SALES:**
+```
+configure terminal
+interface range fa0/1 , fa0/4
+switchport mode trunk
+exit
+interface range fa0/2 - 3 , fa0/5
+switchport mode access
+switchport access vlan 22
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+interface range fa0/6 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![SW-HZ-SALES](images/step-m4-sales.png)
+
+**MLS-HZ-SVC** (3560 — one extra command!):
+```
+configure terminal
+interface range fa0/1 , fa0/4
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+interface range fa0/2 - 3
+switchport mode access
+switchport access vlan 32
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+interface range fa0/5 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![MLS-HZ-SVC](images/step-m4-svc.png)
+
+**SW-HZ-IT:**
+```
+configure terminal
+interface range fa0/2 - 3
+switchport mode trunk
+exit
+interface fa0/1
+switchport mode access
+switchport access vlan 42
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+interface range fa0/4 - 24 , g0/1 - 2
+shutdown
+end
+```
+
+![SW-HZ-IT](images/step-m4-it.png)
+
+**MLS-HZ-SRV** (3560):
+```
+configure terminal
+vtp mode transparent
+vlan 52
+name SERVERS
+exit
+interface range fa0/1 - 2
+switchport mode access
+switchport access vlan 52
+exit
+interface range fa0/3 - 24 , g0/1 - 2
+shutdown
+exit
+interface fa0/2
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+end
+```
+
+![Beginning of MLS-HZ-SRV](images/step-m4-srv.png)
+
+![End of MLS-HZ-SRV. The PortFast warning is normal](images/07-srv.png)
+
+🧠 The link SW-HZ-MAIN ↔ MLS-HZ-SRV is **access VLAN 52**: only the servers are there, so VTP does not
+pass and VLAN 52 is created by hand in transparent mode.
+
+✅ On SW-HZ-SALES: `show vtp status` and `show vlan brief`. The VLANs arrived, and Fa0/2, Fa0/3, Fa0/5 are in VLAN 22.
+
+![VTP worked](images/06-sales-vtp-vlan.png)
+
+✅ On SW-HZ-MAIN: `show interfaces trunk`. (Fa0/5 and Fa0/6 appear only after the routers are connected.)
+
+![The trunks](images/08-trunk.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `switchport mode access` | a port for one device | a PC must not open a trunk |
+| `switchport access vlan 22` | puts the port in VLAN 22 | this is the department |
+| `spanning-tree portfast` | green immediately | a PC cannot create a loop |
+| `spanning-tree bpduguard enable` | shuts the port if a switch is connected | protects PortFast |
+| `switchport port-security` | turns it on | **without this line the lines below do nothing** |
+| `maximum 1` + `sticky` | one MAC, learned by itself | no need to type MAC addresses |
+| `switchport trunk encapsulation dot1q` | chooses the tag kind (3560 only) | a 3560 also knows ISL; a 2960 knows only dot1q |
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show vlan brief` | The list of VLANs and the ports in each one. Trunks do not appear. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `interface range fa0/3 , fa0/5` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `switchport mode trunk` | The port carries **all** the VLANs, with a tag. For switch ↔ switch and switch ↔ router. |
+| `exit` | One level back, for example from a port to general configuration. The next line belongs to the upper level. |
+| `interface fa0/1` | Chooses the port. Everything below applies to it, until `exit`. |
+| `switchport port-security maximum 1` | How many MAC addresses may be on this port. |
+| `switchport port-security mac-address sticky` | Learns the MAC that is connected now and remembers it. |
+| `switchport port-security violation shutdown` | What to do with a stranger: shut the port. |
+| `shutdown` | Turns the port off. |
+| `end` | Straight out to `#`, from any depth. |
+| `vtp mode transparent` | This switch keeps its own list and doesn't learn from VTP. Good for a switch that needs one VLAN only. |
+| `vlan 52` | Creates the VLAN with this number. The number is what travels in the tag. |
+| `name SERVERS` | A name for the VLAN, for people only. The switch works with the number. |
+| `show vtp status` | Domain, mode and revision number. All must have the same domain. |
+| `show interfaces trunk` | Which ports are trunks, and which VLANs pass. |
+
+</details>
+
+**⏭ What comes next.** Now every department has two roads up. Two roads are a loop, so who decides which one works?
+
+## Mission 5 — STP: we choose who is root
+**📖 How we got here.** Every department switch has a link to the main switch and one to the backup.
+
+**🌐 The network now.** VLANs, trunks and a backup switch. Two roads to every department = a loop, and STP blocks one of them:
+
+![1 SW-HZ-MAIN, 2 SW-HZ-BKP, 3 SW-HZ-SALES](images/step-map-m5.png)
+
+**❗ The problem.** We never chose a root bridge, so STP chose alone. SW-HZ-MAIN, `show spanning-tree vlan 22`:
+
+![SW-HZ-MAIN is not the root. The root is behind Fa0/8](images/step-m5-before-main.png)
+
+Port Fa0/8 leads to **SW-HZ-IT**: the switch of the IT department is the center of the whole branch! All the priorities are 32768, so the lowest MAC won, by accident. SW-HZ-SALES pays cost 38 to reach it:
+
+![The cost from SW-HZ-SALES is 38](images/step-m5-before-sales.png)
+
+**🎯 What we want now.** Choose the boss (the root bridge) ourselves, and protect our choice.
+
+**💡 The solution.** We decide: the main switch = `root primary`, the backup = `root secondary`, and **Root Guard** so no department switch takes the role (theory 1.4).
+
+**📋 Do it in the project.** Make SW-HZ-MAIN root of VLANs 1,12,22,32,42,52, SW-HZ-BKP second, and Root Guard on the ports to the departments. Which port of SW-HZ-MAIN should **not** get Root Guard?
+
+### 🖱 The solution: what to click and what to write
+**SW-HZ-MAIN:**
+```
+configure terminal
+spanning-tree mode pvst
+spanning-tree vlan 1,12,22,32,42,52 root primary
+interface range fa0/1 , fa0/3 , fa0/4 , fa0/8
+spanning-tree guard root
+end
+```
+
+![SW-HZ-MAIN](images/step-m5-main.png)
+
+**SW-HZ-BKP:**
+```
+configure terminal
+spanning-tree vlan 1,12,22,32,42,52 root secondary
+end
+```
+
+![SW-HZ-BKP](images/step-m5-bkp.png)
+
+| Command | What it does | Why |
+|---|---|---|
+| `root primary` | priority 24576 | the main switch is the strongest, and the shortest path goes through it |
+| `root secondary` | priority 28672 | takes over if the main switch falls |
+| `spanning-tree guard root` | Root Guard | not on Fa0/7: the backup switch is **allowed** to become root |
+
+⚠️ Include **VLAN 1**. We forgot it when we tested, and Root Guard blocked the ports with
+`root-inconsistent`, because some other switch was root of VLAN 1.
+
+✅ After about 50 seconds, `show spanning-tree vlan 22` on SW-HZ-MAIN: **This bridge is the root**.
+Priority 24598 = 24576 + 22 (the VLAN number).
+
+![Root bridge](images/09-stp-root.png)
+
+✅ On SW-HZ-SALES: Fa0/1 (to the backup) is **Altn BLK** — it waits — and Fa0/4 is **Root FWD**.
+
+![The blocked port](images/10-stp-blocked.png)
+
+<details open><summary><b>📘 The other commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show spanning-tree vlan 22` | Who the root is, and the state of each port: FWD works, BLK waits. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `spanning-tree mode pvst` | PVST: a separate tree for each VLAN. |
+| `spanning-tree vlan 1,12,22,32,42,52 root primary` | Makes this switch the root of these VLANs (priority 24576; lower wins). |
+| `interface range fa0/1 , fa0/3 , fa0/4 , fa0/8` | Configures several ports together. Note the spaces around the comma and the dash. |
+| `end` | Straight out to `#`, from any depth. |
+| `spanning-tree vlan 1,12,22,32,42,52 root secondary` | The deputy (priority 28672): root only if the first falls. |
+
+</details>
+
+**⏭ What comes next.** Everything is configured. Time to prove that the walls stand.
+
+## Mission 6 — Test
+**📖 How we got here.** VLANs, trunks, ports and STP are ready.
+
+**🌐 The network now.** Five separate networks on the same cables. We test from PC-SALES-1 (1) to PC-SALES-2 (2) and PC-MGMT-1 (3):
+
+![1 PC-SALES-1, 2 PC-SALES-2, 3 PC-MGMT-1](images/step-map-m6.png)
+
+**❗ The problem.** How do we know that the VLANs really separate and not only appear in a table?
+
+**🎯 What we want now.** Proof in both directions: the same department **can**, another department **can't**.
+
+**💡 The solution.** Two pings: one that **must** work (same VLAN) and one that **must** fail (another VLAN). A test that checks only success proves half.
+
+**📋 Do it in the project.** Before you press Enter, write your guess for each ping and why.
+
+### 🖱 The solution: what to click and what to write
+**PC-SALES-1** → Command Prompt:
+```
+ping 192.168.22.22
+ping 192.168.12.21
+```
+![Same VLAN works, another VLAN doesn't](images/11-ping.png)
+
+🧠 The second ping **must** fail: between VLANs you need a router. That is lesson 3.
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `ping 192.168.22.22` | Sends 4 test messages. Replies = the road works in **both** directions. |
+
+</details>
+
+**⏭ What comes next.** Our own people can't cross. What about somebody who enters the office with a laptop?
+
+## Mission 7 — Attack: a stranger connects
+**📖 How we got here.** The network is separated, and each port remembers the MAC address of its PC.
+
+**🌐 The network now.** Protected ports. We play the attacker on PC-SALES-3 (2) and the administrator on SW-HZ-SALES (1):
+
+![1 SW-HZ-SALES, 2 PC-SALES-3](images/step-map-m7.png)
+
+**❗ The problem.** A stranger enters the office, unplugs PC-SALES-3 and connects a laptop to its cable. Without port security the laptop is in VLAN 22 at once.
+
+**🎯 What we want now.** Attack ourselves: unplug a PC, connect a stranger, and see the port shut. Then repair it.
+
+**💡 The solution.** The port remembers the MAC of the first PC (`sticky`) and shuts itself on any other one (`violation shutdown`).
+
+**📋 Do it in the project.** Change the MAC of PC-SALES-3, show that it is cut off, find the proof on the switch, and bring the port back.
+
+### 🖱 The solution: what to click and what to write
+1. On SW-HZ-SALES: `show port-security interface fa0/2`. Status **Secure-up**, one sticky MAC.
+
+   ![Port security works](images/12-port-security.png)
+2. From **PC-SALES-3** ping 192.168.22.21, so the switch learns its MAC.
+
+   ![The real PC-SALES-3 works](images/step-m7-ping.png)
+
+3. PC-SALES-3 → **Config** (1) → **FastEthernet0** (2) → MAC Address (3): write down the address, then change the last four digits to `9999` and press Tab. Now it's a "stranger".
+
+   ![Changing the MAC](images/13-mac-change.png)
+4. Ping again: it fails.
+
+   ![No connection](images/15-violation-pc.png)
+5. On SW-HZ-SALES: `show port-security interface fa0/5`, then `show interfaces status`. **Secure-shutdown**, violation count 1, port **err-disabled**.
+
+   ![The switch caught the stranger](images/14-violation.png)
+6. Recover: first return the **original MAC** to the PC, then on SW-HZ-SALES:
+   ```
+   configure terminal
+   interface fa0/5
+   shutdown
+   no shutdown
+   end
+   ```
+   ![Recovering the port](images/16-recover.png)
+
+   ![Ping works again](images/17-recover-ping.png)
+7. Save on all **seven** switches: `copy running-config startup-config`. Then File → Save.
+
+<details open><summary><b>📘 The commands of this mission, explained</b></summary>
+
+| Command | What it does, and why it is here |
+|---|---|
+| `show port-security interface fa0/2` | State of the port, how many violations, and the last MAC. |
+| `show interfaces status` | Each port: connected or not, and its VLAN. |
+| `configure terminal` | Opens configuration mode (`(config)#`). Changes are possible only from here. |
+| `interface fa0/5` | Chooses the port. Everything below applies to it, until `exit`. |
+| `shutdown` | Turns the port off. |
+| `no shutdown` | Turns the port on. Router ports are off by default. |
+| `end` | Straight out to `#`, from any depth. |
+
+</details>
+
+**⏭ What comes next.** The walls are strong, too strong: nobody can pass, even when it's allowed. That is lesson 3.
+
+## 👀 See it happen — the VLAN border, the tag and STP
+Simulation was explained in [lesson 1](../lesson-01/). Filters: **ARP** and **ICMP**. PC-SALES-1:
+```
+arp -d
+ping 192.168.22.22
+```
+**1. Where does the broadcast stop?** Three steps forward:
+
+![The broadcast is on the switches, not on the PCs of other VLANs](images/sim-vlan.png)
+
+❓ The envelope reached SW-HZ-MGMT and SW-HZ-IT. Why didn't it continue to PC-MGMT-1 and PC-IT-1? And why didn't it reach MLS-HZ-SRV?
+
+<details><summary>Answer</summary>
+
+The trunk carries VLAN 22 to every switch, but PC-MGMT-1 is on an access port of VLAN 12 and PC-IT-1 on one of VLAN 42, so the
+frame doesn't go out there. The link to MLS-HZ-SRV is access VLAN 52, so VLAN 22 never enters it.
+
+</details>
+
+**2. The tag.** Open the envelope on SW-HZ-MGMT → **Inbound PDU Details**:
+
+![TPID 0x8100, TCI 0x0016](images/sim-tag.png)
+
+| Field | Value | Meaning |
+|---|---|---|
+| TPID | 0x8100 | "I have a VLAN tag" (802.1Q) |
+| TCI | 0x0016 | hex 16 = 1 × 16 + 6 = **22**, so VLAN 22 |
+
+Now open the first frame on SW-HZ-SALES, the one that came from PC-SALES-1: no tag. The PC knows nothing about VLANs.
+
+**3. STP at work.** One more step: copies arrive from SW-HZ-BKP too. Open the envelope that came to MLS-HZ-SVC from SW-HZ-BKP
+→ **Next Layer**:
+
+![Fa0/4 is blocked by STP. The device drops the frame](images/sim-stp.png)
+
+Packet Tracer says it: **blocked by STP, the device drops the frame**. Without the block the frame would go around forever.
+
+✏️ **Try:** `ping 192.168.12.21`. On which PCs does an envelope appear?
+
+<details><summary>Answer</summary>
+
+Only on PC-SALES-1, where it dies. The address is in another network and the PC has no gateway yet, so nothing goes out.
+
+</details>
+
+## 🧯 It doesn't work?
+| What you see | Probably | What to do |
+|---|---|---|
+| no VLANs on a client | no trunk, or a different domain/password | `show interfaces trunk`, `show vtp status`, `show vtp password` |
+| `Command rejected: ... trunk encapsulation is "Auto"` | a 3560 | first `switchport trunk encapsulation dot1q` |
+| port in VLAN 1 | you forgot `switchport access vlan` | `show vlan brief` |
+| `BKN*` / `root-inconsistent` | VLAN 1 missing in `root primary` | add it, wait 50 seconds |
+| err-disabled comes back | the stranger is still connected | return the original MAC **before** `shutdown` / `no shutdown` |
+
+---
+
+## 🔎 Find the bug — from real projects
+1. The links main switch ↔ departments were in **access** mode.
+2. The backup switch was never configured: everything in VLAN 1.
+3. Ports 9–24 of the main switch were left as **trunk**, although nothing is connected.
+4. The **IT** VLAN (42) was named "servers".
+
+<details><summary>Answer</summary>
+
+1. An access link carries one VLAN, and VTP does not pass over it. Fix: trunk.
+2. When the main switch fails the departments have no path: it's a backup only in the drawing. Fix: trunks, VTP client, root secondary.
+3. Whoever connects there gets **all** the VLANs. Fix: `shutdown`.
+4. Wrong documentation causes mistakes. The name must match the job.
+
+</details>
+
+## 🏋 Exercises
+1. Fail the main path: on SW-HZ-MAIN `interface fa0/3` → `shutdown`. On SW-HZ-SALES run `show spanning-tree vlan 22` every 10 seconds. How long until Fa0/1 is FWD? What is the new cost? Draw the new path and do `no shutdown`.
+2. Try to create `vlan 64` on SW-HZ-SALES. Which message do you get, and why?
+3. Set `switchport port-security violation restrict` on Fa0/5 and attack again. What is different from `shutdown`? Put `shutdown` back.
+
+<details><summary>Answers (we tested them)</summary>
+
+1. About 30–35 seconds: LIS (15) → LRN (15) → FWD. Fa0/1 is now the Root port and the cost is **38** (19 + 19). The path: SW-HZ-SALES → SW-HZ-BKP → SW-HZ-MAIN.
+
+   ![The backup path is forwarding, cost 38](images/18-stp-backup.png)
+2. `VTP VLAN configuration not allowed when device is in CLIENT mode.` Only the server creates VLANs.
+3. The stranger's ping fails, but the port stays **connected** (Secure-up), the counter rises and a message appears. With `shutdown` the port goes down and the administrator must open it. Don't forget to return the PC's MAC.
+
+   ![restrict: the port stays up, 5 violations](images/19-restrict.png)
+
+</details>
+
+## 🎓 Explain it to the examiner
+- What is the difference between access and trunk? What is in the 802.1Q tag?
+- What happens in a loop without STP? How is the root bridge elected?
+- What is the difference between PortFast, BPDU Guard and Root Guard?
+- Why is VTP dangerous, and why did MLS-HZ-SRV get transparent mode?
+- What are sticky MAC and err-disabled, and how do you recover?
+
+<details><summary>Model answers</summary>
+
+1. Access = one VLAN, without a tag, to an end device. Trunk = many VLANs, with an 802.1Q tag of 4 bytes that contains the VLAN number (12 bits).
+2. Broadcasts multiply, the MAC table jumps between ports and the network collapses. Root = the lowest bridge ID (priority, then MAC).
+3. PortFast skips the wait on PC ports. BPDU Guard shuts a PC port that hears a switch. Root Guard blocks a port from which somebody tries to become root.
+4. A switch with a higher revision overwrites the VLAN list. MLS-HZ-SRV is connected by an access link, VTP doesn't reach it, so it keeps its own list.
+5. Sticky = the switch learns the MAC and writes it in the configuration. err-disabled = a port shut by a protection. Recovery: fix the cause, `shutdown`, `no shutdown`.
+
+</details>
+
+## ✏️ Exit quiz (3 minutes)
+1. Which VTP mode can create VLANs and pass them on?
+2. Which switch becomes root: priority 28672 or 24576?
+3. A PC was connected to a port with BPDU Guard, and then a switch instead. What happens?
+4. Which command is missing: `switchport port-security maximum 1`, `mac-address sticky` — and nothing is protected?
+5. Why does a ping from VLAN 22 to VLAN 12 fail now?
+
+<details><summary>Answers</summary>
+
+1. Server.
+2. 24576.
+3. The port goes to err-disabled.
+4. `switchport port-security` itself.
+5. There is no router yet.
+
+</details>
+
+## ⏭ What we did, and what comes next
+**What we did.** One building became five separate networks. There is a backup road, and a stranger who plugs in shuts the port.
+
+**What is still missing.** We built the walls so well that **nobody can pass**. Sales can't get a file from IT, nobody reaches the server, and every address is typed by hand.
+
+**What comes next.** In [lesson 3](../lesson-03/) we open **doors in the walls**: two routers, and a server that serves everybody.
+
+## 🛠 Your project book
+- [ ] The VLAN table: number, name, network, switch.
+- [ ] A port table for every switch.
+- [ ] One paragraph each: VLAN, trunk, VTP, STP, port security. What problem did each one solve **here**?
+- [ ] Screenshots: `show vlan brief`, `show vtp status`, `show interfaces trunk`, `show spanning-tree`, the attack.
+- [ ] Save your file under a new name before lesson 3, so you can always come back.
